@@ -1,0 +1,25 @@
+{{/* JS/GO LOADER */}}
+{{/* Gets Javascript that uses Go's templating language and outputs the Go-parsed result. */}}
+{{/* Parses files via Hugo's ExecuteAsTemplate function. */}}
+
+{{/* Fun fact: Hugo is "smart" with the cache files ExecuteAsTemplate generates. */}}
+{{/* That is, it will discard the files if, and only if, they are made unnecessary. */}}
+{{/* This function pulls the raw .Content from the file, so Hugo grabs it and discards the file. */}}
+{{/* But if you change it to .Permalink, Hugo will keep the file. */}}
+{{/* Just be sure to clean your publish directory if you switch back and forth. */}}
+
+{{/* PARAMS: */}}
+{{/*	scope = the page for this link */}}
+{{/*	file = the path of the Javascript file */}}
+
+{{- $scope := .scope -}}
+{{- $file := .file -}}
+
+<script type='text/javascript'>
+	{{- with $scope -}}
+		{{- $cache := print (replace .RelPermalink `/` ``) "_cache.js" -}}
+		{{- with resources.Get $file | resources.ExecuteAsTemplate $cache . -}}
+			{{- .Content | safeJS -}}
+		{{- end -}}
+	{{- end -}}
+</script>

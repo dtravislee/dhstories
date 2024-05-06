@@ -1,0 +1,53 @@
+{{/* RSS TEMPLATE */}}
+
+{{- printf `<?xml version='1.0' encoding='utf-8' standalone='yes'?>` | safeHTML -}}
+<rss version='2.0' xmlns:atom='http://www.w3.org/2005/Atom'>
+	<channel>
+		{{/* --- */}}
+		{{/* RSS META */}}
+		{{/* --- */}}
+		
+		{{- define `title` -}}
+			{{- with .Title -}} {{- . -}} {{- ` on ` -}} {{- end -}} {{- .Site.Params.title -}}
+		{{- end -}}
+
+		<title>{{- template `title` . -}}</title>
+		<link>{{- .Permalink -}}</link>
+		<description>{{- `Recent content from ` -}} {{- template `title` . -}}</description>
+		<generator>Hugo – gohugo.io</generator>
+		{{- with .Site.Params.lang -}}
+			<language>{{- . -}}</language>
+		{{- end -}}
+		{{- with .Site.Params.copyright -}}
+			<copyright>{{- . -}}</copyright>
+		{{- end -}}
+		{{- if not .Date.IsZero -}}
+			<lastBuildDate>{{- .Date.Format `Mon, 02 Jan 2006 15:04:05 -0700` | safeHTML -}}</lastBuildDate>
+		{{- end -}}
+		{{- with .OutputFormats.Get "RSS" -}}
+			{{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
+		{{- end -}}
+		
+		{{/* --- */}}
+		{{/* RSS POSTS */}}
+		{{/* --- */}}
+		
+		{{- $pages := .Pages -}}
+		{{- if .IsHome -}}{{- $pages = .Site.RegularPages -}}
+		{{- else if .IsSection -}}{{- $pages = .RegularPages -}}
+		{{- end -}}
+		{{- with .Site.Params.rss -}}{{- $pages = $pages | first . -}}{{- end -}}
+
+		{{- range $pages -}}
+			{{/* Get description or summary, trimming excess whitespace and line breaks. */}}
+			{{- $desc := (partial `description` .) | replaceRE `(?:$\s+|^\s+)` `` -}}
+			<item>
+				<title>{{- .Title -}}</title>
+				<link>{{- .Permalink -}}</link>
+				<pubDate>{{- .Date.Format `Mon, 02 Jan 2006 15:04:05 -0700` -}}</pubDate>
+				<guid>{{- .Permalink -}}</guid>
+				{{- if gt (len $desc) 0 -}}<description>{{- $desc -}}</description>{{- end -}}
+			</item>
+		{{- end -}}
+	</channel>
+</rss>

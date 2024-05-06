@@ -1,0 +1,5 @@
+/* CSS rules for second-level content headings */
+/* Title is h1, so we start at h2 */
+
+h3 { font-size: 1.25em; font-style: italic; }
+h3 a, h3 a:hover, h3 a:focus { border-width: 0.08em; } /*(base width / font size) = 0.1 / 1.25 ~= 0.08em)*/

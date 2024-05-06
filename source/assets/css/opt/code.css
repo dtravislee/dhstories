@@ -1,0 +1,22 @@
+/* CSS rules for inline code and code blocks */
+
+code { 
+	font-size: 0.9em;
+	border-radius: 0.5em;
+	padding: 0 0.1em;
+}
+pre code { 
+	border: thin solid #aaa;
+	overflow: show;
+	padding: 0 1em 0 2em;
+	border-radius: 0;
+	border: none;
+	display: block;
+	white-space: pre;
+}
+pre code:before, pre code:after {
+	display: block;
+	margin-left: -1.5em;
+}
+pre code:before { content: "> Code _"; }
+pre code:after { content: "> End _"; }

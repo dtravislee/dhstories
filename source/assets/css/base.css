@@ -1,0 +1,192 @@
+/* CSS rules for all pages */
+
+/* *** */
+/* COLOUR REFERENCES */
+/* *** */
+/*
+$white: #fafafa;
+$silver: #aaa;
+$black: #252525;
+$gold: #daa520;
+*/
+
+:root {	
+	color-scheme: light dark;
+	supported-color-schemes: light dark; 
+}
+* { 
+	color: inherit;
+	margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+	background: 0;
+    vertical-align: baseline;
+
+}
+
+/* HTML5 display-role reset for older browsers */
+/* Plus some general "display: block" elements. */
+article, aside, details, figcaption, figure, main, 
+footer, fieldset, header, hgroup, menu, nav, section,
+h1, h2, h3, h4, h5, h6, ul {
+	display: block;
+}
+li { 
+	display: -moz-inline-stack; /* For old Firefox */
+	display: inline-block; 
+	zoom: 1;
+	*display: inline; /* For IE6-7; see: https://blog.mozilla.org/webdev/2009/02/20/cross-browser-inline-block/ */
+}
+
+/* Body text */
+body { padding: 0 0.5em; }
+/* Fonts*/
+body.serif, .preview-box.serif {
+	font-family: "Iowan Old Style",
+				"Palatino Nova",
+				"Palatino Linotype",
+				Palatino,
+				"URW Palladio L",
+				"Palatino LT STD",
+				"Book Antiqua",
+				Constantina,
+				Georgia,
+				serif;
+}
+body.sans, .preview-box.sans { font-family: -apple-system, 
+				BlinkMacSystemFont, 
+				"Segoe UI", 
+				"Roboto", 
+				"Droid Sans", 
+				"Ubuntu", 
+				"Helvetica Neue", 
+				Helvetica, 
+				Arial, 
+				"Apple Color Emoji",
+				"Segoe UI Emoji", 
+				"Segoe UI Symbol",
+				sans-serif; 
+}
+body.mono, .preview-box.mono, code { font-family: "SFMono-Regular", 
+		"SF-Mono", 
+		Menlo, 
+		Monaco, 
+		Consolas, 
+		"Liberation Mono", 
+		"Roboto Mono", 
+		"Ubuntu Mono", 
+		"Courier New", 
+		Courier, 
+		monospace; 
+}
+/* Colours */
+body.lightmode *, .preview-box.lightmode *  { color: #252525; }
+body.lightmode, .preview-box.lightmode, body.lightmode .to-top { background-color: #fafafa; }
+body.darkmode *, .preview-box.darkmode *  { color: #fafafa; }
+body.darkmode, .preview-box.darkmode, body.darkmode .to-top { background-color: #252525; }
+body.autocolour *, .preview-box.autocolour *  { color: #252525; }
+body.autocolour, .preview-box.autocolour, body.autocolour .to-top { background-color: #fafafa; }
+@media (prefers-color-scheme: dark) {
+	body.autocolour *, .preview-box.autocolour *  { color: #fafafa; }
+	body.autocolour, .preview-box.autocolour, body.autocolour .to-top { background-color: #252525; }
+}
+/* Font sizes */
+body.s050 { font-size: 50%; }
+body.s075 { font-size: 75%; }
+body.s100 { font-size: 100%; }
+body.s125 { font-size: 125%; }
+body.s150 { font-size: 150%; }
+body.s175 { font-size: 175%; }
+body.s200 { font-size: 200%; }
+/* Line spacing */
+body.l100 { line-height: 1.00; }
+body.l125 { line-height: 1.25; }
+body.l150 { line-height: 1.50; }
+body.l175 { line-height: 1.75; }
+body.l200 { line-height: 2.00; }
+
+/* Site banner */
+.site-nav { 
+	font-size: 1.35em; 
+	margin: 0.25em 0 0 0;
+	font-variant: small-caps;
+	
+}
+.site-nav li { margin: 0 0.5em 0 0; }
+.site-nav li a { border-width: 0.074em; } /*(base border width / font-size) = (0.1 / 1.35) ~= 0.074em */
+
+/* Metadata / Site Tagline */
+.tagline, .meta { font-size: 0.9em; }
+.tagline { font-style: italic; }
+.meta a, .meta a:hover, .meta a:focus { border-width: 0.11em; } /*(base border width / font-size) = (0.1 / 0.9) = 0.111...em*/
+
+/* Main column */
+main {	
+	margin: 2em auto 0 auto;
+	max-width: 34em;
+}
+/* Screen reader only elements */
+/* From: https://www.nomensa.com/blog/how-improve-web-accessibility-hiding-elements */
+.sr-only {	
+	border: 0;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+	clip: rect(1px, 1px, 1px, 1px);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+}
+.sr-only:focus {
+	display: inline-block;
+	clip: auto;
+	height: auto;
+	padding: 0.5em;
+	margin: 0;
+	position: static;
+	width: auto; 
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 { font-weight: normal; }
+/* Page title */
+h1 { 
+	font-size: 1.5em; 
+	line-height: 1;
+	border-bottom: 0.067em solid #daa520; /*(base border width / font-size) ~= (0.1 / 1.5) = 0.067em*/
+}
+
+/* Links */
+/* Buttons with an inner span / div with class 'a' are also styled as links */
+a, button .a {	
+	text-decoration: none;
+	cursor: pointer;
+	border-bottom: 0.1em solid #daa520;
+	display: inline-block;
+	line-height: 1;
+	padding-top: 0.1em;
+}
+a:hover, a:focus, button:hover .a, button:focus .a
+ { 
+	border-bottom: 0.1em dashed #aaa;
+	border-top: 0.1em dashed #aaa;
+	padding-top: 0em;
+}
+a:active, button:active .a { background-color: #aaa; }
+/* FOOTER */
+.site-footer {	
+	text-align: center;
+	padding-top: 3em;
+	padding-bottom: 3em; 
+	width: 100%;
+}
+.to-top {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	padding: 0.5em;
+	font-size: 0.9em;
+}
+.to-top a { border-width: 0.11em; } /*(base border width / font-size) = (0.1 / 0.9) = 0.111...em*/

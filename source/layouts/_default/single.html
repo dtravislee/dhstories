@@ -1,0 +1,100 @@
+{{/* HTML content for articles */}}
+
+{{/* --- */}}
+{{/* JAVASCRIPT */}}
+{{/* --- */}}
+
+{{- define `js` -}}
+	
+	{{/* DISQUS COMMENTS - See disqus.js for more */}}
+
+	{{/* Only use this script if footer is visible or if comments are forced on. */}}
+	{{/* (Comments are held in the footer, so no footer = no visible comments = no need for script.) */}}
+	{{/* We force comments on the contact page, where the rest of the footer is hidden. */}}
+	{{/* Requires DisqusShortname set in config.toml */}}
+	{{- if and
+		(.Site.DisqusShortname)
+		(or (.Params.forceComments) (not .Params.hideFooter)) -}}
+		{{- partial `jsgoloader` (dict `file` `js/multi/disqus.js` `scope` . ) -}}
+	{{- end -}}
+{{- end -}}
+
+{{/* --- */}}
+{{/* CSS */}}
+{{/* --- */}}
+
+{{- define `css` -}}
+
+	{{/* MAIN CSS */}}
+	{{- .Scratch.Add `css` (slice
+		(resources.Get "css/single.css")
+		(resources.Get "css/opt/metadata.css")
+		)
+	-}}
+	
+	{{/* CONDITIONAL CSS */}}
+	
+	{{/* Article footer styles */}}
+	{{- if not .Params.hideFooter -}}
+		{{- .Scratch.Add `css` (slice (resources.Get "css/opt/article-footer.css")) -}}
+		{{- if .Params.date -}}
+			{{- .Scratch.Add `css` (slice (resources.Get "css/opt/next-previous.css")) -}}
+		{{- end -}}
+	{{- end -}}
+	
+	{{/* Comment styles */}}
+	{{- if and
+		(.Site.DisqusShortname)
+		(or (.Params.forceComments) (not .Params.hideFooter)) -}}
+		{{- .Scratch.Add `css` (slice (resources.Get "css/opt/comments.css")) -}}
+	{{- end -}}
+	
+	{{/* RETURN */}}
+	{{- range .Scratch.Get `css` -}}
+		{{- .Content | safeCSS -}}
+	{{- end -}}
+	
+{{- end -}}
+
+{{/* --- */}}
+{{/* CONTENT */}}
+{{/* --- */}}
+
+{{- define `content` -}}
+	{{- partial `content` . -}}
+	
+	{{- if not .Params.hideFooter -}}
+		<footer class='article-footer'>	
+		
+			{{/* --- */}}
+			{{/* FOOTER LINKS */}}
+			{{/* --- */}}
+			
+			{{/* Get ko-fi donation link */}}
+			{{- $kofi := `` -}}
+			{{- range .Site.Menus.main -}}
+				{{- if eq .Identifier `ko-fi` -}} 
+					{{- $kofi = .URL -}}
+				{{- end -}}
+			{{- end -}}
+			{{/* Write donation link + share links */}}
+			<p>{{- `Enjoy this work? ` -}}<a href='{{ $kofi }}'>{{- `Support the Dragonhouse ` -}}</a>{{- `on Ko-Fi` -}}
+			<span class='js-only'>{{- ` and ` -}}<a href='/share/#&p={{- replace .RelPermalink `/` `` -}}&t={{- .Title | title -}}&d={{- partial `description` . | replaceRE `(?:$\s+|^\s+)` `` -}}'>{{- `share this` -}}</a>{{- ` with your friends` -}}</span>{{- `!` -}}</p>
+			
+			{{- with .Params.commentLink -}}
+				<p><a href="{{- . -}}">Discuss <i>{{- $.Title -}}</i> here</a></p>
+			{{- end -}}
+			
+			{{/* --- */}}
+			{{/* NAVIGATION */}}
+			{{/* --- */}}
+				
+			{{- if .Params.date -}}
+				<div class='next-previous' role='navigation'>
+					{{- partial `nextprev` (dict `type` `prev` `scope` . ) -}}
+					{{- partial `nextprev` (dict `type` `next` `scope` . ) -}}
+				</div>
+			{{- end -}}
+		</footer>
+	{{- end -}}
+{{- end -}}

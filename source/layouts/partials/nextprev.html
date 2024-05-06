@@ -1,0 +1,36 @@
+{{/* NEXT / PREVIOUS LINKS - PAGINATION */}}
+{{/* Shows links to next / previous page or post. */}}
+
+{{/* To check, we try to grab the next / previous page, */}}
+{{/*	and if it doesn't exist, we fall back to grabbing the page we're on. */}}
+{{/* This is done so dates can be checked for single page navigation, */}}
+{{/*	as we don't want undated pages (e.g. about page) to be included in navigation. */}}
+{{/* Then, if we grabbed the fallback, we don't display the next / previous page. */}}
+{{/* To ensure correct spacing, we still write the "next" or "previous" box and title, */}}
+{{/*	but replace the link with generic "no entry found" text. */}}
+
+{{/* PARAMS: */}}
+{{/*	scope = the page for this link */}}
+{{/*	type = which page this points to, either "next" or "previous" */}}
+{{/*	kind = whether this is for a list page or a single page. */}}
+
+{{- $scope := .scope -}}
+{{- $type := .type | lower -}}
+{{- $target := cond (eq $type `prev`) $scope.Prev $scope.Next -}}
+
+{{- with $target | default $scope -}}
+	<p class='np-{{- $type -}}' role='{{- $type -}}'>
+		<span class='np-title'>
+			{{- if eq $type `prev` -}}
+				{{- `Previous: ` -}}
+			{{- else if eq $type `next` -}}
+				{{- `Next: ` -}}
+			{{- end -}}
+		</span>
+		{{- if and .Params.date (ne . $scope) -}}
+			<a href='{{- .RelPermalink -}}'>{{- .Title -}}</a>
+		{{- else -}}
+			{{- `No ` -}} {{- cond (eq $type `prev`) `older` `newer` -}} {{- ` posts` -}}
+		{{- end -}}
+	</p>	
+{{- end -}}

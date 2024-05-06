@@ -1,0 +1,6 @@
+{{/* LINK RENDER */}}
+{{/* Adds target=_blank to external links, plus rel=noopener for safety */}}
+{{/*	Also helps with theme selector JS function */}}
+{{/* Taken straight from: https://gohugo.io/templates/render-hooks/ */}}
+
+<a href="{{ .Destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if strings.HasPrefix .Destination "http" }} target="_blank" rel="noopener"{{ end }}>{{ .Text | safeHTML }}</a>

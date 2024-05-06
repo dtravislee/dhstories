@@ -1,0 +1,17 @@
+[
+
+{{- $pages := .Site.RegularPages.ByPublishDate.Reverse -}}
+
+{{- $paginator := (.Paginate (where (where $pages `Params.hide` `=` nil) `Params.date` `!=` nil) .Site.Params.paginate) -}}
+
+{{- range $index,$paginator.Pages -}}
+	{{- if $index -}},{{- end -}}
+	{
+		"url": {{- .RelPermalink | jsonify -}}
+		"date": {{- .PublishDate.Format "2006-01-02" | jsonify -}}
+		"title": {{- .Title | jsonify -}}
+		"desc": {{- .Description | jsonify -}}
+	}
+{{- end -}}
+
+]

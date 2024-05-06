@@ -1,0 +1,18 @@
+{{- $blog := slice -}}
+
+{{- $pages := site.RegularPages.ByPublishDate.Reverse -}}
+{{- if .IsHome -}}{{- $pages = .Site.RegularPages -}}{{- end -}}
+{{- $paginator := (.Paginate (where (where $pages `Params.hide` `=` nil) `Params.date` `!=` nil) .Site.Params.paginate) -}}
+
+{{- range $paginator.Pages -}}
+  {{- $item := dict
+    "Title" .Title
+    "PublishDateFormatted" (.PublishDate.Format "2006-01-02")
+    "RelPermalink" .RelPermalink -}}
+
+  {{- $blog = $blog | append $item -}}
+{{- end -}}
+
+{{- $object := dict "blog" $blog -}}
+
+{{- $object | jsonify -}}

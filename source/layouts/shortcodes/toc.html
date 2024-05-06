@@ -1,0 +1,11 @@
+{{/* TOC SHORTCODE */}}
+{{/* Gets and formats the table of contents. */}}
+
+{{- with .Page.TableOfContents -}}
+	<div class='toc' role='navigation' aria-labelledby='toc-title'>
+		<a class='sr-only' href='#after-toc'>{{- `Skip table of contents` -}}</a>
+		<h2 id='toc-title'>{{- `Contents` -}}</h2>
+		{{- . -}}
+	</div>
+	<span id='after-toc'></span>
+{{- end -}}

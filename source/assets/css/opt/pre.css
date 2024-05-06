@@ -1,0 +1,12 @@
+/* CSS rules for preformatted text */
+
+pre {
+	overflow: auto;
+	border: thin solid #aaa;
+	margin-bottom: 1em;
+	display: block;
+	white-space: pre;
+	tab-size: 4;
+	padding-top: 1em!ie7;
+	padding-bottom: 1em!ie7;
+}

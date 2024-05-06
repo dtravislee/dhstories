@@ -1,0 +1,4 @@
+/* CSS rules for footers in articles incl. share links */
+
+.article-footer { border-top: thin solid #aaa; }
+.article-footer p { margin: 1em 0; }

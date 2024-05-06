@@ -1,0 +1,39 @@
+{{/* JavaScript and CSS for Share page */}}
+
+{{/* --- */}}
+{{/* JAVASCRIPT */}}
+{{/* --- */}}
+
+{{- define `js` -}}
+	{{- partial `jsgoloader` (dict `file` `js/share.js` `scope` . ) -}}
+{{- end -}}
+
+{{/* --- */}}
+{{/* CSS */}}
+{{/* --- */}}
+
+{{- define `css` -}}
+
+	{{/* MAIN CSS */}}
+	{{- .Scratch.Add `css` (slice
+		(resources.Get "css/share.css")
+		(resources.Get "css/opt/lists.css")
+		)
+	-}}
+	
+	{{/* RETURN */}}
+	{{- range .Scratch.Get `css` -}}
+		{{- .Content | safeCSS -}}
+	{{- end -}}
+	
+{{- end -}}
+
+{{/* --- */}}
+{{/* CONTENT */}}
+{{/* --- */}}
+
+{{- define `content` -}}
+	<div id="content">
+		{{- partial `content` . -}}
+	</div>
+{{- end -}}
