@@ -22,7 +22,8 @@
 	{{- end -}}
 	{{- $item := dict
 		"Title" .Title
-		"Date" (.Date.Format (`January 02, 2006`))
+		"Date" (.Date.Format (`2006-01-02`))
+		"DateFormatted" (.Date.Format (`January 02, 2006`))
 		"Link" .RelPermalink
 		"Text" .Plain
 		"Tags" $tags
