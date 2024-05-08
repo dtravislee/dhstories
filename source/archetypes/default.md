@@ -1,11 +1,11 @@
 +++
 ### Front Matter
 
-###### Date (YYYY-MM-DD) - For ordering posts and displaying in content lists.
+###### Dates (YYYY-MM-DD) - For ordering posts and displaying in content lists.
 date = {{ .Date }}
 
-###### Last Modified (YYYY-MM-DD) - When the content was last edited. Update as necessary.
-lastmod = {{ .Date }}
+###### Last Modified (YYYY-MM-DD) - When the content was last edited. (Optional - If omitted, will show no edited date)
+lastmod = ''
 
 ###### Title (string) - Required.
 title = "{{ .Name | humanize | title }}"
@@ -19,8 +19,11 @@ tags = [{{ range (sort .Site.Taxonomies.tags) }}"{{ .Page.Title }}", {{ end }}]
 ###### Hide Footer - Whether to show the footer at the end of this post.
 hideFooter = false
 
-###### Comments Links - Full URL to a comments page for this post
+###### Comments Links - Full URL to a comments page for this post.
 commentLink = ""
+
+###### Disable Disqus - Disables disqus comments, e.g. if linked comments are preferred.
+disableDisqus = ""
 
 +++
 
