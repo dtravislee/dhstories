@@ -1,21 +1,26 @@
 +++
 ### Front Matter
 
-###### Date - For ordering posts. No visual presence.
-###### If excluded: 
-###### 1. the post will not show up in content lists 
-###### 2. next/previous navigation will not be generated
-###### 3. metadata will not display on the page
-date = 2016-09-09
+###### Date (YYYY-MM-DD) - For ordering posts and displaying in content lists.
+date = 2024-05-08
 
-###### Last Modified - When the content was last edited. Update as necessary.
-lastmod = 2016-09-09
+###### Last Modified (YYYY-MM-DD) - When the content was last edited. Update as necessary.
+lastmod = 2024-05-08
 
-###### Title - Required.
-title = "Markdown Demo example"
+###### Title (string) - Required.
+title = "Markdown Demo"
 
-###### Draft - True if this page is still being worked on and should not be accessible
-draft = false
+###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
+description = "A demonstration of markdown"
+
+###### Tags (string array) - Tags for the content. Included in social media.
+tags = ["test 1","test 2"]
+
+###### Hide Footer - Whether to show the footer at the end of this post.
+hideFooter = false
+
+###### Comments Links - Full URL to a comments page for this post
+commentLink = ""
 
 +++
 
