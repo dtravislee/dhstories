@@ -10,7 +10,7 @@ description = "A guide on advanced search options"
 ###### Hide Footer - Whether to show the footer at the end of this post.
 hideFooter = true
 
-draft = false
+draft = true
 
 +++
 
