@@ -10,7 +10,8 @@
 
 	{{/* Only use this script if footer is visible or if comments are forced on. */}}
 	{{/* (Comments are held in the footer, so no footer = no visible comments = no need for script.) */}}
-	{{/* We force comments on the contact page, where the rest of the footer is hidden. */}}
+	{{/* forceComments is implemented in case one wants to use Disqus as a contact form */}}
+	{{/*	or otherwise wants to enable comments without adding the traditional footer */}}
 	{{/* Requires DisqusShortname set in config.toml */}}
 	{{- if and
 		(.Site.DisqusShortname)
@@ -77,12 +78,32 @@
 					{{- $kofi = .URL -}}
 				{{- end -}}
 			{{- end -}}
-			{{/* Write donation link + share links */}}
-			<p>{{- `Enjoy this work? ` -}}<a href='{{ $kofi }}'>{{- `Support the Dragonhouse ` -}}</a>{{- `on Ko-Fi` -}}
-			<span class='js-only'>{{- ` and ` -}}<a href='/share/#&p={{- replace .RelPermalink `/` `` -}}&t={{- .Title | title -}}&d={{- partial `description` . | replaceRE `(?:$\s+|^\s+)` `` -}}'>{{- `share this` -}}</a>{{- ` with your friends` -}}</span>{{- `!` -}}</p>
+			<p>
+				{{/* Write donation link if kofi variable is populated */}}
+				{{- `Enjoy this work? ` -}}
+				{{- with $kofi -}}
+					<a href='{{ . }}'>{{- `Support the Dragonhouse` -}}</a>{{- ` on Ko-Fi` -}}
+					<span class='js-only'>{{- ` and ` -}}
+				{{- end -}}
+				{{/* Add the share link, adjusting phrasing appropriately */}}
+				{{- if not $kofi -}}<span class='js-only'>{{- end -}}
+				<a href='/share/#&p={{- replace .RelPermalink `/` `` -}}&t={{- .Title | title -}}&d={{- partial `description` . | replaceRE `(?:$\s+|^\s+)` `` -}}'>
+					{{- if $kofi -}}{{- `share this` -}}
+					{{- else -}}{{- `Share it` -}}
+					{{- end -}}
+				</a>{{- ` with your friends` -}}</span>{{- `!` -}}
+			</p>
 			
+			{{/* COMMENTS */}}
+			
+			{{/* Standard comment link */}}
 			{{- with .Params.commentLink -}}
 				<p><a href="{{- . -}}">Discuss <i>{{- $.Title -}}</i> here</a></p>
+			{{- end -}}
+			
+			{{/* Disqus comments - may be used alongside comment link */}}
+			{{- if and .Site.DisqusShortname (not .Params.disableDisqus) -}}
+				<p><a href="javascript:startDisqus();">Load Disqus comments</a></p>
 			{{- end -}}
 			
 			{{/* --- */}}
