@@ -5,7 +5,8 @@
 {{/* --- */}}
 
 {{- define `js` -}}
-	{{- partial `jsgoloader` (dict `file` `js/share.js` `scope` . ) -}}
+	{{- partial `jsgoloader` (dict `file` `js/multi/errorbox.js` `scope` . ) -}}
+	{{- partial `jsgoloader` (dict `file` `js/singles/search.js` `scope` . ) -}}
 {{- end -}}
 
 {{/* --- */}}
@@ -14,10 +15,13 @@
 
 {{- define `css` -}}
 
+	{{/* LIST CSS BLOCK */}}
+	{{- partial `cssblocks/lists` . -}}
+
 	{{/* MAIN CSS */}}
 	{{- .Scratch.Add `css` (slice
-		(resources.Get "css/share.css")
-		(resources.Get "css/opt/lists.css")
+		(resources.Get "css/search.css")
+		(resources.Get "css/opt/error-box.css")
 		)
 	-}}
 	
