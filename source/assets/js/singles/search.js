@@ -30,9 +30,8 @@ var indexDataRaw = "";
 // Functions for creating query and post objects
 // Post objects are created only when a query matches
 
-function Post(number, title, url, desc, date, dateFormatted, tags, content) {
+function Post(title, url, desc, date, dateFormatted, tags, content) {
 	// Data values
-	this.number = number;
 	this.title = title;
 	this.url = url;
 	this.desc = desc;
