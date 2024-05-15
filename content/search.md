@@ -5,16 +5,22 @@ title = "Search"
 
 ###### Description (string) - For social media and page listings.
 ###### Optional - Will use pretext or content summary if not set.
-description = "Find posts based on title, description, date, or tags"
+description = "A simple way to find your favourites"
 
-###### Hide Footer - Whether to show the footer at the end of this post.
-hideFooter = true
-
-draft = false
+#### Layout - Layout to use for this content
+layout = "search"
 
 +++
 
 <noscript>JavaScript must be enabled to search the site!</noscript>
 
+{{< search.inline >}}
+{{- $buttonName := "Begin Search" -}}
 <form class='js-only' action='javascript:search();'>
+	<input id='search-input' class='text-input' placeholder='Enter a search query and click "{{- $buttonName -}}"' title='Enter a search query and click "{{- $buttonName -}}"'/>
+	<p id='error-box' class='error-box hidden'></p>
+	<a href='javascript:search();'>{{- $buttonName -}}</a>
 </form>
+
+<div id='results-container'></div>
+{{</ search.inline >}}
