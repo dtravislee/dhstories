@@ -7,7 +7,6 @@
 {{- $paginator := (.Paginate (where (where $pages `Params.hide` `=` nil) `Params.date` `!=` nil) .Site.Params.paginate) -}}
 {{- $posts := slice -}}
 {{- $tags := slice -}}
-{{- $index := 0 -}}
 
 {{/* Page counter */}}
 {{/* Writes total pages and current page to the JSON file */}}
@@ -31,7 +30,6 @@
 		{{- end -}}
 	{{- end -}}
 	{{- $item := dict
-		"NumberInPage" $index
 		"Title" .Title
 		"Date" (.Date.Format (`2006-01-02`))
 		"DateFormatted" (.Date.Format (`January 02, 2006`))
@@ -39,7 +37,6 @@
 		"Text" .Plain
 		"Tags" $tags
 		"Description" .Description -}}
-	{{- $index = add $index 1 -}}
 	{{- $posts = $posts | append $item -}}
 {{- end -}}
 
