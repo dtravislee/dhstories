@@ -33,6 +33,8 @@
 		"Title" .Title
 		"Date" (.Date.Format (`2006-01-02`))
 		"DateFormatted" (.Date.Format (`January 02, 2006`))
+		"Edited" (.Lastmod.Format (`2006-01-02`))
+		"EditedFormatted" (.Lastmod.Format (`January 02, 2006`))
 		"Link" .RelPermalink
 		"Text" .Plain
 		"Tags" $tags
