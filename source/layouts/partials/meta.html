@@ -21,6 +21,21 @@
 {{- end -}}
 
 {{/* ------ */}}
+{{/* EDIT DATE */}}
+{{/* ------ */}}
+
+{{/* Show edited date only if it differs from the post date */}}
+{{- with .Lastmod -}}
+	{{ if ne . $.Date -}}
+	<p class='meta'>
+	{{- `Edited: ` -}}
+	<time>
+		{{- .Format (`January 02, 2006`) -}}
+	</time>
+	{{- end -}}
+{{- end -}}
+
+{{/* ------ */}}
 {{/* CATEGORIES LIST */}}
 {{/* ------ */}}
 {{- with .Params.tags -}}
