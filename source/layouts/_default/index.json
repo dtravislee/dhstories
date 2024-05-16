@@ -38,7 +38,8 @@
 		"Link" .RelPermalink
 		"Text" .Plain
 		"Tags" $tags
-		"Description" .Description -}}
+		"Description" .Description
+		"Words" .WordCount -}}
 	{{- $posts = $posts | append $item -}}
 {{- end -}}
 
