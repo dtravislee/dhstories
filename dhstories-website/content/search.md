@@ -1,15 +1,14 @@
 +++
 ### Front Matter
-###### Title - Required.
+
+###### Title (string) - Required.
 title = "Search"
 
-###### Description (string) - For social media and page listings.
-###### Optional - Will use pretext or content summary if not set.
+###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = "A simple way to find your favourites"
 
-#### Layout - Layout to use for this content
+#### Layout (string) - Layout to use for this content
 layout = "search"
-
 +++
 
 <noscript>JavaScript must be enabled to search the site!</noscript>

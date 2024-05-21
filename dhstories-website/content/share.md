@@ -1,10 +1,10 @@
 +++
 ### Front Matter
+
 ###### Title - Required.
 title = "Share Post"
 
-###### Description (string) - For social media and page listings.
-###### Optional - Will use pretext or content summary if not set.
+###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = "Links for sharing works on this site"
 
 #### Layout - Layout to use for this content

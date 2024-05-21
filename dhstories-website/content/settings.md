@@ -3,7 +3,7 @@
 ###### Title - Required.
 title = "Settings"
 
-###### Description (string) - For social media and page listings.
+###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = "Visual adjustments for your reading comfort"
 
 #### Layout - Layout to use for this content

@@ -1,12 +1,13 @@
 +++
 ### Front Matter
-###### Title - Required.
+
+###### Title (string) - Required.
 title = "About"
 
-###### Description (string) - For social media and page listings. (Optional.)
+###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = "On the author and the site"
 
-#### Hide Footer - Whether to show the footer at the end of this post.
+#### Hide Footer (bool) - Whether to show the footer at the end of this post.
 hideFooter = true
 
 +++

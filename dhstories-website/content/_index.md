@@ -10,9 +10,6 @@ description = "Foyer of the Dragonhouse"
 #### Hide Footer (bool) - Whether to hide the footer at the end of this post.
 hideFooter = true
 
-###### Disable Disqus (bool) - Disables disqus comments, e.g. if linked comments are preferred.
-disableDisqus = true
-
 +++
 
 Welcome to Dragonhouse Stories: a compendium of my works both prosaic and poetic. Learn more [here](/about/).
