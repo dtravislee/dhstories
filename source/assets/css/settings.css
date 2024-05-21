@@ -1,16 +1,5 @@
 /* CSS rules for share page */
 
-/* Field Groups */
-form fieldset { 
-	border: thin solid #aaa; 
-	padding: 0.5em;
-	margin-bottom: 0.5em;
-}
-form legend { 
-	padding: 0 0.5em; 
-	font-variant: small-caps;
-	font-size: 1.2em;
-}
 /* Cookie consent checkbox */
 form .checkbox { margin-right: 0.5em; }
 
