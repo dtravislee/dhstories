@@ -1,0 +1,9 @@
+/* CSS rules for search page */
+
+/* Query Input */
+form { margin: 1.5em 0; }
+form .text-input { 
+	display: block; 
+	padding: 0 0.25em;
+	margin-bottom: 0.5em;
+} 

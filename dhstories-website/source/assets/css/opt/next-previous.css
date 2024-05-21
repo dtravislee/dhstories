@@ -1,0 +1,29 @@
+/* CSS rules for next-previous links */
+
+.next-previous {
+	margin: 2em 0;
+}
+.next-previous:after {
+	content: "";
+	display: block;
+	clear: both; 
+}
+.next-previous p {	
+	width: 45%;
+	padding: 0.5em 0;
+	border-bottom: thin solid #b8860b;
+	border-top: thin solid #b8860b;
+	text-decoration: none;
+}
+.np-prev { 
+	text-align: left;
+	float: left; 
+}
+.np-next { 
+	text-align: right;
+	float: right; 
+}
+.np-title { 
+	display: block;
+	font-weight: bold; 
+}

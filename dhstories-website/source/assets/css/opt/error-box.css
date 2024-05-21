@@ -1,0 +1,12 @@
+/* CSS rules for error boxes (on settings.html and in pagination partials) */
+
+/* Hidden elements */
+/* Includes preview and error boxes */
+.hidden { display: none; }
+
+/* Error box */
+.error-box { 
+	margin-top: 0.5em;
+	padding: 0.25em;
+	border: 0.2em dashed #ff0000; 
+}

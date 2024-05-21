@@ -1,0 +1,50 @@
+{{/* POST METADATA */}}
+{{/* Gets post description, date, read time, and tags in a nice paragraph. */}}
+
+{{/* ------ */}}
+{{/* DESCRIPTION */}}
+{{/* ------ */}}
+
+{{- with .Description -}}
+	<p class='meta'>{{- . -}}</p>
+{{- end -}}
+	
+{{/* ------ */}}
+{{/* DATES + COUNTS */}}
+{{/* ------ */}}
+{{- if .Params.date -}}
+	<p class='meta'>
+		<time>{{- .Date.Format (`January 02, 2006`) -}}</time>
+		{{- ` – ` -}}
+		{{- .WordCount -}}{{- ` words` -}}
+	</p>
+{{- end -}}
+
+{{/* ------ */}}
+{{/* EDIT DATE */}}
+{{/* ------ */}}
+
+{{/* Show edited date only if it differs from the post date */}}
+{{- with .Lastmod -}}
+	{{ if ne . $.Date -}}
+		<p class='meta'>
+			{{- `Edited: ` -}}
+			<time>
+				{{- .Format (`January 02, 2006`) -}}
+			</time>
+		</p>
+	{{- end -}}
+{{- end -}}
+
+{{/* ------ */}}
+{{/* CATEGORIES LIST */}}
+{{/* ------ */}}
+{{- with .Params.tags -}}
+	<ul class="meta" aria-description="Tags">
+		{{- range . -}}
+			<li><a href='{{- `/tags/` | relURL -}}{{- . | urlize -}}'>
+				{{- `#` -}}{{- . | humanize | title -}}
+			</a></li>
+		{{- end -}}
+	</ul>
+{{- end -}}

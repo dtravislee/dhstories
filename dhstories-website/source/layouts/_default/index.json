@@ -1,0 +1,47 @@
+{{/* JSON TEMPLATE */}}
+{{/* Used for JSON files, which are used for site search */}}
+
+{{/* Variable declarations */}}
+
+{{- $pages := .Site.RegularPages.Reverse -}}
+{{- $paginator := (.Paginate (where (where $pages `Params.hide` `=` nil) `Params.date` `!=` nil) .Site.Params.paginate) -}}
+{{- $posts := slice -}}
+{{- $tags := slice -}}
+
+{{/* Page counter */}}
+{{/* Writes total pages and current page to the JSON file */}}
+{{/* Note that this means the first proper post is at index 1, not index 0 */}}
+
+{{- $pages := dict 
+	"TotalPages" $paginator.TotalPages
+	"CurrentPages" $paginator.PageNumber -}}
+{{- $posts = $posts | append $pages -}}
+
+{{/* JSON populator */}}
+{{/* Uses pagination to split JSON files per page */}}
+{{/*	so that search functions needn't pull the entire site index just to get 10 results */}}
+
+{{- range $paginator.Pages -}}
+	{{/* Get tags for the post, if any exist */}}
+	{{- with .Params.tags -}}
+		{{- $tags = slice -}} {{/* Resets the tags variable */}}
+		{{- range . -}}
+			{{- $tags = $tags | append . -}}
+		{{- end -}}
+	{{- end -}}
+	{{- $item := dict
+		"Title" .Title
+		"Date" (.Date.Format (`2006-01-02`))
+		"DateFormatted" (.Date.Format (`January 02, 2006`))
+		"Edited" (.Lastmod.Format (`2006-01-02`))
+		"EditedFormatted" (.Lastmod.Format (`January 02, 2006`))
+		"Link" .RelPermalink
+		"Text" .Plain
+		"Tags" $tags
+		"Description" .Description
+		"Words" .WordCount -}}
+	{{- $posts = $posts | append $item -}}
+{{- end -}}
+
+{{/* Finally, run the whole gamut through the jsonify method */}}
+{{- $posts | jsonify -}}

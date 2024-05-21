@@ -1,0 +1,150 @@
+{{/* Pagination is placed up front to be accessible to list.html and other blocks */}}
+{{- block `pagination` . -}}{{- end -}}
+
+<!doctype html>
+<html lang='{{- .Site.Params.lang | default `en` -}}' itemscope itemtype='https://schema.org/WebPage'>
+	<head>
+		<meta charset='utf-8'/>
+		<meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+		<meta name='robots' content='index,follow'>{{/* Controls all Search Engines */}}
+		<meta name='googlebot' content='index,follow'>{{/* Controls Google Specific Engines */}}
+		<title>
+			{{- if .IsHome -}}
+				{{- .Site.Params.title | title -}}
+				{{- ` - ` -}}
+				{{- .Site.Params.description -}}
+			{{- else -}}
+				{{- partial `title` . -}}
+				{{- ` | ` -}}
+				{{- .Site.Params.title | title -}}
+			{{- end -}}
+		</title>
+		<style>
+			{{/* Base styles */}}
+			{{- with resources.Get "css/base.css" -}}{{- .Content | safeCSS -}}{{- end -}}
+			{{/* Page-type styles */}}
+			{{- block `css` . -}}{{- end -}}
+			{{/* Content styles */}}
+			{{- if .Content -}}
+				{{/* Paragraphs - Always loaded when any content is present */}}
+				{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/p.css")) -}}
+				{{/* Headings */}}
+				{{- range $seq := seq 2 6 -}}
+					{{- $query := print `<h` $seq -}}
+					{{- $src := print `css/opt/h` $seq `.css` -}}
+					{{- if findRE $query $.Content 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get $src)) -}}
+					{{- end -}}
+				{{- end -}}
+				{{/* Other markdown styles */}}
+				{{- with .Content -}}
+					{{- if findRE `<figure` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/figures.css")) -}}
+					{{- end -}}
+					{{- if findRE `<li` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/lists.css")) -}}
+					{{- end -}}
+					{{- if findRE `<dl` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/def-lists.css")) -}}
+					{{- end -}}
+					{{- if findRE `<code` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/code.css")) -}}
+					{{- end -}}
+					{{- if findRE `<del` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/del.css")) -}}
+					{{- end -}}
+					{{- if findRE `<hr` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/hr.css")) -}}
+					{{- end -}}
+					{{- if findRE `<sup` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/footnotes.css")) -}}
+					{{- end -}}
+					{{- if findRE `<blockquote` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/quotes.css")) -}}
+					{{- end -}}
+					{{- if findRE `<table` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/tables.css")) -}}
+					{{- end -}}
+					{{- if findRE `<pre` . 1 -}}
+						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/pre.css")) -}}
+					{{- end -}}
+				{{- end -}}
+				{{- range .Scratch.Get `content-css` -}}
+					{{- .Content | safeCSS -}}
+				{{- end -}}
+			{{- end -}}
+		</style>
+		<style id='js-hide'>.js-only { display: none; }</style>
+		{{- with resources.Get `css/print.css` -}}
+			<style media='print'>{{- .Content | safeCSS -}}</style>
+		{{- end -}}
+		{{- $mediacss := resources.Get `css/media.css` | minify -}}
+		{{- `<link href='` | safeHTML -}} {{- $mediacss.Permalink -}} {{- `' rel='stylesheet'/>` | safeHTML -}}
+		{{/* @media rules are placed in a separate file for respond.js to work. */}}
+		{{/* See: https://github.com/scottjehl/Respond?tab=readme-ov-file#support--caveats */}}
+		
+		{{/* Polyfills for old (pre-IE9) browsers */}}
+		{{/* Placed here so that they load before HTML, especially for the HTML5 shiv */}}
+		{{- $html5shiv := resources.Get `js/global/html5shiv.js` -}}
+		{{- $resp := resources.Get `js/global/respond.js` -}}
+		{{- `<!--[if lt IE 9]> <script src='` | safeHTML -}}
+		{{- $html5shiv.Permalink -}}
+		{{- `'></script> <script src='` | safeHTML -}}
+		{{- $resp.Permalink -}}
+		{{- `'></script> <![endif]-->` | safeHTML -}}
+		
+		{{/* Get description or summary, trimming excess leading and trailing whitespace. */}}
+		
+		{{- $desc := (partial `description` .) | replaceRE `(?:$\s+|^\s+)` `` -}}
+		{{- $iso8601 := `2006-01-02T15:04:05-07:00` -}}
+		<meta name='twitter:title' property='og:title' itemprop='name' content='{{- .Title | default .Site.Params.title -}}'>
+		{{- if gt (len $desc) 0 -}}<meta name='twitter:description' property='og:description' itemprop='description' content='{{- $desc -}}'/>{{- end -}}
+		{{- if .Params.date -}}<meta property='article:published_time' itemprop='datePublished' content='{{- .Date.Format $iso8601 | safeHTMLAttr -}}'/>{{- end -}}
+		{{- if ne .Lastmod .Date -}}<meta property='article:published_time' itemprop='dateModified' content='{{- .Lastmod.Format $iso8601 | safeHTMLAttr -}}'/>{{- end -}}
+		{{- with .Permalink -}}<meta property='og:url' content='{{- . -}}' />{{- end -}}
+		{{- with .Site.Params.title -}}<meta property='og:site_name' content='{{- . -}}'/>{{- end -}}
+		{{- with .OutputFormats.Get "rss" -}}<link rel='{{- .Rel -}}' type='{{- .MediaType.Type -}}' href='{{- .Permalink -}}' title='{{- $.Site.Params.title -}}'/>{{- end -}}
+		<link rel="shortcut icon" type="image/x-icon" href='/favicon.ico'>
+	</head>
+	<body class="autocolour serif s100 l150 justify">
+		<header class='site-header' role='banner'>
+			<a class='sr-only' href='#main'>{{- `Skip to Contents` -}}</a>
+			<nav class='site-nav' aria-label='Site navigation' role='banner'><ul>
+				{{- range where .Site.Menus.main "Params.disable" "!=" true -}}
+					<li {{ with .Params.class -}}class='{{- . -}}'{{- end -}}>
+						<a href='{{- .URL -}}'>{{- .Identifier -}}</a>
+					</li>
+				{{- end -}}
+			</ul></nav>
+			{{- with .Site.Params.description -}}<p class='tagline'>{{- . -}}</p>{{- end -}}
+		</header>
+		<main id='main' role='main'>
+			<article role='article'>
+				<header class='article-header'>
+					<h1>{{- partial `title` . -}}</h1>
+						<a class='sr-only' href='#content'>{{- `Skip Metadata` -}}</a>
+						{{- partial `meta` . -}}
+				</header>
+				{{- block `content` . -}}{{- end -}}
+			</article>
+		</main>
+		<footer id='footer' class='site-footer' role='contentinfo'>
+			<p>{{- `&copy; ` | safeHTML -}} 
+				{{- if ne "2022" (now.Format "2006") -}}{{- `2022–` -}}{{- end -}}
+				{{- now.Format "2006" -}}{{- `&nbsp;` | safeHTML -}}{{- .Site.Params.author -}}{{- ` – ` -}}{{- .Site.Params.copyright -}}</p>
+			<p class='to-top'><a id="top-link" href='#'>{{- `Back to Top` -}}</a></p>
+		</footer>
+		{{/* JavaScript */}}
+		{{/* We place it here to let scripts run after the rest of the DOM loads. */}}
+		{{/* This eases up on the scripting itself (fewer event handlers e.g.) */}}
+		{{/*	And is recommended by Yahoo! Developer: https://developer.yahoo.com/performance/rules.html#js_bottom */}}
+		{{/* Global onload scripts and functions */}}
+		{{- with resources.Get `js/global/jsshow.js` -}}
+			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
+		{{- end -}}
+		{{- with resources.Get `js/global/styler.js` -}}
+			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
+		{{- end -}}
+		{{- block `js` . -}}{{- end -}}
+	</body>
+</html>

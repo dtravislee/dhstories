@@ -1,0 +1,17 @@
+/* CSS rules for share page */
+
+/* Cookie consent checkbox */
+form .checkbox { margin-right: 0.5em; }
+
+/* Buttons */
+.settings-buttons { 
+	margin-top: 1em; 
+	font-size: 1.2em;
+}
+.go, .demo { margin-right: 0.75em; }
+
+/* Preview box */
+.preview-box { 
+	padding: 0.5em; 
+	margin-top: 1em;
+}

@@ -1,7 +1,0 @@
-/* CSS override rules for print view */
-
-/* Forced light mode */
-* {
-	color: #000 !important;
-	background-color: transparent !important;
-}

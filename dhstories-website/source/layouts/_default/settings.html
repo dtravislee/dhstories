@@ -1,0 +1,42 @@
+{{/* JavaScript and CSS for Share page */}}
+
+{{/* --- */}}
+{{/* JAVASCRIPT */}}
+{{/* --- */}}
+
+{{- define `js` -}}
+	{{- partial `jsgoloader` (dict `file` `js/multi/errorbox.js` `scope` . ) -}}
+	{{- partial `jsgoloader` (dict `file` `js/singles/settings.js` `scope` . ) -}}
+{{- end -}}
+
+{{/* --- */}}
+{{/* CSS */}}
+{{/* --- */}}
+
+{{- define `css` -}}
+
+	{{/* MAIN CSS */}}
+	{{- .Scratch.Add `css` (slice
+		(resources.Get "css/settings.css")
+		(resources.Get "css/opt/forms.css")
+		(resources.Get "css/opt/error-box.css")
+		(resources.Get "css/opt/fieldset.css")
+		)
+	-}}
+	
+	{{/* RETURN */}}
+	{{- range .Scratch.Get `css` -}}
+		{{- .Content | safeCSS -}}
+	{{- end -}}
+	
+{{- end -}}
+
+{{/* --- */}}
+{{/* CONTENT */}}
+{{/* --- */}}
+
+{{- define `content` -}}
+	<div id='content'>
+		{{- partial `content` . -}}
+	</div>
+{{- end -}}

@@ -1,0 +1,7 @@
+/* CSS @media rules for all pages */
+/* For use in polyfills */
+
+@media (max-width: 600px) { html { font-size: 16px; } } /* Small phones (<600px) */
+@media (min-width: 600px) { html { font-size: 18px; } } /* Large phones (>600px) */
+@media (min-width: 768px) {	html { font-size: 20px; } } /* Tablets (>768px) */
+@media (min-width: 992px) { html { font-size: 22px; } } /* Desktops (>992px) */

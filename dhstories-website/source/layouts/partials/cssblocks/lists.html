@@ -1,0 +1,9 @@
+{{/* LISTS CSS */}}
+{{/* Gets CSS for lists of posts: index pages and search results in particular */}}
+
+{{- .Scratch.Add `css` (slice
+	(resources.Get "css/list.css")
+	(resources.Get "css/opt/h2.css")
+	(resources.Get "css/opt/metadata.css")
+	)
+-}}

@@ -1,0 +1,11 @@
+{{/* PAGE TITLE */}}
+{{/* Writes the title, with a page number if it's part of a pagination scheme */}}
+	
+{{- $title := .Title | title -}}
+{{- with .Scratch.Get `pageNum` -}}
+	{{- if gt . 1 -}}
+		{{- $title = print ($title) ` - Page ` . -}}
+	{{- end -}}
+{{- end -}}
+
+{{- $title -}}

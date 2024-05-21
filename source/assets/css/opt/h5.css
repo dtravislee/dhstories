@@ -1,5 +1,0 @@
-/* CSS rules for fourth-level content headings */
-/* Title is h1, so we start at h2 */
-
-h5 { font-size: 1.15rem;  font-style: italic; }
-h5 a, h5 a:hover, h5 a:focus { border-width: 0.087em; } /*(base width / font size) = 0.1 / 1.15 ~= 0.07em)*/
