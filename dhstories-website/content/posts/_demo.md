@@ -2,19 +2,19 @@
 ### Front Matter
 
 ###### Dates (YYYY-MM-DD) - For ordering posts and displaying in content lists.
-date = {{ (time.AsTime .Date).Format (`2006-01-02`) }}
+date = 2024-05-21
 
 ###### Last Modified (YYYY-MM-DD) - When the content was last edited. (Optional - If omitted, will show no edited date)
 lastmod = ""
 
 ###### Title (string) - Required.
-title = "{{ .Name | humanize | title }}"
+title = "Demo"
 
 ###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = ""
 
 ###### Tags (string array) - Tags for the content. Included in social media.
-tags = [{{ range (sort .Site.Taxonomies.tags) }}"{{ .Page.Title }}", {{ end }}]
+tags = ["Test 1", "Test 2", ]
 
 ###### Hide Footer (bool) - Whether to show the footer at the end of this post.
 hideFooter = false
@@ -30,10 +30,8 @@ draft = true
 
 +++
 
-Body text for this item will go here.
+This is a test file showcasing backend content organization.
 
-Begin headers at level 2, using two hash symbols (##).
+You can add additional files and folders at your leisure: all file URLs will be set at the root directory (/) rather than their parent directory (e.g. /posts/).
 
-You can add a table of contents via the shortcode `{{< toc >}}`.
-
-For a complete markdown reference, see [this guide](https://www.markdownguide.org/tools/hugo/).
+Be careful to keep file names unique, even if they are in different folders!
