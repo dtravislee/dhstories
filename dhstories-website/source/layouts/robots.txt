@@ -1,8 +1,8 @@
 # robots.txt file
 
 User-agent: *
-{{ if .Site.Params.Robots }}
-	allow: /
-{{ else }}
+{{ if or (not .Site.Params.Robots) (.Params.noRobot) }}
 	disallow: /
+{{ else }}
+	allow: /
 {{ end }}

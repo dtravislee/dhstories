@@ -6,8 +6,10 @@
 	<head>
 		<meta charset='utf-8'/>
 		<meta name='viewport' content='width=device-width, initial-scale=1.0'/>
-		<meta name='robots' content='index,follow'>{{/* Controls all Search Engines */}}
-		<meta name='googlebot' content='index,follow'>{{/* Controls Google Specific Engines */}}
+		{{- if not .Params.noRobot -}}
+			<meta name='robots' content='index,follow'>{{/* Controls all Search Engines */}}
+			<meta name='googlebot' content='index,follow'>{{/* Controls Google Specific Engines */}}
+		{{- end -}}
 		<title>
 			{{- if .IsHome -}}
 				{{- .Site.Params.title | title -}}
