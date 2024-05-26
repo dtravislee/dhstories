@@ -77,11 +77,11 @@ layout = "settings"
 	<fieldset>
 		<legend>Text Alignment</legend>
 		<div>
-			<input type='radio' id='left' name='align' value='left' checked>
+			<input type='radio' id='left' name='align' value='left'>
 			<label for='left'>Left-Align</label>
 		</div>
 		<div>
-			<input type='radio' id='justify' name='align' value='justify'>
+			<input type='radio' id='justify' name='align' value='justify' checked>
 			<label for='justify'>Justify</label>
 		</div>
 		<div>
@@ -116,10 +116,10 @@ layout = "settings"
 	<legend>Cookie Consent</legend>
 		<span id='cookie-notice'><input id='cookie-consent' class='checkbox' type='checkbox'/><label for='cookie-consent'><b>Note:</b> By checking this box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two <a href='https://secureprivacy.ai/blog/what-are-cookies' target='_blank'>persistent cookies</a>—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.</label></span>
 	</fieldset>
-	<span class='settings-buttons'>
-		<a href='javascript:updateSettings();' class='go'>Apply</a>
-		<a href='javascript:previewSettings();' class='demo'>Preview</a>
-		<a href='javascript:window.history.back();' class='cancel'>Cancel</a>
+	<span class='settings-buttons' id='preview-stop'>
+		<a href='javascript:updateSettings();' class='go' aria-role='button' title='Apply the current settings and return to the previous page'>Apply</a>
+		<a href='javascript:previewSettings();' class='demo' aria-role='button' title='Demonstrate the current settings in a preview box'>Preview</a>
+		<a href='javascript:window.history.back();' class='cancel' aria-role='button' title='Discard the current settings and return to the previous page'>Cancel</a>
 	</span>
 </form>
 

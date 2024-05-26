@@ -1,11 +1,36 @@
 /* CSS rules for search page */
 
+/* Input fields */
 .text-input {
 	border-top: 0.1em solid #aaa;
 	border-bottom: 0.1em solid #aaa;
 	font-size: 1em;
-	display: block;
-	width: 100%;
 	margin: 0.5em 0;
 	font-family: inherit;
 }
+.text-input.long {
+	display: block;
+	width: 100%;
+}
+
+/* Search tip */
+.search-tip { font-size: 85%; }
+
+/* Search buttons */
+.search-buttons { font-size: 1.2em; }
+.search-go { margin-right: 0.5em; }
+
+/* Advanced search sub-sections */
+.search-section {
+	padding-bottom: 1em;
+	margin-bottom: 1em;
+	border-bottom: thin solid #aaa;
+}
+
+/* "Search In" section */
+.loc-col { display: inline-block; width: 40%; }
+.loc-item { margin-right: 0.75em; display: inline-block; width: 100%; }
+
+/* "Tags Select" section */
+.tag-select { font: inherit; }
+.tag-input { margin-right: 0.25em; }

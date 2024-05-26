@@ -14,7 +14,7 @@
 					{{/*	E.g. 250 = 3 characters, 15 = 2 characters. */}}
 					<label for='pagenum'>{{- `Jump to page:` -}}</label>
 					<input id='pagenum' class='text-input' type='number' min='1' max='{{- .TotalPages -}}' placeholder='{{- .PageNumber -}}' title='Enter a page number from 1 to {{ .TotalPages -}}'/>
-					<a href='javascript:goToPage();'>Go</a>
+					<a href='javascript:goToPage();' aria-role='button' title='Go to the selected page'>Go</a>
 				</form>
 			</span>
 		</div>

@@ -12,7 +12,7 @@ hideFooter = true
 
 +++
 
-Welcome to Dragonhouse Stories: a compendium of my works both prosaic and poetic. Learn more [here](/about/).
+Welcome to Dragonhouse Stories: a compendium of my works both prosaic and poetic. Learn more in [the About page](/about/).
 
 Search through [the tags](/tags/), subscribe via [RSS](/rss/), or browse about to your heart's content.
 

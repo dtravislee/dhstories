@@ -16,35 +16,109 @@ layout = "search"
 {{< search.inline >}}
 {{- $buttonName := "Begin Search" -}}
 <form class='js-only' action='javascript:search();'>
-	<input id='search-input' class='text-input' placeholder='Enter a search query and click "{{- $buttonName -}}"' title='Enter a search query and click "{{- $buttonName -}}"'/>
-	Can enclose phrases in quotation marks for exact matches, exclude keywords via appending a dash to the beginning, or use regex by surrounding keywords in forward slashes (/).
+	<input id='search-input' class='text-input long' placeholder='Enter keywords to search and click "{{- $buttonName -}}"' title='Enter a search query and click "{{- $buttonName -}}"'/>
+	<p class='search-tip'>
+		<b>Note:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable <a href='https://en.wikipedia.org/wiki/Regular_expression'>Regex</a> by surrounding expressions with <code>/forward slashes/</code>.</p>
 	<p id='error-box' class='error-box hidden'></p>
-	<a href='javascript:search();'>{{- $buttonName -}}</a>
-	<a href='javascript:openAdvanced();'>Advanced Options</a>
-	<fieldset id='advanced' class='hidden'>
-		<legend>Advanced Search</legend>
-	</fieldset>
-	
-	Search in: Checklist
-	
-	Include tags: select list + add / remove (remove will find the tag from the list and remove it)
-		Plus a text line, full width, that contains the list of tags
-			with a default saying something like "add tags here, separated by commas"
-	
-	Exclude tags: 
-	
-	Before: and after: (use select lists, pulling applicable dates from all posts
+	<p class='search-buttons'>
+		<a href='javascript:search();' class='search-go'>{{- $buttonName -}}</a>
+		<a href='javascript:openAdvanced();' id='search-adv'>Advanced Options</a>
+	</p>
+	<div id='advanced-opt' class=''>
+		<h2>Advanced Search</h2>
+		<fieldset>
+			<legend>Search In</legend>
+			<div class='loc-col left-col'>
+				<span class='loc-item'>
+					<input type='checkbox' id='loc-title' name='search-loc' value='title'>
+					<label for='loc-title'>Title</label>
+				</span>
+				<span class='loc-item'>
+					<input type='checkbox' id='loc-date' name='search-loc' value='date'>
+					<label for='loc-date'>Date</label>
+				</span>
+				<span class='loc-item'>
+					<input type='checkbox' id='loc-edited' name='search-loc' value='edited'>
+					<label for='loc-edited'>Edited Date</label>
+				</span>
+				<span class='loc-item'>
+					<input type='checkbox' id='loc-link' name='search-loc' value='link'>
+					<label for='loc-link'>URL</label>
+				</span>
+			</div>
+			<div class='loc-col right-col'>
+				<span class='loc-item'>
+					<input type='checkbox' id='loc-tags' name='search-loc' value='tags'>
+					<label for='loc-tags'>Tags</label>
+				</span>
+				<span class='loc-item'>
+					<input type='checkbox' id='loc-desc' name='search-loc' value='desc'>
+					<label for='loc-desc'>Description</label>
+				</span>
+				<span class='loc-item'>
+					<input type='checkbox' id='loc-text' name='search-loc' value='text'>
+					<label for='loc-text'>Content</label>
+				</span>
+				<span class='loc-item'>
+					<input type='checkbox' id='loc-words' name='search-loc' value='words'>
+					<label for='loc-words'>Word Count</label>
+				</span>
+			</div>
+			<div class='loc-col left-col'>
+				<a href='javascript:locAll();'>Select All</a>
+			</div>
+			<div class='loc-col right-col'>
+				<a href='javascript:locNone();'>Select None</a>
+			</div>
+		</fieldset>
+			{{/* Create tags list */}}
+			{{- define "taglist" -}}
+				{{ range (sort .Site.Taxonomies.tags) }}
+					{{- with .Page.Title -}}
+						<option value='{{- . -}}'>{{- . -}}</option>
+					{{- end -}}
+				{{- end -}}
+			{{- end -}}
+			{{/* Set tags input description */}}
+			{{- $tagInputDesc := `Add tags, separated by commas (e.g. tag 1, tag 2)` -}}
+		<fieldset id='tag-filter'>
+			<legend>Filter Tags</legend>
+			<select name='include-tag' class='tag-select tag-input'>{{- template "taglist" . -}}</select>
+			<a href='javascript:inclTag(tag-input);' class='tag-input'>Include</a>
+			<a href='javascript:exclTag(tag-input);' class='tag-input'>Exclude</a>
+			<a href='javascript:removeTag(tag-input);' class='tag-input'>Remove</a>
+			<input id='tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
+		</fieldset>
+		<fieldset>
+			<legend>Exclude Tags</legend>
+			<select name='exclude-tag' class='tag-select tag-input'>{{- template "taglist" . -}}</select>
+			<a href='javascript:addTag(excl-tag-input);' class='tag-input'>Add</a>
+			<a href='javascript:removeTag(excl-tag-input);' class='tag-input'>Remove</a>
+			<input id='excl-tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
+		</fieldset>
+		<fieldset>
+			<legend>Date</legend>
+			Before:
+			After:
+			(use select lists, pulling applicable dates from all posts
 		these are inclusive of the date, too)
+		Be sure to include an N/A option! (Or "any")
+		</fieldset>
+		<fieldset>
+			<legend>Word Count</legend>
+			More than (input) words
+			Fewer than (input) words
+		</fieldset>
+		<p class='search-buttons'>
+			<a href='javascript:search();' class='search-go'>{{- $buttonName -}}</a>
+			<a href='javascript:openAdvanced();' id='search-adv-foot'>Advanced Options</a>
+		</p>
+	</div>
 	
-	<select name="pets" id="pet-select">
-  <option value="">--Please choose an option--</option>
-  <option value="dog">Dog</option>
-  <option value="cat">Cat</option>
-  <option value="hamster">Hamster</option>
-  <option value="parrot">Parrot</option>
-  <option value="spider">Spider</option>
-  <option value="goldfish">Goldfish</option>
-</select>
+	https://www.codingwithjesse.com/blog/submit-a-form-in-ie-with-enter/
+	-So be sure to test this in IE7 mode - the multiple text fields here may prove to be an issue!
+	(Might need to use input type='submit' buttons instead...)
+	
 	
 </form>
 

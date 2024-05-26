@@ -8,7 +8,7 @@
 
 {{/* Pull footnote href and rebuild with more generic / ascii "return" */}}
 {{- $footnoteReturn := `(?:<a href=(?:\"|')(.*)(?:\'|")(?:.*) class=(?:\"|')footnote-backref(?:'|\") (?:.*)>)(?:.*)(?:</a>)` -}}
-{{- $newFootnoteReturn := `<sup><a href='${1}' role='doc-backlink' aria-label='return'>^</a></sup>` -}}
+{{- $newFootnoteReturn := `<sup><a href='${1}' role='doc-backlink' aria-label='return'>Return</a></sup>` -}}
 
 {{/* Remove footnote-ref classes */}}
 {{- $oldFootnote := `(class=(?:\"|')footnote-ref(?:'|\"))` -}}
