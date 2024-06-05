@@ -9,7 +9,7 @@ table {
 }
 th { font-weight: bold; }
 th, td {	
-	border: thin solid #aaa;
+	border: 2px solid #aaa;
 	padding: 0.25em 0.5em;
 	vertical-align: middle; 
 }

@@ -3,9 +3,6 @@
 sup { 
 	vertical-align: super; 
 }
-sup a { 
-	font-size: 0.85em;
-	border-width: 0.1176em !important; /*(base width / font size) = 0.1 / 0.85 ~= 0.1176em */
-}
+sup a { font-size: 0.85em; }
 sup a:before { content: "["; }
 sup a:after { content: "]"; }

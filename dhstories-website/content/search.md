@@ -23,11 +23,13 @@ layout = "search"
 	<p class='search-buttons'>
 		<a href='javascript:search();' class='search-go'>{{- $buttonName -}}</a>
 		<a href='javascript:openAdvanced();' id='search-adv'>Advanced Options</a>
+		<a href='javascript:closeAdvanced();' id='close-search-adv' class='hidden'>Close Options</a>
 	</p>
 	<div id='advanced-opt' class=''>
 		<h2>Advanced Search</h2>
 		<fieldset>
 			<legend>Search In</legend>
+			<p>Look for the search query in:</p>
 			<div class='loc-col left-col'>
 				<span class='loc-item'>
 					<input type='checkbox' id='loc-title' name='search-loc' value='title'>
@@ -81,46 +83,90 @@ layout = "search"
 			{{- end -}}
 			{{/* Set tags input description */}}
 			{{- $tagInputDesc := `Add tags, separated by commas (e.g. tag 1, tag 2)` -}}
-		<fieldset id='tag-filter'>
-			<legend>Filter Tags</legend>
-			<select name='include-tag' class='tag-select tag-input'>{{- template "taglist" . -}}</select>
-			<a href='javascript:inclTag(tag-input);' class='tag-input'>Include</a>
-			<a href='javascript:exclTag(tag-input);' class='tag-input'>Exclude</a>
-			<a href='javascript:removeTag(tag-input);' class='tag-input'>Remove</a>
-			<input id='tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
+		<fieldset id='incl-tags'>
+			<legend>Include Tags</legend>
+			<label for='include-tag'>Select a tag to add to the "include tag" list:</label>
+			<p>
+				<select id='include-tag' name='include-tag' class='select-box'>
+					<option value=''>--Choose a tag--</option>
+					{{- template "taglist" . -}}
+				</select>
+			</p><p>
+				<a href='javascript:addTag(incl-tag-input);' class='tag-input'>Add tag to list</a>
+				<a href='javascript:removeTag(incl-tag-input);' class='tag-input'>Remove tag from list</a>
+			</p>
+			<hr/>
+			<label for='incl-tag-input'>Enter list of tags to include in the search:</label>
+			<input id='incl-tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
+			<a href='javascript:resetFields("incl-tags");' class='reset-button'>Reset</a>
 		</fieldset>
-		<fieldset>
+		<fieldset id='excl-tags'>
 			<legend>Exclude Tags</legend>
-			<select name='exclude-tag' class='tag-select tag-input'>{{- template "taglist" . -}}</select>
-			<a href='javascript:addTag(excl-tag-input);' class='tag-input'>Add</a>
-			<a href='javascript:removeTag(excl-tag-input);' class='tag-input'>Remove</a>
+			<label for='exclude-tag'>Select a tag to add to the "avoid tag" list:</label>
+			<p>
+				<select id='exclude-tag' name='exclude-tag' class='select-box'>
+					<option value=''>--Choose a tag--</option>
+					{{- template "taglist" . -}}
+				</select>
+			</p><p>
+				<a href='javascript:addTag(excl-tag-input);' class='tag-input'>Add tag to list</a>
+				<a href='javascript:removeTag(excl-tag-input);' class='tag-input'>Remove tag from list</a>
+			</p>
+			<hr/>
+			<label for='excl-tag-input'>Enter list of tags to avoid when searching:</label>
 			<input id='excl-tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
+			<a href='javascript:resetFields("excl-tags");' class='reset-button'>Reset</a>
 		</fieldset>
-		<fieldset>
+		{{/* Get all the dates on the site, truncating repetition */}}
+		{{- define "datelist" -}}
+			{{- $datesList := slice -}} {{/* Empty starter array / slice */}}
+			{{- range .Site.RegularPages -}}
+				{{- with .Date -}} {{/* Only get dates from pages with the date parameter set */}}
+					{{/* Add formatted (YYYY-MM-DD) date to datesList */}}
+					{{- $datesList = $datesList | append (.) -}}
+				{{- end -}}
+			{{- end -}}
+			{{- $datesList = $datesList | uniq -}} {{/* Trim duplicate dates */}}
+			{{- range $datesList -}}
+				<option value='{{- .Format (`2006-01-02`) -}}'>{{- .Format (`Jan 02, 2006`) -}}</option>
+			{{- end -}}
+		{{- end -}}
+		<fieldset id='dates'>
 			<legend>Date</legend>
-			Before:
-			After:
-			(use select lists, pulling applicable dates from all posts
-		these are inclusive of the date, too)
-		Be sure to include an N/A option! (Or "any")
+			<p>
+				Find posts published <label for='before-date'>starting on the date</label>
+				<select id='before-date' name='before-date' class='select-box date'>
+					<option value=''>--Choose a date--</option>
+					<option value=''>Any date</option>
+					{{- template "datelist" . -}}
+				</select>
+				<label for='after-date'>up to and including the date</label>
+				<select id='after-date' name='after-date' class='select-box date'>
+					<option value=''>--Choose a date--</option>
+					<option value=''>Any date</option>
+					{{- template "datelist" . -}}
+				</select>
+			</p>
+			<a href='javascript:resetFields("dates");' class='reset-button'>Reset</a>
 		</fieldset>
-		<fieldset>
+		<fieldset id='words'>
 			<legend>Word Count</legend>
-			More than (input) words
-			Fewer than (input) words
+			<p>Look for posts with:</p>
+			<p><label>More than <input id='word-min' class='text-input number' type='number' placeholder='0' min='0' title='Enter a minimum word count (optional)'/> words</label></p>
+			<p><label>Fewer than <input id='word-max' class='text-input number' type='number' placeholder='0' min='0' title='Enter a maximum word count (optional)'/> words</label></p>
+			<p id='error-box-numbers' class='error-box hidden'><b>!!ERROR:</b> Word counts must be a number greater than or equal to 0!</p>
+			<a href='javascript:resetFields("words");' class='reset-button'>Reset</a>
 		</fieldset>
 		<p class='search-buttons'>
-			<a href='javascript:search();' class='search-go'>{{- $buttonName -}}</a>
-			<a href='javascript:openAdvanced();' id='search-adv-foot'>Advanced Options</a>
+			<a href='javascript:search();'>{{- $buttonName -}}</a>
+			<a href='#search-input' id='search-adv-foot'>Return to Top</a>
+			<a href='javascript:resetFields("everything");'>Reset All</a>
 		</p>
 	</div>
-	
+</form>
+{{</ search.inline >}}	
 	https://www.codingwithjesse.com/blog/submit-a-form-in-ie-with-enter/
 	-So be sure to test this in IE7 mode - the multiple text fields here may prove to be an issue!
 	(Might need to use input type='submit' buttons instead...)
-	
-	
-</form>
-
 <div id='results-container'></div>
-{{</ search.inline >}}
+

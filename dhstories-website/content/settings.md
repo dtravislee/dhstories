@@ -77,11 +77,11 @@ layout = "settings"
 	<fieldset>
 		<legend>Text Alignment</legend>
 		<div>
-			<input type='radio' id='left' name='align' value='left'>
+			<input type='radio' id='left' name='align' value='left' checked>
 			<label for='left'>Left-Align</label>
 		</div>
 		<div>
-			<input type='radio' id='justify' name='align' value='justify' checked>
+			<input type='radio' id='justify' name='align' value='justify'>
 			<label for='justify'>Justify</label>
 		</div>
 		<div>

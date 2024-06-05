@@ -11,6 +11,7 @@
 var cookiesPreOk = getLocalObj("dhstories-cookies"); /* Whether cookies have been approved before */
 var cookiesOk = cookiesPreOk;
 var i, dump, settingsCode;
+var errorBoxId = "error-box";
 
 /* SET COOKIE */
 /* Sets a browser cookie with the given key name, value, and expiration date (in # of days). */
@@ -54,7 +55,7 @@ function getSettings() {
 
 function previewSettings() {
 	/* Reset any error message */
-	setError("");
+	setError("", errorBoxId);
 	/* Get the settings as input by the user */
 	getSettings();
 	/* Apply settings classes to the settings page */
@@ -68,13 +69,13 @@ function previewSettings() {
 
 function updateSettings() {
 	/* Reset any error message */
-	setError("");
+	setError("", errorBoxId);
 	/* Get the settings as input by the user */
 	getSettings();
 	/* Check that cookies are accepted by the user, either now (checkbox) or earlier (storage obj.)
 	/* if not, display an error and halt */
 	if (!cookiesOk) {
-		setError("<b>ERROR:</b> Unable to save settings. Be sure to accept cookies!");
+		setError("<b>ERROR:</b> Unable to save settings. Be sure to accept cookies!", errorBoxId);
 		return;
 	}
 	/* Set local storage or cookie values; display an error if this fails somehow (likely disabled storage) */
@@ -92,7 +93,7 @@ function updateSettings() {
 	}
 	catch(e) {
 		console.log(e);
-		setError("<b>!!ERROR:</b> Unable to save settings. You may have cookies and/or local storage disabled in your browser!");
+		setError("<b>!!ERROR:</b> Unable to save settings. You may have cookies and/or local storage disabled in your browser!", errorBoxId);
 	}
 }
 

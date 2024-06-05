@@ -2,4 +2,3 @@
 /* Title is h1, so we start at h2 */
 
 h2 { font-size: 1.4em; }
-h2 a, h2 a:hover, h2 a:focus { border-width: 0.07em; } /*(base width / font size) = 0.1 / 1.4 ~= 0.07em)*/

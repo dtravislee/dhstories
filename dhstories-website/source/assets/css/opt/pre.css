@@ -2,7 +2,7 @@
 
 pre {
 	overflow: auto;
-	border: thin solid #aaa;
+	border: 2px solid #aaa;
 	margin-bottom: 1em;
 	display: block;
 	white-space: pre;

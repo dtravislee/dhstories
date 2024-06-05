@@ -20,7 +20,7 @@ function goToPage() {
 		var pagenum = document.getElementById('pagenum').value;
 		// Try to parse the input as a number - most likely fail point for old browsers
 		//	(Some old browsers will render the Number input as a generic text input)
-		pagenum = Number(pagenum);
+		pagenum = parseInt(pagenum);
 		// Ensure pagenum is a number within the paginator range, as a fallback to HTML5 limits
 		if (pagenum >= 1 && pagenum <= totalpages) {
 			// If so, get the URL of the last page in the paginator
@@ -35,6 +35,6 @@ function goToPage() {
 		}
 		else { throw "Bad number input"; }
 	}
-	catch(e) { var dump = e; /* IE7 */ setError('<b>ERROR:</b> Please enter a number between 1 and ' + totalpages); }
+	catch(e) { var dump = e; /* IE7 */ setError('<b>ERROR:</b> Please enter a number between 1 and ' + totalpages, "error-box"); }
 }
 {{- end -}}{{- end -}}

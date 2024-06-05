@@ -30,13 +30,13 @@ Prior to starting the Dragonhouse, he earned a Creative Writing bachelor's degre
 
 Much of Lee's writing tends toward fantasy, science fiction, and abstract or surrealist poetry—or hybrids therein. He lists the likes of [Terry Pratchett](https://terrypratchett.com/); [Adrian Tschaikovsky](https://www.adriantchaikovsky.com/); [Alastair Reynolds](https://www.alastairreynolds.com/); [Sarah Jolley](https://jolleycomics.com/); [Sharon Lee and Steve Miller](https://korval.com/); and countless contrubitors to short-story anthologies as inspirations. Out of all the works found on his e-reader, anthologies are, by far, the most plentiful.
 
-When not writing, Travis dabbles in web design, having built _Dragonhouse Stories_ as a challenge in user accessibility, minimalistic design, and file size restrictions[^1]. He can also be found browsing philosophy and science websites, watching videogame-related videos, or—when words won't suffice—taking his creativity to the voxel world of Minecraft.
+When not writing, Travis dabbles in web design, having built _Dragonhouse Stories_ as a challenge in user accessibility, minimalistic design, and file size restrictions[^Note 1]. He can also be found browsing philosophy and science websites, watching videogame-related videos, or—when words won't suffice—taking his creativity to the voxel world of Minecraft.
 
-If he was a dragon,[^2] he would hoard ideas, notions, dreams, and other abstractions. He finds duality, and dualistic concepts, the most fascinating. The best food with which to bribe him is chocolate-covered pretzels.[^3]
+If he was a dragon,[^Note 2] he would hoard ideas, notions, dreams, and other abstractions. He finds duality, and dualistic concepts, the most fascinating. The best food with which to bribe him is chocolate-covered pretzels.[^Note 3]
 
-[^1]: His inability to draw contributed to this decision.
-[^2]: He claims he is not one. His preference for the colour gold makes this dubious
-[^3]: Cookies of most varieties are an acceptable substitute. Various other sweets may, also, suffice.
+[^Note 1]: His inability to draw contributed to this decision.
+[^Note 2]: He claims he is not one. His preference for the colour gold makes this dubious
+[^Note 3]: Cookies of most varieties are an acceptable substitute. Various other sweets may, also, suffice.
 
 ### Education
 

@@ -6,8 +6,6 @@ code {
 	padding: 0 0.1em;
 }
 pre code { 
-	border: thin solid #aaa;
-	overflow: show;
 	padding: 0 1em 0 2em;
 	border-radius: 0;
 	border: none;

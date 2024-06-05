@@ -6,7 +6,7 @@ main dl dt {
 	font-weight: bold;
 }
 main dl dd {
-	border-left: thin solid #aaa;
+	border-left: 2px solid #aaa;
 	margin: 0 0 1em 0;
 	padding: 1em;
 }
