@@ -161,15 +161,12 @@ a, button .a {
 	text-decoration: none;
 	cursor: pointer;
 	border-bottom: 2px solid #daa520;
+	padding: 2px 2px 0 2px;
 	display: inline-block;
 	line-height: 1;
 	border-top: 1px;
 }
-a:hover, a:focus, button:hover .a, button:focus .a { 
-	text-decoration: underline; 
-	border: none;
-	padding-bottom: 2px;
-}
+a:hover, a:focus, button:hover .a, button:focus .a { padding: 0; border: 2px dashed #aaa; }
 a:active, button:active .a { background-color: #aaa; }
 
 /* FOOTER */

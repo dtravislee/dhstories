@@ -32,37 +32,37 @@ layout = "search"
 			<p>Look for the search query in:</p>
 			<div class='loc-col left-col'>
 				<span class='loc-item'>
-					<input type='checkbox' id='loc-title' name='search-loc' value='title'>
+					<input type='checkbox' id='loc-title' name='search-loc' value='title' checked>
 					<label for='loc-title'>Title</label>
 				</span>
 				<span class='loc-item'>
-					<input type='checkbox' id='loc-date' name='search-loc' value='date'>
+					<input type='checkbox' id='loc-date' name='search-loc' value='date' checked>
 					<label for='loc-date'>Date</label>
 				</span>
 				<span class='loc-item'>
-					<input type='checkbox' id='loc-edited' name='search-loc' value='edited'>
+					<input type='checkbox' id='loc-edited' name='search-loc' value='edited' checked>
 					<label for='loc-edited'>Edited Date</label>
 				</span>
 				<span class='loc-item'>
-					<input type='checkbox' id='loc-link' name='search-loc' value='link'>
+					<input type='checkbox' id='loc-link' name='search-loc' value='link' checked>
 					<label for='loc-link'>URL</label>
 				</span>
 			</div>
 			<div class='loc-col right-col'>
 				<span class='loc-item'>
-					<input type='checkbox' id='loc-tags' name='search-loc' value='tags'>
+					<input type='checkbox' id='loc-tags' name='search-loc' value='tags' checked>
 					<label for='loc-tags'>Tags</label>
 				</span>
 				<span class='loc-item'>
-					<input type='checkbox' id='loc-desc' name='search-loc' value='desc'>
+					<input type='checkbox' id='loc-desc' name='search-loc' value='desc' checked>
 					<label for='loc-desc'>Description</label>
 				</span>
 				<span class='loc-item'>
-					<input type='checkbox' id='loc-text' name='search-loc' value='text'>
+					<input type='checkbox' id='loc-text' name='search-loc' value='text' checked>
 					<label for='loc-text'>Content</label>
 				</span>
 				<span class='loc-item'>
-					<input type='checkbox' id='loc-words' name='search-loc' value='words'>
+					<input type='checkbox' id='loc-words' name='search-loc' value='words' checked>
 					<label for='loc-words'>Word Count</label>
 				</span>
 			</div>
@@ -156,6 +156,15 @@ layout = "search"
 			<p><label>Fewer than <input id='word-max' class='text-input number' type='number' placeholder='0' min='0' title='Enter a maximum word count (optional)'/> words</label></p>
 			<p id='error-box-numbers' class='error-box hidden'><b>!!ERROR:</b> Word counts must be a number greater than or equal to 0!</p>
 			<a href='javascript:resetFields("words");' class='reset-button'>Reset</a>
+		</fieldset>
+		<fieldset id='sort'>
+			<legend>Results Order</legend>
+			<p>Sort search results by:</p>
+			<p><input type='radio' id='new-first' name='sort-rule' value='new-first' checked>
+				<label for='new-first'>Newest first</label></p>
+			<p><input type='radio' id='old-first' name='sort-rule' value='old-first'>
+				<label for='new-first'>Oldest first</label></p>
+			<a href='javascript:resetFields("sort");' class='reset-button'>Reset</a>
 		</fieldset>
 		<p class='search-buttons'>
 			<a href='javascript:search();'>{{- $buttonName -}}</a>
