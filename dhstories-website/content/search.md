@@ -25,7 +25,7 @@ layout = "search"
 		<a href='javascript:openAdvanced();' id='search-adv'>Advanced Options</a>
 		<a href='javascript:closeAdvanced();' id='close-search-adv' class='hidden'>Close Options</a>
 	</p>
-	<div id='advanced-opt' class=''>
+	<div id='advanced-opt' class='hidden'>
 		<h2>Advanced Search</h2>
 		<fieldset>
 			<legend>Search In</legend>
@@ -173,9 +173,6 @@ layout = "search"
 		</p>
 	</div>
 </form>
-{{</ search.inline >}}	
-	https://www.codingwithjesse.com/blog/submit-a-form-in-ie-with-enter/
-	-So be sure to test this in IE7 mode - the multiple text fields here may prove to be an issue!
-	(Might need to use input type='submit' buttons instead...)
+{{</ search.inline >}}
 <div id='results-container'></div>
 
