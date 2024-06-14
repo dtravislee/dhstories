@@ -80,11 +80,11 @@ body.mono, .preview-box.mono, code { font-family: "SFMono-Regular",
 		monospace; 
 }
 /* Colours */
-body.lightmode, body.lightmode *  { color: #252525; background-color: #fafafa; }
-body.darkmode, body.darkmode * { color: #fafafa; background-color: #252525; }
-body.autocolour, body.autocolour * { color: #252525; background-color: #fafafa;}
+body.lightmode, body.lightmode .to-top  { color: #252525; background-color: #fafafa; }
+body.darkmode, body.darkmode .to-top { color: #fafafa; background-color: #252525; }
+body.autocolour, body.autocolour .to-top { color: #252525; background-color: #fafafa;}
 @media (prefers-color-scheme: dark) {
-	body.autocolour, body.autocolour * { color: #fafafa; background-color: #252525;}
+	body.autocolour, body.autocolour .to-top { color: #fafafa; background-color: #252525;}
 }
 /* Font sizes */
 body.s050 { font-size: 50%; }
