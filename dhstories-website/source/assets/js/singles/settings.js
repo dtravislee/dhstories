@@ -12,7 +12,6 @@ var cookiesPreOk = getLocalObj("dhstories-cookies"); /* Whether cookies have bee
 var cookiesOk = cookiesPreOk; /* Initializing cookiesOk with pre-approval, if it exists */
 var i, dump, settingsCode;
 var errorBoxId = "error-box";
-var hashCode = window.hash; /* Set if the user happens to go back in browser history */
 
 /* SET COOKIE */
 /* Sets a browser cookie with the given key name, value, and expiration date (in # of days). */
@@ -80,21 +79,31 @@ function updateSettings() {
 		return;
 	}
 	/* Set local storage or cookie values; display an error if this fails somehow (likely disabled storage) */
-	try {
-		try { 
-			window.localStorage.setItem("dhstories-cookies", "true"); /* Cookie acceptance */
-			window.localStorage.setItem("dhstories-theme", settingsCode); /* Settings */
+	if (window.confirm("Are these settings correct? If yes, click OK. NOTE: This will return you to the previous page!")) {
+		try {
+			try { 
+				window.localStorage.setItem("dhstories-cookies", "true"); /* Cookie acceptance */
+				window.localStorage.setItem("dhstories-theme", settingsCode); /* Settings */
+			}
+			catch(e) { /* Set cookies for ~1 year instead */
+				dump = e; /* IE7 */
+				setCookie("dhstories-cookies", "true", 365); /* Cookie acceptance */
+				setCookie("dhstories-theme", settingsCode, 365); /* Settings */
+			}
+			window.history.back(); /* Navigate to previous page */
 		}
-		catch(e) { /* Set cookies for ~1 year instead */
-			dump = e; /* IE7 */
-			setCookie("dhstories-cookies", "true", 365); /* Cookie acceptance */
-			setCookie("dhstories-theme", settingsCode, 365); /* Settings */
+		catch(e) {
+			console.log(e);
+			setError("<b>!!ERROR:</b> Unable to save settings. You may have cookies and/or local storage disabled in your browser!", errorBoxId);
 		}
-		window.history.back(); /* Navigate to previous page */
 	}
-	catch(e) {
-		console.log(e);
-		setError("<b>!!ERROR:</b> Unable to save settings. You may have cookies and/or local storage disabled in your browser!", errorBoxId);
+}
+
+/* CANCEL BUTTON */
+/* Cancels any changes to the page and returns the user to the previous page. */
+function cancelSettings() {
+	if (window.confirm("Do you want to discard your changes and return to the previous page? If yes, click OK.")) {
+		window.history.back();
 	}
 }
 

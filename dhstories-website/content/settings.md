@@ -119,7 +119,7 @@ layout = "settings"
 	<span class='settings-buttons' id='preview-stop'>
 		<a href='javascript:updateSettings();' class='go' aria-role='button' title='Apply the current settings and return to the previous page'>Apply</a>
 		<a href='javascript:previewSettings();' class='demo' aria-role='button' title='Demonstrate the current settings in a preview box'>Preview</a>
-		<a href='javascript:window.history.back();' class='cancel' aria-role='button' title='Discard the current settings and return to the previous page'>Cancel</a>
+		<a href='javascript:cancelSettings();' class='cancel' aria-role='button' title='Discard the current settings and return to the previous page'>Cancel</a>
 	</span>
 </form>
 
