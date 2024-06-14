@@ -95,11 +95,6 @@ enableInlineShortcodes = true
 	
 ## Markup Settings
 [markup]
-
-	## Code Syntax Highlighting disable
-	[markup.highlight]
-		codeFences = false
-		
 	## Table of Contents Settings
 	[markup.tableOfContents]
 		ordered = false

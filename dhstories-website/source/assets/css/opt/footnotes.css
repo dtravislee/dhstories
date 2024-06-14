@@ -4,5 +4,3 @@ sup {
 	vertical-align: super; 
 }
 sup a { font-size: 0.85em; }
-sup a:before { content: "["; }
-sup a:after { content: "]"; }

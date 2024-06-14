@@ -67,7 +67,7 @@ body.sans, .preview-box.sans { font-family: -apple-system,
 				"Segoe UI Symbol",
 				sans-serif; 
 }
-body.mono, .preview-box.mono, code { font-family: "SFMono-Regular", 
+body.mono, .preview-box.mono, code, .codeblock { font-family: "SFMono-Regular", 
 		"SF-Mono", 
 		Menlo, 
 		Monaco, 
@@ -156,8 +156,8 @@ h1 {
 }
 
 /* Links */
-/* Buttons with an inner span / div with class 'a' are also styled as links */
-a, button .a {	
+/* Inputs with a class of 'a', e.g. buttons, are also styled as links */
+a, input.a {	
 	text-decoration: none;
 	cursor: pointer;
 	border-bottom: 2px solid #daa520;
@@ -166,8 +166,22 @@ a, button .a {
 	line-height: 1;
 	border-top: 1px;
 }
-a:hover, a:focus, button:hover .a, button:focus .a { padding: 0; border: 2px dashed #aaa; }
-a:active, button:active .a { background-color: #aaa; }
+a:hover, a:focus, input.a:hover, input.a:focus { padding: 0; border: 2px dashed #aaa; }
+a:active, input.a:active { background-color: #aaa; }
+/* External link notes */
+.ext-link { position: relative; }
+.ext-note {
+	font-size: 85%;
+	display: none;
+	position: absolute;
+	top: 1.3em;
+	background-color: #ff0000;
+	border-radius: 5px;
+	border: 1px solid #000;
+	padding: 2px 3px;
+	z-index: 2;
+}
+.ext-link:hover .ext-note { display: inline; }
 
 /* FOOTER */
 .site-footer {	

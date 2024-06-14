@@ -1,6 +1,9 @@
-<a href="{{- .Destination | safeURL -}}"{{- with .Title -}} title="{{- . -}}"{{- end -}}{{- if strings.HasPrefix .Destination "http" -}} target="_blank" rel="noopener"{{- end -}}>{{- .Text | safeHTML -}}</a>
-
-{{/* Also maybe add an "external link" pop-up on external links
-(Just a little something that appears below external links e.g. at https://semenar.itch.io/version-control)
--And add a aria-description or some other tag for screen readers, of course 
-Be sure to remove this comment - otherwise links will have whitespace around them. IDFK why. */}}
+{{- $extLink := strings.HasPrefix .Destination "http" -}}
+<a href='{{- .Destination | safeURL -}}'{{- if or .Title $extLink -}} title='{{- with .Title -}}{{- . -}}{{- else -}}{{- .Text | safeHTML -}}{{- end -}}{{- if $extLink }} - opens in new tab{{- end -}}'{{- end -}}
+	{{- if $extLink -}} 
+		class='ext-link' target='_blank' rel='noopener' aria-label='{{- .Text | safeHTML }} (external link)'>
+		<span class='ext-note'>External link</span>
+	{{- else -}}>{{- end -}}
+	{{- .Text | safeHTML -}}
+	{{/* Use angled arrow at end of text. Can add aria-label that says "external link - opens in new window". Could undo the title stuff then, but that may be useful for accessibility. Does it hurt? Not really, so... */}}
+</a>

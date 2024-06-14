@@ -2,13 +2,13 @@
 {{/* Applies some post-markdown, pre-render adjustments to content files */}}
 
 <div id="content">
-{{/* Add 'bookmark' links to each heading */}}
-{{- $contentHeading := `(<h[2-9] id=(?:\"|')([^\"|']+)(?:\"|').*>)(.*)(</h[2-9]+>)` -}}
-{{- $contentHeadingWithLink := `${1}<a href='#${2}'>${3}</a>${4}` -}}
+{{/* Pull footnote return and rebuild with more generic / ascii "return" */}}
+{{- $footnoteReturn := `(?:<a href=(?:\"|')(#fnref:)([0-9])(?:\'|")([^>]*)>)(?:.*)(?:</a>)` -}}
+{{- $newFootnoteReturn := `<sup><a href='${1}${2}' ${3} title='Return to reference ${2}' aria-label='Return to reference ${2}'>[^]</a></sup>` -}}
 
-{{/* Pull footnote href and rebuild with more generic / ascii "return" */}}
-{{- $footnoteReturn := `(?:<a href=(?:\"|')(.*)(?:\'|")(?:.*) class=(?:\"|')footnote-backref(?:'|\") (?:.*)>)(?:.*)(?:</a>)` -}}
-{{- $newFootnoteReturn := `<sup><a href='${1}' role='doc-backlink' aria-label='return'>Return</a></sup>` -}}
+{{/* Pull footnote reference and rebuild with proper characters and ARIA accessibility features */}}
+{{- $footnoteRef := `(?:<a href=(?:\"|')(#fn:)([0-9])(?:\'|")([^>]*)>)(?:[0-9]*)(?:</a>)` -}}
+{{- $newFootnoteRef := `<a href='${1}${2}' ${3} title='Jump to footnote ${2}' aria-label='Jump to footnote ${2}'>[${2}]</a>` -}}
 
 {{/* Remove footnote-ref classes */}}
 {{- $oldFootnote := `(class=(?:\"|')footnote-ref(?:'|\"))` -}}
@@ -32,8 +32,8 @@
 
 {{- .Content
 	| replaceRE $footnotesHr $footnotesNoHr
+	| replaceRE $footnoteRef $newFootnoteRef
 	| replaceRE $footnoteReturn $newFootnoteReturn 
-	| replaceRE $contentHeading $contentHeadingWithLink 
 	| replaceRE $endOfToc $notesLink
 	| replaceRE $toc $tocNew
 	| replaceRE $oldFootnote $newFootnote

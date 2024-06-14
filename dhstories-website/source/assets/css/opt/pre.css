@@ -1,12 +1,7 @@
 /* CSS rules for preformatted text */
+/* Mostly used for code blocks - could be useful for poetry? */
 
 pre {
-	overflow: auto;
-	border: 2px solid #aaa;
-	margin-bottom: 1em;
 	display: block;
 	white-space: pre;
-	tab-size: 4;
-	padding-top: 1em!ie7;
-	padding-bottom: 1em!ie7;
 }

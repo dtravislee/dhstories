@@ -18,14 +18,15 @@ layout = "search"
 <form class='js-only' action='javascript:search();'>
 	<input id='search-input' class='text-input long' placeholder='Enter keywords to search and click "{{- $buttonName -}}"' title='Enter a search query and click "{{- $buttonName -}}"'/>
 	<p class='search-tip'>
-		<b>Note:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable <a href='https://en.wikipedia.org/wiki/Regular_expression'>Regex</a> by surrounding expressions with <code>/forward slashes/</code>.</p>
+		{{- $regexNote := "Regex on Wikipedia - opens in new tab" -}}
+		<b>Note:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable <a href='https://en.wikipedia.org/wiki/Regular_expression' title='{{- $regexNote -}}' target='_blank' rel='noopener' aria-label='{{- $regexNote -}}'>Regex</a> by surrounding expressions with <code>/forward slashes/</code>.</p>
 	<p id='error-box' class='error-box hidden'></p>
 	<p class='search-buttons'>
 		<a href='javascript:search();' class='search-go'>{{- $buttonName -}}</a>
 		<a href='javascript:openAdvanced();' id='search-adv'>Advanced Options</a>
 		<a href='javascript:closeAdvanced();' id='close-search-adv' class='hidden'>Close Options</a>
 	</p>
-	<div id='advanced-opt' class='hidden'>
+	<div id='advanced-opt' class=''>
 		<h2>Advanced Search</h2>
 		<fieldset>
 			<legend>Search In</legend>
@@ -92,13 +93,13 @@ layout = "search"
 					{{- template "taglist" . -}}
 				</select>
 			</p><p>
-				<a href='javascript:addTag(incl-tag-input);' class='tag-input'>Add tag to list</a>
-				<a href='javascript:removeTag(incl-tag-input);' class='tag-input'>Remove tag from list</a>
+				<a href='javascript:addTag(incl-tag-input);' class='tag-input'>Add tag to Include list</a>
+				<a href='javascript:removeTag(incl-tag-input);' class='tag-input'>Remove tag from Include list</a>
 			</p>
 			<hr/>
 			<label for='incl-tag-input'>Enter list of tags to include in the search:</label>
 			<input id='incl-tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
-			<a href='javascript:resetFields("incl-tags");' class='reset-button'>Reset</a>
+			<a href='javascript:resetFields("incl-tags");' class='reset-button'>Reset Include Tags</a>
 		</fieldset>
 		<fieldset id='excl-tags'>
 			<legend>Exclude Tags</legend>
@@ -109,13 +110,13 @@ layout = "search"
 					{{- template "taglist" . -}}
 				</select>
 			</p><p>
-				<a href='javascript:addTag(excl-tag-input);' class='tag-input'>Add tag to list</a>
-				<a href='javascript:removeTag(excl-tag-input);' class='tag-input'>Remove tag from list</a>
+				<a href='javascript:addTag(excl-tag-input);' class='tag-input'>Add tag to Exclude list</a>
+				<a href='javascript:removeTag(excl-tag-input);' class='tag-input'>Remove tag from Exclude list</a>
 			</p>
 			<hr/>
 			<label for='excl-tag-input'>Enter list of tags to avoid when searching:</label>
 			<input id='excl-tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
-			<a href='javascript:resetFields("excl-tags");' class='reset-button'>Reset</a>
+			<a href='javascript:resetFields("excl-tags");' class='reset-button'>Reset Excluded Tags</a>
 		</fieldset>
 		{{/* Get all the dates on the site, truncating repetition */}}
 		{{- define "datelist" -}}
@@ -147,7 +148,7 @@ layout = "search"
 					{{- template "datelist" . -}}
 				</select>
 			</p>
-			<a href='javascript:resetFields("dates");' class='reset-button'>Reset</a>
+			<a href='javascript:resetFields("dates");' class='reset-button'>Reset Dates</a>
 		</fieldset>
 		<fieldset id='words'>
 			<legend>Word Count</legend>
@@ -155,7 +156,7 @@ layout = "search"
 			<p><label>More than <input id='word-min' class='text-input number' type='number' placeholder='0' min='0' title='Enter a minimum word count (optional)'/> words</label></p>
 			<p><label>Fewer than <input id='word-max' class='text-input number' type='number' placeholder='0' min='0' title='Enter a maximum word count (optional)'/> words</label></p>
 			<p id='error-box-numbers' class='error-box hidden'><b>!!ERROR:</b> Word counts must be a number greater than or equal to 0!</p>
-			<a href='javascript:resetFields("words");' class='reset-button'>Reset</a>
+			<a href='javascript:resetFields("words");' class='reset-button'>Reset Word Counts</a>
 		</fieldset>
 		<fieldset id='sort'>
 			<legend>Results Order</legend>
@@ -164,7 +165,7 @@ layout = "search"
 				<label for='new-first'>Newest first</label></p>
 			<p><input type='radio' id='old-first' name='sort-rule' value='old-first'>
 				<label for='new-first'>Oldest first</label></p>
-			<a href='javascript:resetFields("sort");' class='reset-button'>Reset</a>
+			<a href='javascript:resetFields("sort");' class='reset-button'>Reset Results Order</a>
 		</fieldset>
 		<p class='search-buttons'>
 			<a href='javascript:search();'>{{- $buttonName -}}</a>
