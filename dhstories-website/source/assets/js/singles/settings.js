@@ -9,9 +9,10 @@
 /* GLOBAL VARIABLES */
 
 var cookiesPreOk = getLocalObj("dhstories-cookies"); /* Whether cookies have been approved before */
-var cookiesOk = cookiesPreOk;
+var cookiesOk = cookiesPreOk; /* Initializing cookiesOk with pre-approval, if it exists */
 var i, dump, settingsCode;
 var errorBoxId = "error-box";
+var hashCode = window.hash; /* Set if the user happens to go back in browser history */
 
 /* SET COOKIE */
 /* Sets a browser cookie with the given key name, value, and expiration date (in # of days). */

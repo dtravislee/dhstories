@@ -1,9 +1,8 @@
-{{- $extLink := strings.HasPrefix .Destination "http" -}}
-<a href='{{- .Destination | safeURL -}}'{{- if or .Title $extLink -}} title='{{- with .Title -}}{{- . -}}{{- else -}}{{- .Text | safeHTML -}}{{- end -}}{{- if $extLink }} - opens in new tab{{- end -}}'{{- end -}}
-	{{- if $extLink -}} 
-		class='ext-link' target='_blank' rel='noopener' aria-label='{{- .Text | safeHTML }} (external link)'>
-		<span class='ext-note'>External link</span>
-	{{- else -}}>{{- end -}}
+{{- /* Taken from: https://gohugo.io/render-hooks/links/ */ -}}
+{{- $u := urls.Parse .Destination -}}
+<a href='{{- .Destination | safeURL -}}'
+	{{- with .Title -}} title='{{- . -}}'{{- end -}}
+	{{- if $u.IsAbs -}} rel="external"{{- end -}}
+	>
 	{{- .Text | safeHTML -}}
-	{{/* Use angled arrow at end of text. Can add aria-label that says "external link - opens in new window". Could undo the title stuff then, but that may be useful for accessibility. Does it hurt? Not really, so... */}}
 </a>

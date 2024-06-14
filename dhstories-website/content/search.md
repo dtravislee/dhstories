@@ -19,7 +19,7 @@ layout = "search"
 	<input id='search-input' class='text-input long' placeholder='Enter keywords to search and click "{{- $buttonName -}}"' title='Enter a search query and click "{{- $buttonName -}}"'/>
 	<p class='search-tip'>
 		{{- $regexNote := "Regex on Wikipedia - opens in new tab" -}}
-		<b>Note:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable <a href='https://en.wikipedia.org/wiki/Regular_expression' title='{{- $regexNote -}}' target='_blank' rel='noopener' aria-label='{{- $regexNote -}}'>Regex</a> by surrounding expressions with <code>/forward slashes/</code>.</p>
+		<b>Note:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable regex by surrounding expressions with <code>/forward slashes/</code>.</p>
 	<p id='error-box' class='error-box hidden'></p>
 	<p class='search-buttons'>
 		<a href='javascript:search();' class='search-go'>{{- $buttonName -}}</a>

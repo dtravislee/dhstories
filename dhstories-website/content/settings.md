@@ -114,7 +114,7 @@ layout = "settings"
 	</fieldset>
 	<fieldset>
 	<legend>Cookie Consent</legend>
-		<span id='cookie-notice'><input id='cookie-consent' class='checkbox' type='checkbox'/><label for='cookie-consent'><b>Note:</b> By checking this box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two <a href='https://secureprivacy.ai/blog/what-are-cookies' target='_blank' rel='noopener'>persistent cookies</a>—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.</label></span>
+		<span id='cookie-notice'><input id='cookie-consent' class='checkbox' type='checkbox'/><label for='cookie-consent'><b>Note:</b> By checking this box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two "cookies"—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.</label></span>
 	</fieldset>
 	<span class='settings-buttons' id='preview-stop'>
 		<a href='javascript:updateSettings();' class='go' aria-role='button' title='Apply the current settings and return to the previous page'>Apply</a>
@@ -129,7 +129,7 @@ layout = "settings"
 
 {{< markdownify >}}
 
-# Preview
+## Preview
 
 Here is a preview of your settings!
 
@@ -147,7 +147,7 @@ And a test with ~~some strikethrough text~~
 - Using some more items
 - To give a good example
 
-Some [links](/) and `inline code` alongside a big code block:
+Some <a>links</a> and `inline code` alongside a big code block:
 
 ```
 This is some code
