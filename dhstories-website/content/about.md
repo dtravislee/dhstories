@@ -14,13 +14,13 @@ hideFooter = true
 
 {{< toc >}}
 
-## The Site
+## The site
 
 _Dragonhouse Stories_ is a digital villa containing a miscellany of works by D. Travis Lee. This includes poetry, essays, opinion pieces, and—of course—stories. 
 
 The website is built using the [Hugo static site generator](https://gohugo.io/). Its source code can be viewed [on Github](https://github.com/dtravislee/dhstories).
 
-## The Author
+## The author
 
 D. Travis Lee is a creator of fiction, poetry, and similar works hailing from British Columbia, Canada. He is the main writer, editor, and webmaster of _Dragonhouse Stories_.
 
@@ -52,11 +52,11 @@ If he was a dragon,[^Note 2] he would hoard ideas, notions, dreams, and other ab
 ## Contact
 
 To get in touch with the author, use [this contact form](https://forms.gle/dnFrmqeiwqLEzqXe9).
-
+{{< comment >}}
 ## Support
 
-If you would like to support these works, check out [the Dragonhouse Ko-Fi](https://ko-fi.com/).
-
+If you would like to support these works, check out [the Dragonhouse on Ko-Fi](https://ko-fi.com/).
+{{</ comment >}}
 ## Disclaimer
 
 Written content native to _Dragonhouse Stories_ belongs to D. Travis Lee.

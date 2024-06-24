@@ -11,8 +11,8 @@
 .next-previous p {	
 	width: 45%;
 	padding: 0.5em 0;
-	border-bottom: 2px solid #b8860b;
-	border-top: 2px solid #b8860b;
+	border-bottom: 2px solid #aaa;
+	border-top: 2px solid #aaa;
 	text-decoration: none;
 }
 .np-prev { 
