@@ -1,5 +1,5 @@
 /* LIST PAGES */
-.page-list article { 
+.page-list .listed-article { 
 	border-bottom: 2px solid #aaa;
 	margin-top: 1em;
 	display: block;

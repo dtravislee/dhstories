@@ -132,7 +132,7 @@ document.getElementById("top-link").href = "javascript:window.location.replace('
 /* Do a few things if cookies have been accepted by the user beforehand... */
 if (cookiesPreOk) {
 	/* Update the cookie notice box (#cookie-notice) based on whether cookies are already allowed */
-	document.getElementById("cookie-notice").innerHTML = "Cookies for <i>Dragonhouse Stories</i> have been accepted on this device. <p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, please <a href='javascript:resetSettings()'>click here</a>.</p>"
+	document.getElementById("cookie-notice").innerHTML = "Cookies for <i>Dragonhouse Stories</i> have been accepted on this device. <p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'>reset all settings</a>.</p>"
 	/* Update default checked states of radio buttons based on existing styler settings
 	/* (Split into array, loop array, use array values as ID targets for GEBI and check the targets) */
 	var themeCode = getLocalObj("dhstories-theme");

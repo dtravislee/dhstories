@@ -20,3 +20,4 @@ code { /* Inline code strips */
 	display: block;
 	padding: 0 1em 0 2em; 
 }
+.codeblock-delimit { padding: 0.5em 0; }

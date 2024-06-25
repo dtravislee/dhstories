@@ -50,22 +50,22 @@
 
 {{- define `content` -}}
 
+	{{- partial "content" . -}}
+
 	{{- $paginator := .Scratch.Get `pages` -}}
 	
-	<ul id='tag-list' role='directory'>
+	<ul>
 		{{- range $paginator.Pages -}}
-		<li class='list-tag' role='listitem'>
+		<li class='list-tag'>
 			<a href='{{- .RelPermalink -}}'>{{- .Title -}}</a>
-			<span class='post-count'>
-				{{- with .Pages -}}
-					{{- ` – ` -}} {{- len . -}}
-					{{- if gt (len .) 1 -}}
-						{{- ` Entries` -}}
-					{{- else -}}
-						{{- ` Entry` -}}
-					{{- end -}}
+			{{- with .Pages -}}
+				{{- ` – ` -}} {{- len . -}}
+				{{- if gt (len .) 1 -}}
+					{{- ` Entries` -}}
+				{{- else -}}
+					{{- ` Entry` -}}
 				{{- end -}}
-			</span>
+			{{- end -}}
 		</li>
 		{{- end -}}
 	</ul>

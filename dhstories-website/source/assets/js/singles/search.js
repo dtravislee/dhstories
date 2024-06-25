@@ -158,7 +158,7 @@ function Post(title, url, desc, date, dateFormatted, edited, editedFormatted, ta
 				+ "</time></p>";
 		}
 		if (this.tags != "") {
-			output += "<ul class='meta' aria-description='Tags'>";
+			output += "<ul class='meta' aria-label='Tags'>";
 			for (var i = 0; i < this.tags.length; i++) {
 				output += "<li><a href='/tags/"
 					+ this.tags

@@ -13,6 +13,8 @@ layout = "search"
 
 <noscript>JavaScript must be enabled to search the site!</noscript>
 
+https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/searchbox_role
+
 {{< search.inline >}}
 {{- $buttonName := "Begin Search" -}}
 <form class='js-only' action='javascript:search();'>

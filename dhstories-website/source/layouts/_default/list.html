@@ -49,16 +49,18 @@
 	{{- $pageNum := .Scratch.Get `pageNum` -}}
 	{{- if and (.Content) (lt $pageNum 2) -}}
 		{{- partial `content` . -}}
+	{{- else -}}
+		<div id='#content'></div>
 	{{- end -}}
 
 	{{- $paginator := .Scratch.Get `pages` -}}
 	
 	<div class='page-list'>
 		{{- range $paginator.Pages -}}
-			<article role='article'>
+			<article><div class='listed-article'>
 				<h2 itemprop='name'><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></h2>
 				{{- partial `meta` . -}}
-			</article>
+			</div></article>
 		{{- end -}}
 	</div>
 	{{- partial `pagination` . -}}

@@ -100,12 +100,16 @@ layout = "settings"
 			<label for='l175'>1.75 lines</label>
 		</div>
 		<div>
-			<input type='radio' id='l150' name='line' value='l150' checked>
+			<input type='radio' id='l150' name='line' value='l150'>
 			<label for='l150'>1.5 lines</label>
 		</div>
 		<div>
-			<input type='radio' id='l125' name='line' value='l125'>
+			<input type='radio' id='l125' name='line' value='l125' checked>
 			<label for='l125'>1.25 lines</label>
+		</div>
+		<div>
+			<input type='radio' id='l115' name='line' value='l115'>
+			<label for='l125'>1.15 lines</label>
 		</div>	
 		<div>
 			<input type='radio' id='l100' name='line' value='l100'>
@@ -117,9 +121,9 @@ layout = "settings"
 		<span id='cookie-notice'><input id='cookie-consent' class='checkbox' type='checkbox'/><label for='cookie-consent'><b>Note:</b> By checking this box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two "cookies"—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.</label></span>
 	</fieldset>
 	<span class='settings-buttons' id='preview-stop'>
-		<a href='javascript:updateSettings();' class='go' aria-role='button' title='Apply the current settings and return to the previous page'>Apply</a>
-		<a href='javascript:previewSettings();' class='demo' aria-role='button' title='Demonstrate the current settings in a preview box'>Preview</a>
-		<a href='javascript:cancelSettings();' class='cancel' aria-role='button' title='Discard the current settings and return to the previous page'>Cancel</a>
+		<a href='javascript:updateSettings();' class='go' role='button' title='Apply the current settings and return to the previous page'>Apply</a>
+		<a href='javascript:previewSettings();' class='demo' role='button' title='Demonstrate the current settings in a preview box'>Preview</a>
+		<a href='javascript:cancelSettings();' class='cancel' role='button' title='Discard the current settings and return to the previous page'>Cancel</a>
 	</span>
 </form>
 

@@ -1,5 +1,7 @@
 /* CSS rules for post metadata (dates, categories, etc.) */
 
-ul.meta li {
+/* Tags */
+.meta ul { display: inline; }
+.meta ul li, .meta .tags-label, .footer-meta ul li {
 	margin: 0 0.5em 0 0;
 }

@@ -1,12 +1,8 @@
-/* CSS rules for content lists */
-/* Does NOT include lists outside of content, e.g. meta tags */
+/* CSS rules for content lists (i.e. not inline-block "lists") */
 
-#content ol, #content ul, #content dl, #content li { margin: 1em 0; }
-#content ol, #content ul { margin-left: 2em; }
-#content ol ul, #content ul ul, #content ul ol, #content ol ol { margin-left: 1em; }
 #content ul { list-style: initial; }
-#content li { 
-	vertical-align: middle; /* For <IE8 cleanliness; not perfect, but the best option. */
+#content li, .list-tag { 
+	margin: 1em 0 1em 2em;
 	padding-left: 0.5em; 
 	display: list-item;
 }

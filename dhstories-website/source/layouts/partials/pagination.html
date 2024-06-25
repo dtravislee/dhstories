@@ -5,8 +5,8 @@
 
 {{- if gt $paginator.TotalPages 1 -}}{{- with $paginator -}}
 	<a class='sr-only' href='#footer'>Skip Pagination</a>
-	<nav class='pagination' aria-label='Pagination'>
-		<div>
+	<nav aria-label='Pagination'>
+		<div class='pagination'>
 			{{- `Page ` -}} {{- .PageNumber -}} {{- ` of ` -}} {{- .TotalPages -}}
 			<span class='js-only'>
 				<form action='javascript:goToPage();'>

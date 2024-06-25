@@ -1,0 +1,11 @@
+/* CSS rules for metadata placed in the footer of a post */
+
+.footer-meta { 
+	border: 2px solid #aaa; 
+	padding: 0 1.25em;
+	margin: 2em 0;
+}
+.meta-row { padding: 1em 0.75em; }
+.meta-row+.meta-row { border-top: 2px solid #aaa; } /* Every .meta-row but the first */
+.meta-row dt { font-weight: bold; width: 30%; }
+.meta-row dd { margin-left: 1em; }

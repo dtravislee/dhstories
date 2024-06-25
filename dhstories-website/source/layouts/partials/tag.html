@@ -1,0 +1,9 @@
+{{/* TAG */}}
+{{/* Writes information for a given tag object as HTML */}}
+{{/* Be sure to place in UL or OL tags! */}}
+	
+<li>
+	<a href='{{- `/tags/` | relURL -}}{{- . | urlize -}}'>
+		{{- `#` -}}{{- . | humanize | title -}}
+	</a>
+</li>
