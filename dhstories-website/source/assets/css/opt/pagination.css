@@ -8,13 +8,9 @@
 	display: inline; 
 	margin-left: 0.5em;
 	padding-left: 0.5em;
-	border-left: 0.1em solid #aaa;
+	border-left: 2px solid #aaa;
 }
 
 /* Pagination Links */
 .pagilinks { margin-top: 0.5em; } /* Spacing between pagination links and page selector */
 .pagilinks a, .pagination .pagibar { margin-right: 0.25em; }
-.pagilinks .first:before { content: '<< ' }
-.pagilinks .previous:before { content: '< ';}
-.pagilinks .next:after { content: ' >'; }
-.pagilinks .last:after { content: ' >>'}

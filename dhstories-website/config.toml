@@ -49,7 +49,7 @@ enableInlineShortcodes = true
 	rss = 25
 	
 	## Pagination size
-	paginate = 10
+	paginate = 2
 	
 	## Taxonomy pagination size
 	taxPaginate = 20

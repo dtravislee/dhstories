@@ -25,13 +25,21 @@ function setCookie(name, value, expDays) {
 	document.cookie = name + "=" + value + ";expires=" + expireDate + ";path=/";
 }
 
-/* GET RADIO STATE */
-/* Gets the value of a selected radio button when given the name of the radio button group */
+/* GET INPUT STATE */
+/* Gets the value of a selected input when given the name of the input or input group */
 
-function getRadioState(name) {
-	var radioButtons = document.getElementsByName(name);
-	for (i = 0; i < radioButtons.length; i++) {
-		if (radioButtons[i].checked) { return (radioButtons[i].value); }
+function getInputState(name) {
+	var inputs = document.getElementsByName(name);
+	var inputTagName = inputs[0].tagName.toLowerCase();
+	/* Radio button handling */
+	if (inputTagName == "input") {
+		for (i = 0; i < inputs.length; i++) {
+			if (inputs[i].checked) { return (inputs[i].value); }
+		}
+	}
+	/* Select input handling */
+	else if (inputTagName == "select") {
+		return inputs[0].value;
 	}
 }
 
@@ -43,11 +51,12 @@ function getSettings() {
 	if (!cookiesPreOk) {
 		cookiesOk = document.getElementById("cookie-consent").checked;
 	}
-	settingsCode = getRadioState("theme") + " " 
-					+ getRadioState("font") + " " 
-					+ getRadioState("size") + " " 
-					+ getRadioState("line") + " "
-					+ getRadioState("align");
+	settingsCode = getInputState("theme") + " " 
+					+ getInputState("font") + " " 
+					+ getInputState("size") + " " 
+					+ getInputState("line") + " "
+					+ getInputState("align");
+	console.log(settingsCode);
 }
 
 /* PREVIEW SETTINGS */
@@ -133,13 +142,16 @@ document.getElementById("top-link").href = "javascript:window.location.replace('
 if (cookiesPreOk) {
 	/* Update the cookie notice box (#cookie-notice) based on whether cookies are already allowed */
 	document.getElementById("cookie-notice").innerHTML = "Cookies for <i>Dragonhouse Stories</i> have been accepted on this device. <p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'>reset all settings</a>.</p>"
-	/* Update default checked states of radio buttons based on existing styler settings
+	/* Update default states of inputs based on existing styler settings
 	/* (Split into array, loop array, use array values as ID targets for GEBI and check the targets) */
 	var themeCode = getLocalObj("dhstories-theme");
 	if (themeCode) {
 		var themeCodeArray = themeCode.split(" ");
 		for (i = 0; i < themeCodeArray.length; i++) {
-			document.getElementById(themeCodeArray[i]).checked = true;
+			var inputElement = document.getElementById(themeCodeArray[i]);
+			var inputTagName = inputElement.tagName.toLowerCase();
+			if (inputTagName == "input") { inputElement.checked = true; }
+			else if (inputTagName == "option") { inputElement.selected = true; }
 		}
 	}
 }

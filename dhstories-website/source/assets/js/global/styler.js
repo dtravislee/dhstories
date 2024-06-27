@@ -41,6 +41,6 @@ if (cookiePermission) {
 	// Get the theme code
 	/* NOTE: Theme codes are space-separated values: (color) (font) (size) */
 	var styleCode = getLocalObj("dhstories-theme");
-	// Apply theme code to the document body class list (only if not null)
-	if (styleCode) { document.body.className = styleCode; }
+	// Apply theme code to the document body (only if not null)
+	if (styleCode) { applyStyle(styleCode); }
 }

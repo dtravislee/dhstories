@@ -39,7 +39,8 @@
 		"Text" .Plain
 		"Tags" $tags
 		"Description" .Description
-		"Words" .WordCount -}}
+		"Words" .WordCount 
+		"WordsFuzzy" .FuzzyWordCount -}}
 	{{- $posts = $posts | append $item -}}
 {{- end -}}
 

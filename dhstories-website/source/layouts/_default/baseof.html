@@ -81,13 +81,6 @@
 			<style media='print'>{{- .Content | safeCSS -}}</style>
 		{{- end -}}
 		
-		{{/* HTML5 Polyfill */}}
-		{{/* Website is built not to break in case this doesn't load */}}
-		{{/* This largely just helps with ARIA + HTML5 combos in IE7 */}}
-		{{- `<!--[if lt IE 9]>` | safeHTML -}}
-			{{- partial `jsgoloader` (dict `file` `js/global/html5shiv.js` `scope` . ) -}}
-		{{- `<![endif]-->` | safeHTML -}}
-		
 		{{/* Get description or summary, trimming excess leading and trailing whitespace. */}}
 		{{- $desc := (partial `description` .) | replaceRE `(?:$\s+|^\s+)` `` -}}
 		{{- $iso8601 := `2006-01-02T15:04:05-07:00` -}}
@@ -100,48 +93,45 @@
 		{{- with .OutputFormats.Get "rss" -}}<link rel='{{- .Rel -}}' type='{{- .MediaType.Type -}}' href='{{- .Permalink -}}' title='{{- $.Site.Params.title -}}'/>{{- end -}}
 		<link rel="shortcut icon" type="image/x-icon" href='/favicon.ico'>
 	</head>
-	<body class="autocolour serif s100 l125 left">
-		<header> {{/* Role=banner implied, see: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/banner_role */}}
-			<div class='site-header'>
-				<a class='sr-only' href='#main'>{{- `Skip to contents` -}}</a>
-				<nav>
-					<ul class='site-nav' aria-label='Site navigation'>
-						{{- range where .Site.Menus.main "Params.disable" "!=" true -}}
-							<li {{ with .Params.class -}}class='{{- . -}}'{{- end -}}>
-								<a href='{{- .URL -}}'>{{- .Identifier -}}</a>
-							</li>
-						{{- end -}}
-					</ul>
-				</nav>
-				{{- with .Site.Params.description -}}<p class='tagline'>{{- . -}}</p>{{- end -}}
+	<body>
+		<div role='banner' class='site-header'>
+			<a class='sr-only' href='#main'>{{- `Skip to contents` -}}</a>
+			<ul class='site-nav' aria-label='Site navigation'>
+				{{- range where .Site.Menus.main "Params.disable" "!=" true -}}
+					<li {{ with .Params.class -}}class='{{- . -}}'{{- end -}}>
+						<a href='{{- .URL -}}'>{{- .Identifier -}}</a>
+					</li>
+				{{- end -}}
+			</ul>
+			{{- with .Site.Params.description -}}<p class='tagline'>{{- . -}}</p>{{- end -}}
+		</div>
+		<div role='main' id='main'>
+			<div class='article-header'>
+				<h1>{{- partial `title` . -}}</h1>
+				{{/* Skip link - only shows if there's any metadata to worry about skipping */}}
+				{{- if or (.Params.date) (and .Lastmod (ne .Lastmod .Date)) (.Params.tags) -}}
+					<a class='sr-only' href='#content'>{{- `Skip metadata` -}}</a>
+				{{- end -}}
+				{{- with .Description -}}<p class='meta' aria-label='Subtitle'>{{- . -}}</p>{{- end -}}
+				{{- if not .Site.Params.footerMeta -}}{{- partial `meta` . -}}{{- end -}}
 			</div>
-		</header>
-		<main><div id='main'>
-			<article>
-				<header><div class='article-header'>
-					<h1>{{- partial `title` . -}}</h1>
-						{{/* Skip link - only shows if there's any metadata to worry about skipping */}}
-						{{- if or (.Params.date) (and .Lastmod (ne .Lastmod .Date)) (.Params.tags) -}}
-							<a class='sr-only' href='#content'>{{- `Skip metadata` -}}</a>
-						{{- end -}}
-						{{- with .Description -}}<p class='meta'>{{- . -}}</p>{{- end -}}
-						{{- if not .Site.Params.footerMeta -}}{{- partial `meta` . -}}{{- end -}}
-				</div></header>
-				{{- block `content` . -}}{{- end -}}
-			</article>
-		</div></main>
-		<footer aria-label='Site footer'><div class='site-footer'>
+			{{- block `content` . -}}{{- end -}}
+		</div>
+		<div role='contentinfo' aria-label='Site footer' class='site-footer'>
 			<p>{{- `&copy; ` | safeHTML -}} 
 				{{- if ne "2022" (now.Format "2006") -}}{{- `2022–` -}}{{- end -}}
 				{{- now.Format "2006" -}}{{- `&nbsp;` | safeHTML -}}{{- .Site.Params.author -}}{{- ` – ` -}}{{- .Site.Params.copyright -}}</p>
 			<p class='to-top'><a id="top-link" href='#'>{{- `Back to Top` -}}</a></p>
-		</div></footer>
+		</div>
 		{{/* JavaScript */}}
 		{{/* We place it here to let scripts run after the rest of the DOM loads. */}}
 		{{/* This eases up on the scripting itself (fewer event handlers e.g.) */}}
 		{{/*	And is recommended by Yahoo! Developer: https://developer.yahoo.com/performance/rules.html#js_bottom */}}
 		{{/* Global onload scripts and functions */}}
 		{{- with resources.Get `js/global/jsshow.js` -}}
+			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
+		{{- end -}}
+		{{- with resources.Get `js/global/stylebody.js` -}}
 			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
 		{{- end -}}
 		{{- with resources.Get `js/global/styler.js` -}}

@@ -13,15 +13,14 @@ layout = "search"
 
 <noscript>JavaScript must be enabled to search the site!</noscript>
 
-https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/searchbox_role
-
 {{< search.inline >}}
 {{- $buttonName := "Begin Search" -}}
 <form class='js-only' action='javascript:search();'>
-	<input id='search-input' class='text-input long' placeholder='Enter keywords to search and click "{{- $buttonName -}}"' title='Enter a search query and click "{{- $buttonName -}}"'/>
+	<label for='search-input' >Enter keywords to search and click "{{- $buttonName -}}":</label>
+	<input type='text' id='search-input' class='text-input long'/>
 	<p class='search-tip'>
 		{{- $regexNote := "Regex on Wikipedia - opens in new tab" -}}
-		<b>Note:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable regex by surrounding expressions with <code>/forward slashes/</code>.</p>
+		<b>Tip:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable regex by surrounding expressions with <code>/forward slashes/</code>.</p>
 	<p id='error-box' class='error-box hidden'></p>
 	<p class='search-buttons'>
 		<a href='javascript:search();' class='search-go'>{{- $buttonName -}}</a>
@@ -33,51 +32,46 @@ https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/searchbox_
 		<fieldset>
 			<legend>Search In</legend>
 			<p>Look for the search query in:</p>
-			<div class='loc-col left-col'>
-				<span class='loc-item'>
-					<input type='checkbox' id='loc-title' name='search-loc' value='title' checked>
-					<label for='loc-title'>Title</label>
-				</span>
-				<span class='loc-item'>
-					<input type='checkbox' id='loc-date' name='search-loc' value='date' checked>
-					<label for='loc-date'>Date</label>
-				</span>
-				<span class='loc-item'>
-					<input type='checkbox' id='loc-edited' name='search-loc' value='edited' checked>
-					<label for='loc-edited'>Edited Date</label>
-				</span>
-				<span class='loc-item'>
-					<input type='checkbox' id='loc-link' name='search-loc' value='link' checked>
-					<label for='loc-link'>URL</label>
-				</span>
+			<div class='loc-item'>
+				<input type='checkbox' id='loc-title' name='search-loc' value='title' checked>
+				<label for='loc-title'>Title</label>
 			</div>
-			<div class='loc-col right-col'>
-				<span class='loc-item'>
-					<input type='checkbox' id='loc-tags' name='search-loc' value='tags' checked>
-					<label for='loc-tags'>Tags</label>
-				</span>
-				<span class='loc-item'>
-					<input type='checkbox' id='loc-desc' name='search-loc' value='desc' checked>
-					<label for='loc-desc'>Description</label>
-				</span>
-				<span class='loc-item'>
-					<input type='checkbox' id='loc-text' name='search-loc' value='text' checked>
-					<label for='loc-text'>Content</label>
-				</span>
-				<span class='loc-item'>
-					<input type='checkbox' id='loc-words' name='search-loc' value='words' checked>
-					<label for='loc-words'>Word Count</label>
-				</span>
+			<div class='loc-item'>
+				<input type='checkbox' id='loc-date' name='search-loc' value='date' checked>
+				<label for='loc-date'>Date</label>
 			</div>
-			<div class='loc-col left-col'>
-				<a href='javascript:locAll();'>Select All</a>
+			<div class='loc-item'>
+				<input type='checkbox' id='loc-edited' name='search-loc' value='edited' checked>
+				<label for='loc-edited'>Edited Date</label>
 			</div>
-			<div class='loc-col right-col'>
-				<a href='javascript:locNone();'>Select None</a>
+			<div class='loc-item'>
+				<input type='checkbox' id='loc-link' name='search-loc' value='link' checked>
+				<label for='loc-link'>URL</label>
+			</div>
+			<div class='loc-item'>
+				<input type='checkbox' id='loc-tags' name='search-loc' value='tags' checked>
+				<label for='loc-tags'>Tags</label>
+			</div>
+			<div class='loc-item'>
+				<input type='checkbox' id='loc-desc' name='search-loc' value='desc' checked>
+				<label for='loc-desc'>Description</label>
+			</div>
+			<div class='loc-item'>
+				<input type='checkbox' id='loc-text' name='search-loc' value='text' checked>
+				<label for='loc-text'>Content</label>
+			</div>
+			<div class='loc-item'>
+				<input type='checkbox' id='loc-words' name='search-loc' value='words' checked>
+				<label for='loc-words'>Word Count</label>
+			</div>
+			<div class='loc-item'>
+				<a class='loc-button all' href='javascript:locAll();'>Select All</a>
+				<a class='loc-button none' href='javascript:locNone();'>Select None</a>
 			</div>
 		</fieldset>
 			{{/* Create tags list */}}
 			{{- define "taglist" -}}
+				<option value='' selected>--Choose a tag--</option>
 				{{ range (sort .Site.Taxonomies.tags) }}
 					{{- with .Page.Title -}}
 						<option value='{{- . -}}'>{{- . -}}</option>
@@ -88,10 +82,9 @@ https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/searchbox_
 			{{- $tagInputDesc := `Add tags, separated by commas (e.g. tag 1, tag 2)` -}}
 		<fieldset id='incl-tags'>
 			<legend>Include Tags</legend>
-			<label for='include-tag'>Select a tag to add to the "include tag" list:</label>
+			<label for='include-tag'>Select a tag to look for when searching:</label>
 			<p>
 				<select id='include-tag' name='include-tag' class='select-box'>
-					<option value=''>--Choose a tag--</option>
 					{{- template "taglist" . -}}
 				</select>
 			</p><p>
@@ -99,16 +92,15 @@ https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/searchbox_
 				<a href='javascript:removeTag(incl-tag-input);' class='tag-input'>Remove tag from Include list</a>
 			</p>
 			<hr/>
-			<label for='incl-tag-input'>Enter list of tags to include in the search:</label>
-			<input id='incl-tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
+			<label for='incl-tag-input'>Enter list of tags to include in the search, separated by commas<br/>(e.g. tag 1, tag 2):</label>
+			<input type='text' id='incl-tag-input' class='text-input long' title='{{- $tagInputDesc -}}'/>
 			<a href='javascript:resetFields("incl-tags");' class='reset-button'>Reset Include Tags</a>
 		</fieldset>
 		<fieldset id='excl-tags'>
 			<legend>Exclude Tags</legend>
-			<label for='exclude-tag'>Select a tag to add to the "avoid tag" list:</label>
+			<label for='exclude-tag'>Select a tag to avoid when searching:</label>
 			<p>
 				<select id='exclude-tag' name='exclude-tag' class='select-box'>
-					<option value=''>--Choose a tag--</option>
 					{{- template "taglist" . -}}
 				</select>
 			</p><p>
@@ -116,8 +108,8 @@ https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/searchbox_
 				<a href='javascript:removeTag(excl-tag-input);' class='tag-input'>Remove tag from Exclude list</a>
 			</p>
 			<hr/>
-			<label for='excl-tag-input'>Enter list of tags to avoid when searching:</label>
-			<input id='excl-tag-input' class='text-input long' placeholder='{{- $tagInputDesc -}}' title='{{- $tagInputDesc -}}'/>
+			<label for='excl-tag-input'>Enter list of tags to avoid when searching, separated by commas<br/>(e.g. tag 1, tag 2):</label>
+			<input type='text' id='excl-tag-input' class='text-input long' title='{{- $tagInputDesc -}}'/>
 			<a href='javascript:resetFields("excl-tags");' class='reset-button'>Reset Excluded Tags</a>
 		</fieldset>
 		{{/* Get all the dates on the site, truncating repetition */}}
@@ -130,6 +122,8 @@ https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/searchbox_
 				{{- end -}}
 			{{- end -}}
 			{{- $datesList = $datesList | uniq -}} {{/* Trim duplicate dates */}}
+			{{/* Outputs */}}
+			<option value='' selected>Any date</option>
 			{{- range $datesList -}}
 				<option value='{{- .Format (`2006-01-02`) -}}'>{{- .Format (`Jan 02, 2006`) -}}</option>
 			{{- end -}}
@@ -139,25 +133,37 @@ https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/searchbox_
 			<p>
 				Find posts published <label for='before-date'>starting on the date</label>
 				<select id='before-date' name='before-date' class='select-box date'>
-					<option value=''>--Choose a date--</option>
-					<option value=''>Any date</option>
 					{{- template "datelist" . -}}
 				</select>
 				<label for='after-date'>up to and including the date</label>
 				<select id='after-date' name='after-date' class='select-box date'>
-					<option value=''>--Choose a date--</option>
-					<option value=''>Any date</option>
 					{{- template "datelist" . -}}
 				</select>
 			</p>
 			<a href='javascript:resetFields("dates");' class='reset-button'>Reset Dates</a>
 		</fieldset>
+		{{- define "wordcountlist" -}}
+			{{- $wordcounts := slice -}} {{/* Empty starter array / slice */}}
+			{{- range .Site.RegularPages -}}
+				{{- if .Date -}} {{/* Only get wordcounts from pages with the date parameter set */}}
+					{{- $wordcounts = $wordcounts | append (.FuzzyWordCount) -}}
+				{{- end -}}
+			{{- end -}}
+			{{/* Round to hundreds place e.g. 153 -> 100 */}}
+			{{- $minWords := (math.Min $wordcounts) -}}
+			{{- $maxWords := (math.Max $wordcounts) -}}
+			{{- $wordcountList := (seq $minWords 200 $maxWords) -}}
+			{{/* Outputs */}}
+			<option value='' selected>Any</option>
+			{{- range $wordcountList -}}
+				<option value='{{- . -}}'>{{- . -}}{{- ` words` -}}</option>
+			{{- end -}}
+		{{- end -}}
 		<fieldset id='words'>
 			<legend>Word Count</legend>
 			<p>Look for posts with:</p>
-			<p><label>More than <input id='word-min' class='text-input number' type='number' placeholder='0' min='0' title='Enter a minimum word count (optional)'/> words</label></p>
-			<p><label>Fewer than <input id='word-max' class='text-input number' type='number' placeholder='0' min='0' title='Enter a maximum word count (optional)'/> words</label></p>
-			<p id='error-box-numbers' class='error-box hidden'><b>!!ERROR:</b> Word counts must be a number greater than or equal to 0!</p>
+			<p><label for='wordcount-more'>More than this many words: </label><select id='wordcount-more' name='wordcount-more' class='select-box words'>{{- template "wordcountlist" . -}}</select></p>
+			<p><label for='wordcount-less'>Fewer than this many words: </label><select id='wordcount-less' name='wordcount-less' class='select-box words'>{{- template "wordcountlist" . -}}</select></p>
 			<a href='javascript:resetFields("words");' class='reset-button'>Reset Word Counts</a>
 		</fieldset>
 		<fieldset id='sort'>

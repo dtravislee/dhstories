@@ -5,32 +5,33 @@
 
 {{- if gt $paginator.TotalPages 1 -}}{{- with $paginator -}}
 	<a class='sr-only' href='#footer'>Skip Pagination</a>
-	<nav aria-label='Pagination'>
-		<div class='pagination'>
-			{{- `Page ` -}} {{- .PageNumber -}} {{- ` of ` -}} {{- .TotalPages -}}
-			<span class='js-only'>
-				<form action='javascript:goToPage();'>
-					{{/* Len (print .TotalPages) = number of characters the total number of pages take up. */}}
-					{{/*	E.g. 250 = 3 characters, 15 = 2 characters. */}}
-					<label for='pagenum'>{{- `Jump to page:` -}}</label>
-					<input id='pagenum' class='text-input' type='number' min='1' max='{{- .TotalPages -}}' placeholder='{{- .PageNumber -}}' title='Enter a page number from 1 to {{ .TotalPages -}}'/>
-					<a href='javascript:goToPage();' aria-role='button' title='Go to the selected page'>Go</a>
-				</form>
-			</span>
-		</div>
-		<p id='error-box' class='error-box hidden'></p>
+	<div role='navigation' aria-label='Pagination' class='pagination'>
+		{{- `Page ` -}} {{- .PageNumber -}} {{- ` of ` -}} {{- .TotalPages -}}
+		<span class='js-only'>
+			<form action='javascript:goToPage();'>
+				{{/* Len (print .TotalPages) = number of characters the total number of pages take up. */}}
+				{{/*	E.g. 250 = 3 characters, 15 = 2 characters. */}}
+				<label for='pagenum'>{{- `Jump to page:` -}}</label>
+				<select id='pagenum' name='pagenum' class='select-box'>
+					{{- $pageNums := seq .TotalPages -1 1 -}}
+					{{- range $pageNums -}}
+						<option value='{{- . -}}' {{- if eq . $paginator.PageNumber -}}selected{{- end -}}>{{- `Page ` -}}{{- . -}}</option>
+					{{- end -}}
+				</select>
+				<a href='javascript:goToPage();' aria-role='button' title='Go to the selected page'>Go</a>
+			</form>
+		</span>
 		<div class='pagilinks'>
 			{{- if .HasPrev -}}
-				<a class='first' href='{{- .First.URL -}}'>First</a>
-				<a class='previous' href='{{- .Prev.URL -}}'>Previous</a>
+				<a class='first' href='{{- .First.URL -}}'><span aria-hidden='true'>&lt;&lt;</span> First Page</a>
+				<a class='previous' href='{{- .Prev.URL -}}'><span aria-hidden='true'>&lt;</span> Previous Page</a>
 			{{- end -}}
 			{{- if and .HasPrev .HasNext -}}
 				<span class='pagibar'>{{- ` | ` -}}</span>
 			{{- end -}}
 			{{- if .HasNext -}}
-				<a class='next' href='{{- .Next.URL -}}'>Next</a>
-				<a class='last' href='{{- .Last.URL -}}'>Last</a>
+				<a class='next' href='{{- .Next.URL -}}'>Next Page <span aria-hidden='true'>&gt;</span></a>
+				<a class='last' href='{{- .Last.URL -}}'>Last Page <span aria-hidden='true'>&gt;&gt;</span></a>
 			{{- end -}}
 		</div>
-	</nav>
 {{- end -}}{{- end -}}

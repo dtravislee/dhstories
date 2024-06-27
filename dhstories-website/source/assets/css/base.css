@@ -16,21 +16,18 @@ $gold: #daa520; For links
 }
 * { 
 	color: inherit;
-	font: inherit;
 	margin: 0;
     padding: 0;
     border: 0;
-    outline: 0;
 	background: 0;
 	font-size: 100%;
     vertical-align: baseline;
 	box-sizing: border-box;
 }
-html { font-size: 18px; } /* Default font-size fallback */
-@media (max-width: 600px) { html { font-size: 16px; } } /* Small phones (<600px) */
-@media (min-width: 600px) { html { font-size: 18px; } } /* Large phones (>600px) */
-@media (min-width: 768px) {	html { font-size: 20px; } } /* Tablets (>768px) */
-@media (min-width: 992px) { html { font-size: 22px; } } /* Desktops (>992px) */
+*:focus {
+	border: 2px solid #aaa;
+}
+html { font-size: 20px; } /* Default font-size */
 
 /* HTML5 display-role reset for older browsers */
 /* Plus some general "display: block" elements. */
@@ -51,10 +48,28 @@ a, button.a, .site-nav li, .meta ul li, .footer-meta ul li,
 		Something to do with said list items obtaining hasLayout is my best guess, since removing zoom:1—which should prevent hasLayout—seems to fix the problem. See: https://haslayout.net/haslayout.html */
 }
 
-/* Body text */
-body { padding: 0 0.5em; }
+/* THEME SETTINGS */
+/* Defaults have no class selector, so if you want to change the default,
+	add an appropriate class selector to the current default
+	and remove the class selector from your desired default. 
+	Best practice: add the removed class name as a comment! */
+
+/* Non-class defaults */
+/* Alter these as-is to change defaults */
+body { 
+	padding: 0 0.5em; 
+	line-height: 1.30;
+	font-size: 100%;
+}
+/* Base colours */ 
+body, body * { background-color: #fafafa; color: #252525; } /*.light*/
+body.dark, body.dark * { background-color: #252525; color: #fafafa; }
+/* Text alignments */
+body {text-align: left; } /*.left*/
+body.justify { text-align: justify; }
+body.right { text-align: right; }
 /* Fonts*/
-body.serif {
+body { /*.serif*/
 	font-family: "Iowan Old Style",
 				"Palatino Nova",
 				"Palatino Linotype",
@@ -92,36 +107,6 @@ body.mono, code, .codeblock { font-family: "SFMono-Regular",
 		Courier, 
 		monospace; 
 }
-/* Base Colours */
-body.lightmode, body.lightmode .to-top,
-	body.autocolour, body.autocolour .to-top { background-color: #fafafa;}
-body.lightmode, body.lightmode a,
-	body.autocolour, body.autocolour a { color: #252525; }
-body.darkmode, body.darkmode .to-top { background-color: #252525; }
-body.darkmode, body.darkmode a { color: #fafafa; }
-@media (prefers-color-scheme: dark) {
-	body.autocolour, body.autocolour .to-top {  background-color: #252525;}
-	body.autocolour, body.autocolour a { color: #fafafa; }
-}
-/* Font sizes */
-body.s050 { font-size: 50%; }
-body.s075 { font-size: 75%; }
-body.s100 { font-size: 100%; }
-body.s125 { font-size: 125%; }
-body.s150 { font-size: 150%; }
-body.s175 { font-size: 175%; }
-body.s200 { font-size: 200%; }
-/* Line spacing */
-body.l100 { line-height: 1.00; }
-body.l115 { line-height: 1.15; }
-body.l125 { line-height: 1.25; }
-body.l150 { line-height: 1.50; }
-body.l175 { line-height: 1.75; }
-body.l200 { line-height: 2.00; }
-/* Text Alignments */
-body.left {text-align: left; }
-body.justify { text-align: justify; }
-body.right { text-align: right; }
 
 /* Site banner */
 .site-nav { 
@@ -153,7 +138,7 @@ body.right { text-align: right; }
 	position: absolute;
 	width: 1px;
 }
-.sr-only:focus {
+.sr-only:focus, .sr-only:active {
 	display: block;
 	clip: auto;
 	height: auto;
@@ -184,8 +169,10 @@ a {
 	cursor: pointer;
 	padding: 2px 2px 0 2px;
 	border-bottom: 2px solid #daa520;
+	line-height: 1;
 }
-/* Inputs, e.g. radio inputs, also obstain styles from hover and focus */
+/* Ensure elements in a tags render no background and break a tag borders */
+a * { background-color: transparent !important; }
 a:hover, a:focus { 
 	padding: 0; 
 	border: 2px solid #aaa; 
@@ -206,3 +193,8 @@ a:active { background-color: #aaa; }
 	right: 0;
 	padding: 0.25em;
 }
+
+/* HIGHLIGHT JS */
+/* Ensures elements that don't have a traditional :hover  behaviour, e.g. radio buttons, still can. */
+/* This is the visual side. See highlighter.js for the behaviours. */
+.highlighted { border: 2px solid #aaa; }

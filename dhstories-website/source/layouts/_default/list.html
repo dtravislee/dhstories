@@ -57,10 +57,10 @@
 	
 	<div class='page-list'>
 		{{- range $paginator.Pages -}}
-			<article><div class='listed-article'>
+			<div role='article' class='listed-article'>
 				<h2 itemprop='name'><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></h2>
 				{{- partial `meta` . -}}
-			</div></article>
+			</div>
 		{{- end -}}
 	</div>
 	{{- partial `pagination` . -}}

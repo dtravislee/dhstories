@@ -41,7 +41,7 @@
 	{{- partial `content` . -}}
 	
 	{{- if not .Params.hideFooter -}}
-		<footer aria-label='Article footer'><div class='article-footer'>
+		<div role='contentinfo' aria-label='Article footer' class='article-footer'>
 			{{/* --- */}}
 			{{/* FOOTER LINKS */}}
 			{{/* --- */}}
@@ -83,17 +83,17 @@
 					{{- if .Params.date -}}
 						<div class='meta-row'>
 							<dt>Published</dt>
-							<dd><time>{{- .Date.Format (`January 02, 2006`) -}}</time></dd>
+							<dd>{{- .Date.Format (`January 02, 2006`) -}}</dd>
 						</div>
 					{{- end -}}
 					{{/* Show edited date only if it differs from the post date */}}
 					{{- with .Lastmod -}}{{ if ne . $.Date -}}
 						<div class='meta-row'>
 							<dt>Edited</dt>
-							<dd><time>{{- .Format (`January 02, 2006`) -}}</time></dd>
+							<dd>{{- .Format (`January 02, 2006`) -}}</dd>
 						</div>
 					{{- end -}}{{- end -}}
-					{{- with .WordCount -}}
+					{{- with .FuzzyWordCount -}}
 						<div class='meta-row'>
 							<dt>Word count</dt>
 							<dd>{{- . -}}{{- ` words` -}}</dd>
@@ -118,6 +118,6 @@
 					{{- partial `nextprev` (dict `type` `next` `scope` . ) -}}
 				</div>
 			{{- end -}}
-		</div></footer>
+		</div>
 	{{- end -}}
 {{- end -}}

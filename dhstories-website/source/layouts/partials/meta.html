@@ -7,9 +7,9 @@
 {{/* ------ */}}
 {{- if .Params.date -}}
 	<p class='meta'>
-		<time>{{- .Date.Format (`January 02, 2006`) -}}</time>
+		{{- .Date.Format (`January 02, 2006`) -}}
 		{{- ` – ` -}}
-		{{- .WordCount -}}{{- ` words` -}}
+		{{- .FuzzyWordCount -}}{{- ` words` -}}
 	</p>
 {{- end -}}
 
@@ -22,7 +22,7 @@
 	{{ if ne . $.Date -}}
 		<p class='meta'>
 			{{- `Edited: ` -}}
-			<time>{{- .Format (`January 02, 2006`) -}}</time>
+			{{- .Format (`January 02, 2006`) -}}
 		</p>
 	{{- end -}}
 {{- end -}}

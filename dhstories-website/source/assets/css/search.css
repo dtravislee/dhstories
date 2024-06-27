@@ -2,11 +2,8 @@
 
 /* Input fields */
 .text-input {
-	border-top: 2px solid #aaa;
-	border-bottom: 2px solid #aaa;
 	font-size: 1em;
 	margin: 0.5em 0;
-	font-family: inherit;
 }
 .text-input.long {
 	display: block;
@@ -14,7 +11,7 @@
 }
 
 /* Search tips */
-.search-tip { font-size: 85%; }
+.search-tip { font-size: 0.9em; }
 
 /* Search buttons */
 .search-buttons { font-size: 1.2em; }
@@ -28,26 +25,17 @@
 }
 
 /* All select boxes */
-.select-box { font: inherit; }
+.select-box { display: block; margin: 0.5em 0; }
 
 /* Advanced search paragraphs override */
 #content #advanced-opt fieldset p { margin: 0; }
 
 /* "Search In" section */
-.loc-col { display: inline-block; width: 40%; }
-.loc-item { margin-right: 0.75em; display: inline-block; width: 100%; }
+.loc-item { display: block; }
+.loc-button.all { margin-right: 0.25em; }
 
 /* "Tags Select" section */
 .tag-input { margin-right: 0.25em; }
-
-/* "Word Count" section */
-.text-input.number { max-width: 25%; }
-
-/* Date select boxes */
-.select-box.date { 
-	display: block; 
-	margin: 0.5em 0;
-}
 
 /* Reset buttons */
 .reset-button { float: right; }

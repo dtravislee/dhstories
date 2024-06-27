@@ -12,109 +12,82 @@ layout = "settings"
 
 <noscript>JavaScript must be enabled to change site theme settings!</noscript>
 
+{{< settings.inline >}}
+{{- $containerName := `-container` -}}
 <form class='js-only' action='javascript:updateSettings();'>
 	<fieldset>
-		<legend>Site Colours</legend>
-		<div>
-			<input type='radio' id='lightmode' name='theme' value='lightmode'>
-			<label for='lightmode'>Light Theme</label>
+		<legend>Theme</legend>
+		{{- $theme1Name := `light` -}}
+		<div id='{{- $theme1Name -}}{{- $containerName -}}'>
+			<input type='radio' id='{{- $theme1Name -}}' name='theme' value='{{- $theme1Name -}}' checked>
+			<label for='{{- $theme1Name -}}'>{{- $theme1Name | title }} colours</label>
 		</div>
-		<div>
-			<input type='radio' id='darkmode' name='theme' value='darkmode'>
-			<label for='darkmode'>Dark Theme</label>
-		</div>
-		<div>
-			<input type='radio' id='autocolour' name='theme' value='autocolour' checked>
-			<label for='autocolour'>Automatic</label>
+		{{- $theme2Name := `dark` -}}
+		<div id='{{- $theme2Name -}}{{- $containerName -}}'>
+			<input type='radio' id='{{- $theme2Name -}}' name='theme' value='{{- $theme2Name -}}'>
+			<label for='{{- $theme2Name -}}'>{{- $theme2Name | title }} colours</label>
 		</div>
 	</fieldset>
 	<fieldset>
 		<legend>Font Style</legend>
-		<div>
-			<input type='radio' id='serif' name='font' value='serif' checked>
-			<label for='serif'>Serif</label>
+		{{- $font1Name := `serif` -}}
+		<div id='{{- $font1Name -}}{{- $containerName -}}'>
+			<input type='radio' id='{{- $font1Name -}}' name='font' value='{{- $font1Name -}}' checked>
+			<label for='{{- $font1Name -}}'>Serif</label>
 		</div>
-		<div>
-			<input type='radio' id='sans' name='font' value='sans'>
-			<label for='sans'>Sans Serif</label>
+		{{- $font2Name := `sans` -}}
+		<div id='{{- $font2Name -}}{{- $containerName -}}'>
+			<input type='radio' id='{{- $font2Name -}}' name='font' value='{{- $font2Name -}}'>
+			<label for='{{- $font2Name -}}'>Sans Serif</label>
 		</div>
-		<div>
-			<input type='radio' id='mono' name='font' value='mono'>
-			<label for='mono'>Monospace</label>
+		{{- $font3Name := `mono` -}}
+		<div id='{{- $font3Name -}}{{- $containerName -}}'>
+			<input type='radio' id='{{- $font3Name -}}' name='font' value='{{- $font3Name -}}'>
+			<label for='{{- $font3Name -}}'>Monospace</label>
 		</div>
 	</fieldset>
 	<fieldset>
 		<legend>Font Size</legend>
-		<div>
-			<input type='radio' id='s200' name='size' value='s200'>
-			<label for='s200'>200%</label>
-		</div>
-		<div>
-			<input type='radio' id='s175' name='size' value='s175'>
-			<label for='s175'>175%</label>
-		</div>
-		<div>
-			<input type='radio' id='s150' name='size' value='s150'>
-			<label for='s150'>150%</label>
-		</div>
-		<div>
-			<input type='radio' id='s125' name='size' value='s125'>
-			<label for='s125'>125%</label>
-		</div>
-		<div>
-			<input type='radio' id='s100' name='size' value='s100' checked>
-			<label for='s100'>100%</label>
-		</div>
-		<div>
-			<input type='radio' id='s075' name='size' value='s075'>
-			<label for='s075'>75%</label>
-		</div>	
-		<div>
-			<input type='radio' id='s050' name='size' value='s050'>
-			<label for='s050'>50%</label>
-		</div>			
+		<label for='size'>{{- `Select a font size:` -}}</label>
+		<select id='size' name='size' class='select-box'>
+			{{- $fontSizes := seq 200 -10 50 -}}
+			{{- range $fontSizes -}}
+				<option id='s{{- . -}}' value='s{{- . -}}' {{- if eq . 100 -}}selected{{- end -}}>{{- . -}}%</option>
+			{{- end -}}
+		</select>
 	</fieldset>
 	<fieldset>
 		<legend>Text Alignment</legend>
-		<div>
-			<input type='radio' id='left' name='align' value='left' checked>
-			<label for='left'>Left-Align</label>
+		{{- $align1Name := `left` -}}
+		<div id='{{- $align1Name -}}{{- $containerName -}}'>
+			<input type='radio' id='{{- $align1Name -}}' name='align' value='{{- $align1Name -}}' checked>
+			<label for='{{- $align1Name -}}'>Left-Align</label>
 		</div>
-		<div>
-			<input type='radio' id='justify' name='align' value='justify'>
-			<label for='justify'>Justify</label>
+		{{- $align2Name := `justify` -}}
+		<div id='{{- $align2Name -}}{{- $containerName -}}'>
+			<input type='radio' id='{{- $align2Name -}}' name='align' value='{{- $align2Name -}}'>
+			<label for='{{- $align2Name -}}'>Justify</label>
 		</div>
-		<div>
-			<input type='radio' id='right' name='align' value='right'>
-			<label for='right'>Right-Align</label>
+		{{- $align3Name := `right` -}}
+		<div id='{{- $align3Name -}}{{- $containerName -}}'>
+			<input type='radio' id='{{- $align3Name -}}' name='align' value='{{- $align3Name -}}'>
+			<label for='{{- $align3Name -}}'>Right-Align</label>
 		</div>			
 	</fieldset>
 	<fieldset>
 		<legend>Line Spacing</legend>
-		<div>
-			<input type='radio' id='l200' name='line' value='l200'>
-			<label for='l200'>Double</label>
-		</div>
-		<div>
-			<input type='radio' id='l175' name='line' value='l175'>
-			<label for='l175'>1.75 lines</label>
-		</div>
-		<div>
-			<input type='radio' id='l150' name='line' value='l150'>
-			<label for='l150'>1.5 lines</label>
-		</div>
-		<div>
-			<input type='radio' id='l125' name='line' value='l125' checked>
-			<label for='l125'>1.25 lines</label>
-		</div>
-		<div>
-			<input type='radio' id='l115' name='line' value='l115'>
-			<label for='l125'>1.15 lines</label>
-		</div>	
-		<div>
-			<input type='radio' id='l100' name='line' value='l100'>
-			<label for='l100'>Single</label>
-		</div>		
+		<label for='line'>{{- `Select a line height:` -}}</label>
+		<select id='line' name='line' class='select-box'>
+			{{- $lineSizes := seq 200 -10 100 -}}
+			{{- range $lineSizes -}}
+				<option id='l{{- . -}}' value='l{{- . -}}' {{- if eq . 130 -}}selected{{- end -}}>
+					{{- div (. | float) 100 -}}
+					{{- if eq . 100 -}}{{- ` line (single-spaced)` -}}
+					{{- else -}}{{- ` lines` -}}{{- end -}}
+					{{- if eq . 200 -}}{{- ` (double-spaced)` -}}{{- end -}}
+				</option>
+			{{- end -}}
+		</select>	
 	</fieldset>
 	<fieldset>
 	<legend>Cookie Consent</legend>
@@ -126,6 +99,7 @@ layout = "settings"
 		<a href='javascript:cancelSettings();' class='cancel' role='button' title='Discard the current settings and return to the previous page'>Cancel</a>
 	</span>
 </form>
+{{</ settings.inline >}}
 
 <p id='error-box' class='error-box hidden'></p>
 

@@ -14,10 +14,6 @@
 {{- $oldFootnote := `(class=(?:\"|')footnote-ref(?:'|\"))` -}}
 {{- $newFootnote := `` -}}
 
-{{/* Redo TOC title with aria-label */}}
-{{- $toc :=`(<nav id=(?:\"|')TableOfContents(?:'|\"))` -}}
-{{- $tocNew := `<nav aria-label='Page navigation'` -}}
-
 {{/* Remove hr element with heading for footnotes */}}
 {{- $footnotesHr := `(<(?:section|div) class=(?:\"|')footnotes(?:'|\") role=(?:\"|')doc-endnotes(?:'|\")>\s+)(?:<hr>)` -}}
 {{- $footnotesNoHr := `${1}<h2 id='references'>Notes</h2>` -}}
@@ -30,6 +26,14 @@
 	{{- $notesLink = `${1}<li><a href='#references'>Notes</a></li>${2}` -}}
 {{- end -}}
 
+{{/* Replace nav elements with divs using role=navigation */}}
+{{- $navElemOld := `(?:<(nav))` -}}
+{{- $navElemNew := `<div role='navigation'` -}}
+
+{{/* Redo TOC ID with aria-label */}}
+{{- $toc :=`(id=(?:\"|')TableOfContents(?:'|\"))` -}}
+{{- $tocNew := `aria-label='Page contents'` -}}
+
 {{- .Content
 	| replaceRE $footnotesHr $footnotesNoHr
 	| replaceRE $footnoteRef $newFootnoteRef
@@ -37,6 +41,7 @@
 	| replaceRE $endOfToc $notesLink
 	| replaceRE $toc $tocNew
 	| replaceRE $oldFootnote $newFootnote
+	| replaceRE $navElemOld $navElemNew
 	| safeHTML -}}
 	
 </div>
