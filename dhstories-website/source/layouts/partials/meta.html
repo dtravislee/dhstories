@@ -1,15 +1,25 @@
 {{/* POST METADATA */}}
-{{/* Gets post date, read time, and tags in a nice set of paragraphs. */}}
+{{/* Gets post date, read time, word count, and tags in a nice set of paragraphs. */}}
 {{/* Best used for header metadata (just below the title + subtitle) */}}
+
+{{/* Show metadata only on non-list pages or if overwritten in frontmatter */}}
+{{- if and (eq .Kind "page") (not .Params.hideMeta) -}}
+
+{{/* ------ */}}
+{{/* SKIP META LINK */}}
+{{/* ------ */}}
+
+{{/* Only shows if there's any metadata to worry about skipping */}}
+{{- if or (.Params.date) (and .Lastmod (ne .Lastmod .Date)) (.Params.tags) -}}
+	<a class='sr-only' href='#content'>{{- `Skip metadata` -}}</a>
+{{- end -}}
 	
 {{/* ------ */}}
-{{/* DATES + COUNTS */}}
+{{/* PUBLICATION DATE */}}
 {{/* ------ */}}
-{{- if .Params.date -}}
+{{- with .Params.date -}}
 	<p class='meta'>
-		{{- .Date.Format (`January 02, 2006`) -}}
-		{{- ` – ` -}}
-		{{- .FuzzyWordCount -}}{{- ` words` -}}
+		{{- .Format (`January 02, 2006`) -}}
 	</p>
 {{- end -}}
 
@@ -28,6 +38,15 @@
 {{- end -}}
 
 {{/* ------ */}}
+{{/* COUNTS */}}
+{{/* ------ */}}
+<p class='meta'>
+	{{- .ReadingTime -}}
+	{{- ` minute read ` -}}
+	{{- `(` -}}{{- .FuzzyWordCount -}}{{- ` words)` -}}
+</p>
+
+{{/* ------ */}}
 {{/* CATEGORIES LIST */}}
 {{/* ------ */}}
 {{- with .Params.tags -}}
@@ -39,4 +58,6 @@
 			{{- end -}}
 		</ul>
 	</div>
+{{- end -}}
+
 {{- end -}}

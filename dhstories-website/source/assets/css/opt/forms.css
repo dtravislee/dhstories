@@ -1,7 +1,11 @@
 /* Global CSS rules for forms / user inputs */
 
-input[type='text'], input[type='number'], select { border: 2px inset; }
-input[type='text']:active, input[type='number']:active, input[type='text']:focus, input[type='number']:focus { border: 2px solid #aaa; }
-select, select option { 
-	overflow-y: scroll;
-}
+/* Text inputs */
+input[type='text'], select { border: 2px inset; }
+input[type='text']:active, input[type='text']:focus { border: 2px solid #aaa; }
+
+/* Select inputs */
+select, select option { overflow-y: scroll; }
+
+/* Radio buttons and checkboxes */
+.input-toggleable { margin: 0.5em 0; }

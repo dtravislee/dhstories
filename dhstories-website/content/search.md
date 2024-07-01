@@ -7,6 +7,9 @@ title = "Search"
 ###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = "A simple way to find your favourites"
 
+###### Hide Metadata (bool) - Whether to hide metadata for this post (except for description and title)
+hideMeta = true
+
 #### Layout (string) - Layout to use for this content
 layout = "search"
 +++
@@ -15,6 +18,10 @@ layout = "search"
 
 {{< search.inline >}}
 {{- $buttonName := "Begin Search" -}}
+
+{{/* --- */}}
+{{/* Base search */}}
+{{/* --- */}}
 <form class='js-only' action='javascript:search();'>
 	<label for='search-input' >Enter keywords to search and click "{{- $buttonName -}}":</label>
 	<input type='text' id='search-input' class='text-input long'/>
@@ -23,165 +30,136 @@ layout = "search"
 		<b>Tip:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable regex by surrounding expressions with <code>/forward slashes/</code>.</p>
 	<p id='error-box' class='error-box hidden'></p>
 	<p class='search-buttons'>
-		<a href='javascript:search();' class='search-go'>{{- $buttonName -}}</a>
-		<a href='javascript:openAdvanced();' id='search-adv'>Advanced Options</a>
-		<a href='javascript:closeAdvanced();' id='close-search-adv' class='hidden'>Close Options</a>
+		<a role='button' href='javascript:search();' class='search-button'>{{- $buttonName -}}</a>
+		<a role='button' href='javascript:toggleAdvanced();' class='search-button' id='search-adv'>Advanced Options</a>
 	</p>
+	
+{{/* --- */}}
+{{/* Advanced options */}}
+{{/* --- */}}	
+
+	{{/* inputbox: takes box type (checked or radio), id, checkbox name, label, and checked status as inputs (in dict format) */}}
+	{{/* dict `type` "inputType" `group` "groupName" `label` "boxLabel" `id` "boxId" `checked` true/false */}}
+	{{- define `inputbox` -}}
+		<div id='{{- .id -}}-container'>
+			<input type='{{- .type -}}' id='{{- .id -}}' name='{{- .group -}}' value='{{- .id -}}' {{- if .checked -}}{{- ` checked` -}}{{- end -}}>
+			<label for='{{- .id -}}'>{{- .label -}}</label>
+		</div>
+	{{- end -}}
+
 	<div id='advanced-opt' class=''>
 		<h2>Advanced Search</h2>
 		<fieldset>
-			<legend>Search In</legend>
+			<legend>Search in</legend>
 			<p>Look for the search query in:</p>
-			<div class='loc-item'>
-				<input type='checkbox' id='loc-title' name='search-loc' value='title' checked>
-				<label for='loc-title'>Title</label>
-			</div>
-			<div class='loc-item'>
-				<input type='checkbox' id='loc-date' name='search-loc' value='date' checked>
-				<label for='loc-date'>Date</label>
-			</div>
-			<div class='loc-item'>
-				<input type='checkbox' id='loc-edited' name='search-loc' value='edited' checked>
-				<label for='loc-edited'>Edited Date</label>
-			</div>
-			<div class='loc-item'>
-				<input type='checkbox' id='loc-link' name='search-loc' value='link' checked>
-				<label for='loc-link'>URL</label>
-			</div>
-			<div class='loc-item'>
-				<input type='checkbox' id='loc-tags' name='search-loc' value='tags' checked>
-				<label for='loc-tags'>Tags</label>
-			</div>
-			<div class='loc-item'>
-				<input type='checkbox' id='loc-desc' name='search-loc' value='desc' checked>
-				<label for='loc-desc'>Description</label>
-			</div>
-			<div class='loc-item'>
-				<input type='checkbox' id='loc-text' name='search-loc' value='text' checked>
-				<label for='loc-text'>Content</label>
-			</div>
-			<div class='loc-item'>
-				<input type='checkbox' id='loc-words' name='search-loc' value='words' checked>
-				<label for='loc-words'>Word Count</label>
-			</div>
-			<div class='loc-item'>
-				<a class='loc-button all' href='javascript:locAll();'>Select All</a>
-				<a class='loc-button none' href='javascript:locNone();'>Select None</a>
-			</div>
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Title" `id` "loc-title" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Subtitle" `id` "loc-desc" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Date" `id` "loc-date" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Edited date" `id` "loc-edited" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "URL" `id` "loc-link" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Tags" `id` "loc-tags" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Content" `id` "loc-text" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Read time" `id` "loc-time" `checked` true) -}}
+			<p>
+				<a aria-role='button' class='search-button advanced' href='javascript:locAll();'>Select all fields</a>
+				<a aria-role='button' class='search-button advanced' href='javascript:locNone();'>Deselect all fields</a>
+			</p>
 		</fieldset>
 			{{/* Create tags list */}}
 			{{- define "taglist" -}}
-				<option value='' selected>--Choose a tag--</option>
-				{{ range (sort .Site.Taxonomies.tags) }}
-					{{- with .Page.Title -}}
-						<option value='{{- . -}}'>{{- . -}}</option>
+				{{ range (sort $.Site.Taxonomies.tags) }}
+					{{ with .Page }}
+						{{- $urlSafeTitle := .RelPermalink | path.BaseName -}}
+						{{- partial `inputbox` (dict `type` "checkbox" `group` .Type `label` .Title `id` $urlSafeTitle `checked` true) -}}
 					{{- end -}}
 				{{- end -}}
 			{{- end -}}
-			{{/* Set tags input description */}}
-			{{- $tagInputDesc := `Add tags, separated by commas (e.g. tag 1, tag 2)` -}}
-		<fieldset id='incl-tags'>
-			<legend>Include Tags</legend>
-			<label for='include-tag'>Select a tag to look for when searching:</label>
+		<fieldset>
+			<legend>Tags</legend>
+			<p>Look for results in the following categories:</p>
+			<div class='tag-container'>
+				{{- template "taglist" . -}}
+			</div>
 			<p>
-				<select id='include-tag' name='include-tag' class='select-box'>
-					{{- template "taglist" . -}}
-				</select>
-			</p><p>
-				<a href='javascript:addTag(incl-tag-input);' class='tag-input'>Add tag to Include list</a>
-				<a href='javascript:removeTag(incl-tag-input);' class='tag-input'>Remove tag from Include list</a>
+				<a aria-role='button' class='search-button advanced' href='javascript:locAll();'>Select all tags</a>
+				<a aria-role='button' class='search-button advanced' href='javascript:locNone();'>Deselect all tags</a>
 			</p>
-			<hr/>
-			<label for='incl-tag-input'>Enter list of tags to include in the search, separated by commas<br/>(e.g. tag 1, tag 2):</label>
-			<input type='text' id='incl-tag-input' class='text-input long' title='{{- $tagInputDesc -}}'/>
-			<a href='javascript:resetFields("incl-tags");' class='reset-button'>Reset Include Tags</a>
+			<a href='javascript:resetFields("tags");' class='reset-button'>Reset Tags</a>
 		</fieldset>
-		<fieldset id='excl-tags'>
-			<legend>Exclude Tags</legend>
-			<label for='exclude-tag'>Select a tag to avoid when searching:</label>
-			<p>
-				<select id='exclude-tag' name='exclude-tag' class='select-box'>
-					{{- template "taglist" . -}}
-				</select>
-			</p><p>
-				<a href='javascript:addTag(excl-tag-input);' class='tag-input'>Add tag to Exclude list</a>
-				<a href='javascript:removeTag(excl-tag-input);' class='tag-input'>Remove tag from Exclude list</a>
-			</p>
-			<hr/>
-			<label for='excl-tag-input'>Enter list of tags to avoid when searching, separated by commas<br/>(e.g. tag 1, tag 2):</label>
-			<input type='text' id='excl-tag-input' class='text-input long' title='{{- $tagInputDesc -}}'/>
-			<a href='javascript:resetFields("excl-tags");' class='reset-button'>Reset Excluded Tags</a>
-		</fieldset>
-		{{/* Get all the dates on the site, truncating repetition */}}
-		{{- define "datelist" -}}
-			{{- $datesList := slice -}} {{/* Empty starter array / slice */}}
-			{{- range .Site.RegularPages -}}
-				{{- with .Date -}} {{/* Only get dates from pages with the date parameter set */}}
-					{{/* Add formatted (YYYY-MM-DD) date to datesList */}}
-					{{- $datesList = $datesList | append (.) -}}
+		{{/* Date picker: takes id and Hugo context as inputs (in dict format) */}}
+		{{/* dict `id` "Id" (usually "before" or "after") `context` . */}}
+		{{- define "datepicker" -}}
+			{{- $days := seq 31 1 -}}
+			{{- $months := seq 12 1 -}}
+			{{- $years := seq (add (time.Now.Year) 1) (sub (int .context.Site.Params.startYear) 1) -}}
+				{{/* Add a little breadth in the year counter to account for user misinterpretations */}}
+			<select aria-labelledby='{{- .id -}}-day-label' id='{{- .id -}}-day' name='{{- .id -}}' class='select-box date'>
+				{{- range $days -}}
+					<option value='{{- . -}}'>{{- . -}}</option>
 				{{- end -}}
-			{{- end -}}
-			{{- $datesList = $datesList | uniq -}} {{/* Trim duplicate dates */}}
-			{{/* Outputs */}}
-			<option value='' selected>Any date</option>
-			{{- range $datesList -}}
-				<option value='{{- .Format (`2006-01-02`) -}}'>{{- .Format (`Jan 02, 2006`) -}}</option>
-			{{- end -}}
+				<option value=''>Any</option>
+				<option id='{{- .id -}}-day-label' value='' selected>Select day</option>
+			</select>
+			<select aria-labelledby='{{- .id -}}-month-label' id='{{- .id -}}-month' name='{{- .id -}}' class='select-box date'>
+				{{- range $months -}}
+					<option value='{{- . -}}'>{{- dateFormat "January" (printf "2006-%02d-02" . ) -}}</option>
+				{{- end -}}
+				<option value=''>Any</option>
+				<option id='{{- .id -}}-month-label' value='' selected>Select month</option>
+			</select>
+			<select aria-labelledby='{{- .id -}}-month-label' id='{{- .id -}}-year' name='{{- .id -}}' class='select-box date'>
+				{{- range $years -}}
+					<option value='{{- . -}}'>{{- . -}}</option>
+				{{- end -}}
+				<option value=''>Any</option>
+				<option id='{{- .id -}}-year-label' value='' selected>Select year</option>
+			</select>
 		{{- end -}}
 		<fieldset id='dates'>
 			<legend>Date</legend>
-			<p>
-				Find posts published <label for='before-date'>starting on the date</label>
-				<select id='before-date' name='before-date' class='select-box date'>
-					{{- template "datelist" . -}}
-				</select>
-				<label for='after-date'>up to and including the date</label>
-				<select id='after-date' name='after-date' class='select-box date'>
-					{{- template "datelist" . -}}
-				</select>
-			</p>
+			<p>Find posts published before the date:</p>
+			<div>{{- template `datepicker` (dict `id` "before" `context` .) -}}</div>
+			<p>Find posts published after the date:</p>
+			<div>{{- template `datepicker` (dict `id` "after" `context` .) -}}</div>
 			<a href='javascript:resetFields("dates");' class='reset-button'>Reset Dates</a>
 		</fieldset>
-		{{- define "wordcountlist" -}}
-			{{- $wordcounts := slice -}} {{/* Empty starter array / slice */}}
+		{{- define "readtimelist" -}}
+			{{- $readtimes := slice -}} {{/* Empty starter array / slice */}}
 			{{- range .Site.RegularPages -}}
-				{{- if .Date -}} {{/* Only get wordcounts from pages with the date parameter set */}}
-					{{- $wordcounts = $wordcounts | append (.FuzzyWordCount) -}}
+				{{- if .Date -}} {{/* Only get readtimes from pages with the date parameter set */}}
+					{{- $readtimes = $readtimes | append (.ReadingTime) -}}
 				{{- end -}}
 			{{- end -}}
-			{{/* Round to hundreds place e.g. 153 -> 100 */}}
-			{{- $minWords := (math.Min $wordcounts) -}}
-			{{- $maxWords := (math.Max $wordcounts) -}}
-			{{- $wordcountList := (seq $minWords 200 $maxWords) -}}
+			{{- $maxTime := math.Max $readtimes -}}
+			{{- $increment := 5 -}}
+			{{- $wordsPerMin := 200 -}}{{/* See: https://gohugo.io/methods/page/readingtime/ */}}
+			{{/* We round down to simulate FuzzyWordCount's rounding */}}
+			{{- $readtimeList := seq $increment $increment $maxTime -}}
 			{{/* Outputs */}}
-			<option value='' selected>Any</option>
-			{{- range $wordcountList -}}
-				<option value='{{- . -}}'>{{- . -}}{{- ` words` -}}</option>
+			{{- range (collections.Reverse $readtimeList) -}}
+				<option value='{{- . -}}'>{{- . -}}{{- ` minutes` -}}{{- ` (around ` -}}{{- mul . $wordsPerMin -}}{{- ` words)` -}}</option>
 			{{- end -}}
+			<option value='' selected>Any length</option>
 		{{- end -}}
 		<fieldset id='words'>
-			<legend>Word Count</legend>
-			<p>Look for posts with:</p>
-			<p><label for='wordcount-more'>More than this many words: </label><select id='wordcount-more' name='wordcount-more' class='select-box words'>{{- template "wordcountlist" . -}}</select></p>
-			<p><label for='wordcount-less'>Fewer than this many words: </label><select id='wordcount-less' name='wordcount-less' class='select-box words'>{{- template "wordcountlist" . -}}</select></p>
-			<a href='javascript:resetFields("words");' class='reset-button'>Reset Word Counts</a>
+			<legend>Read time</legend>
+			<p><label for='readtime-more'>Look for posts longer than: </label><select id='readtime-more' name='readtime-more' class='select-box words'>{{- template "readtimelist" . -}}</select></p>
+			<p><label for='readtime-less'>Look for posts shorter than: </label><select id='readtime-less' name='readtime-less' class='select-box words'>{{- template "readtimelist" . -}}</select></p>
+			<a href='javascript:resetFields("words");' class='reset-button'>Reset Read Times</a>
 		</fieldset>
 		<fieldset id='sort'>
-			<legend>Results Order</legend>
+			<legend>Results order</legend>
 			<p>Sort search results by:</p>
-			<p><input type='radio' id='new-first' name='sort-rule' value='new-first' checked>
-				<label for='new-first'>Newest first</label></p>
-			<p><input type='radio' id='old-first' name='sort-rule' value='old-first'>
-				<label for='new-first'>Oldest first</label></p>
+			{{- partial `inputbox` (dict `type` "radio" `group` "sort-rule" `label` "Newest first" `id` "new-first" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "radio" `group` "sort-rule" `label` "Oldest first" `id` "old-first" `checked` false) -}}
 			<a href='javascript:resetFields("sort");' class='reset-button'>Reset Results Order</a>
 		</fieldset>
 		<p class='search-buttons'>
-			<a href='javascript:search();'>{{- $buttonName -}}</a>
-			<a href='#search-input' id='search-adv-foot'>Return to Top</a>
-			<a href='javascript:resetFields("everything");'>Reset All</a>
+			<a role='button' href='javascript:search();' class='search-button'>{{- $buttonName -}}</a>
+			<a role='button' href='javascript:toggleAdvanced();' class='search-button' >Close Advanced Options</a>
+			<a role='button' href='javascript:resetFields("everything");' class='search-button'>Reset All</a>
 		</p>
 	</div>
 </form>
 {{</ search.inline >}}
 <div id='results-container'></div>
-

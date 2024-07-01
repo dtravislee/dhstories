@@ -37,13 +37,14 @@ enableInlineShortcodes = true
 	## Copyright
 	copyright = 'All Rights Reserved'
 	author = 'D. Travis Lee'
+	startYear = 2022
 	
 	## Language
 	lang = 'en-us'
 	
 	## Footer metadata - whether to put metadata (eg. date, word count) in the footer
 	## (Purely because I cannot, for the life of me, decide...)
-	footerMeta = false
+	footerMeta = true
 	
 	## RSS Limit - number of posts in RSS
 	rss = 25
@@ -96,12 +97,6 @@ enableInlineShortcodes = true
 	
 ## Markup Settings
 [markup]
-	## Table of Contents Settings
-	[markup.tableOfContents]
-		ordered = false
-		startLevel = 2
-		endLevel = 6
-	
 	## Unsafe Markdown Toggle
 	[markup.goldmark]
 		[markup.goldmark.renderer]

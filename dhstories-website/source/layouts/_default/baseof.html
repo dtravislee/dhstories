@@ -108,10 +108,6 @@
 		<div role='main' id='main'>
 			<div class='article-header'>
 				<h1>{{- partial `title` . -}}</h1>
-				{{/* Skip link - only shows if there's any metadata to worry about skipping */}}
-				{{- if or (.Params.date) (and .Lastmod (ne .Lastmod .Date)) (.Params.tags) -}}
-					<a class='sr-only' href='#content'>{{- `Skip metadata` -}}</a>
-				{{- end -}}
 				{{- with .Description -}}<p class='meta' aria-label='Subtitle'>{{- . -}}</p>{{- end -}}
 				{{- if not .Site.Params.footerMeta -}}{{- partial `meta` . -}}{{- end -}}
 			</div>
@@ -119,8 +115,15 @@
 		</div>
 		<div role='contentinfo' aria-label='Site footer' class='site-footer'>
 			<p>{{- `&copy; ` | safeHTML -}} 
-				{{- if ne "2022" (now.Format "2006") -}}{{- `2022–` -}}{{- end -}}
-				{{- now.Format "2006" -}}{{- `&nbsp;` | safeHTML -}}{{- .Site.Params.author -}}{{- ` – ` -}}{{- .Site.Params.copyright -}}</p>
+				{{- $startYear := .Site.Params.startYear -}}
+				{{- $currentYear := now.Format "2006" -}}
+				{{- with $startYear -}}
+					{{- if ne . $currentYear -}}{{- . -}}{{- `-` -}}{{- end -}}
+				{{- end -}}
+				{{- $currentYear -}}
+				{{- ` ` -}}
+				{{- .Site.Params.author -}}{{- ` – ` -}}{{- .Site.Params.copyright -}}
+				</p>
 			<p class='to-top'><a id="top-link" href='#'>{{- `Back to Top` -}}</a></p>
 		</div>
 		{{/* JavaScript */}}
@@ -128,13 +131,13 @@
 		{{/* This eases up on the scripting itself (fewer event handlers e.g.) */}}
 		{{/*	And is recommended by Yahoo! Developer: https://developer.yahoo.com/performance/rules.html#js_bottom */}}
 		{{/* Global onload scripts and functions */}}
-		{{- with resources.Get `js/global/jsshow.js` -}}
+		{{- with resources.Get `js/jsshow.js` -}}
 			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
 		{{- end -}}
-		{{- with resources.Get `js/global/stylebody.js` -}}
+		{{- with resources.Get `js/stylebody.js` -}}
 			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
 		{{- end -}}
-		{{- with resources.Get `js/global/styler.js` -}}
+		{{- with resources.Get `js/styler.js` -}}
 			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
 		{{- end -}}
 		{{- block `js` . -}}{{- end -}}

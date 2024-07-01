@@ -7,6 +7,9 @@ title = "RSS Feeds"
 ###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = "For your subscription needs"
 
+###### Hide Metadata (bool) - Whether to hide metadata for this post (except for description and title)
+hideMeta = true
+
 #### Hide Footer (bool) - Whether to show the footer at the end of this post.
 hideFooter = true
 +++

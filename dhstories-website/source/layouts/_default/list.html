@@ -19,8 +19,7 @@
 {{/* --- */}}
 
 {{- define `js` -}}
-	{{- partial `jsgoloader` (dict `file` `js/multi/errorbox.js` `scope` . ) -}}
-	{{- partial `jsgoloader` (dict `file` `js/multi/pagejumper.js` `scope` . ) -}}
+	{{- partial `jsgoloader` (dict `file` `js/pagejumper.js` `scope` . ) -}}
 {{- end -}}
 
 {{/* --- */}}
@@ -37,6 +36,10 @@
 	{{- range .Scratch.Get `css` -}}
 		{{- .Content | safeCSS -}}
 	{{- end -}}
+	
+	{{/* RESET */}}
+	{{/* To prevent duplicates on pagination */}}
+	{{- .Scratch.Delete `css` -}}
 	
 {{- end -}}
 

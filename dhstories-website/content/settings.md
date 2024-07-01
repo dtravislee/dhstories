@@ -6,6 +6,9 @@ title = "Settings"
 ###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = "Visual adjustments for your reading comfort"
 
+###### Hide Metadata (bool) - Whether to hide metadata for this post (except for description and title)
+hideMeta = true
+
 #### Layout - Layout to use for this content
 layout = "settings"
 +++
@@ -13,41 +16,31 @@ layout = "settings"
 <noscript>JavaScript must be enabled to change site theme settings!</noscript>
 
 {{< settings.inline >}}
+
+{{/* Radiobutton: takes id, radio group name, label, and checked status as inputs (in dict format) */}}
+{{/* dict `type` "radio" `group` "groupName" `label` "buttonLabel" `id` "buttonId" `checked` true/false */}}
+{{- define `radiobutton` -}}
+	<div id='{{- .id -}}-container'>
+		<input type='radio' id='{{- .id -}}' name='{{- .group -}}' value='{{- .id -}}' {{- if .checked -}}{{- ` checked` -}}{{- end -}}>
+		<label for='{{- .id -}}'>{{- .label -}}</label>
+	</div>
+{{- end -}}
+
 {{- $containerName := `-container` -}}
 <form class='js-only' action='javascript:updateSettings();'>
 	<fieldset>
 		<legend>Theme</legend>
-		{{- $theme1Name := `light` -}}
-		<div id='{{- $theme1Name -}}{{- $containerName -}}'>
-			<input type='radio' id='{{- $theme1Name -}}' name='theme' value='{{- $theme1Name -}}' checked>
-			<label for='{{- $theme1Name -}}'>{{- $theme1Name | title }} colours</label>
-		</div>
-		{{- $theme2Name := `dark` -}}
-		<div id='{{- $theme2Name -}}{{- $containerName -}}'>
-			<input type='radio' id='{{- $theme2Name -}}' name='theme' value='{{- $theme2Name -}}'>
-			<label for='{{- $theme2Name -}}'>{{- $theme2Name | title }} colours</label>
-		</div>
+		{{- partial `inputbox` (dict `type` "radio" `group` "theme" `label` "Light colours" `id` "light" `checked` true) -}}
+		{{- partial `inputbox` (dict `type` "radio" `group` "theme" `label` "Dark colours" `id` "dark" `checked` false) -}}
 	</fieldset>
 	<fieldset>
-		<legend>Font Style</legend>
-		{{- $font1Name := `serif` -}}
-		<div id='{{- $font1Name -}}{{- $containerName -}}'>
-			<input type='radio' id='{{- $font1Name -}}' name='font' value='{{- $font1Name -}}' checked>
-			<label for='{{- $font1Name -}}'>Serif</label>
-		</div>
-		{{- $font2Name := `sans` -}}
-		<div id='{{- $font2Name -}}{{- $containerName -}}'>
-			<input type='radio' id='{{- $font2Name -}}' name='font' value='{{- $font2Name -}}'>
-			<label for='{{- $font2Name -}}'>Sans Serif</label>
-		</div>
-		{{- $font3Name := `mono` -}}
-		<div id='{{- $font3Name -}}{{- $containerName -}}'>
-			<input type='radio' id='{{- $font3Name -}}' name='font' value='{{- $font3Name -}}'>
-			<label for='{{- $font3Name -}}'>Monospace</label>
-		</div>
+		<legend>Font style</legend>
+		{{- partial `inputbox` (dict `type` "radio" `group` "font" `label` "Serif" `id` "serif" `checked` true) -}}
+		{{- partial `inputbox` (dict `type` "radio" `group` "font" `label` "Sans-serif" `id` "sans" `checked` false) -}}
+		{{- partial `inputbox` (dict `type` "radio" `group` "font" `label` "Monospace" `id` "mono" `checked` false) -}}
 	</fieldset>
 	<fieldset>
-		<legend>Font Size</legend>
+		<legend>Font size</legend>
 		<label for='size'>{{- `Select a font size:` -}}</label>
 		<select id='size' name='size' class='select-box'>
 			{{- $fontSizes := seq 200 -10 50 -}}
@@ -57,25 +50,13 @@ layout = "settings"
 		</select>
 	</fieldset>
 	<fieldset>
-		<legend>Text Alignment</legend>
-		{{- $align1Name := `left` -}}
-		<div id='{{- $align1Name -}}{{- $containerName -}}'>
-			<input type='radio' id='{{- $align1Name -}}' name='align' value='{{- $align1Name -}}' checked>
-			<label for='{{- $align1Name -}}'>Left-Align</label>
-		</div>
-		{{- $align2Name := `justify` -}}
-		<div id='{{- $align2Name -}}{{- $containerName -}}'>
-			<input type='radio' id='{{- $align2Name -}}' name='align' value='{{- $align2Name -}}'>
-			<label for='{{- $align2Name -}}'>Justify</label>
-		</div>
-		{{- $align3Name := `right` -}}
-		<div id='{{- $align3Name -}}{{- $containerName -}}'>
-			<input type='radio' id='{{- $align3Name -}}' name='align' value='{{- $align3Name -}}'>
-			<label for='{{- $align3Name -}}'>Right-Align</label>
-		</div>			
+		<legend>Text alignment</legend>
+		{{- partial `inputbox` (dict `type` "radio" `group` "align" `label` "Left-align" `id` "left" `checked` true) -}}
+		{{- partial `inputbox` (dict `type` "radio" `group` "align" `label` "Justify" `id` "justify" `checked` false) -}}
+		{{- partial `inputbox` (dict `type` "radio" `group` "align" `label` "Right-align" `id` "right" `checked` false) -}}		
 	</fieldset>
 	<fieldset>
-		<legend>Line Spacing</legend>
+		<legend>Line spacing</legend>
 		<label for='line'>{{- `Select a line height:` -}}</label>
 		<select id='line' name='line' class='select-box'>
 			{{- $lineSizes := seq 200 -10 100 -}}
@@ -90,19 +71,27 @@ layout = "settings"
 		</select>	
 	</fieldset>
 	<fieldset>
-	<legend>Cookie Consent</legend>
-		<span id='cookie-notice'><input id='cookie-consent' class='checkbox' type='checkbox'/><label for='cookie-consent'><b>Note:</b> By checking this box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two "cookies"—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.</label></span>
+	<legend>Cookie consent</legend>
+		<div id='cookie-notice'><b>Note:</b> By checking the "I consent" box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two "cookies"—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.
+		<p>{{- partial `inputbox` (dict `type` "checkbox" `group` "cookie-consent" `label` "<b>I consent to the above cookie policy for <i>Dragonhouse Stories</i></b>" `id` "cookie-consent" `checked` false) -}}</p></div>
 	</fieldset>
-	<span class='settings-buttons' id='preview-stop'>
-		<a href='javascript:updateSettings();' class='go' role='button' title='Apply the current settings and return to the previous page'>Apply</a>
-		<a href='javascript:previewSettings();' class='demo' role='button' title='Demonstrate the current settings in a preview box'>Preview</a>
-		<a href='javascript:cancelSettings();' class='cancel' role='button' title='Discard the current settings and return to the previous page'>Cancel</a>
+	<span class='settings-buttons'>
+		<a role='button' href='javascript:updateSettings();' class='go' title='Apply the current settings and return to the previous page'>Apply</a>
+		<a role='button' href='javascript:previewSettings();' class='demo' title='Demonstrate the current settings in a preview box'>Preview</a>
+		<a role='button' href='javascript:cancelSettings();' class='cancel' title='Discard the current settings and return to the previous page'>Cancel</a>
 	</span>
 </form>
 {{</ settings.inline >}}
 
-<p id='error-box' class='error-box hidden'></p>
-
+<div id='alert-box' class='alert-box hidden'>
+	<h2>Alert title</h2>
+	<p>Alert body text</p>
+	<div class='alert-buttons>
+		<a role='button' id='accept-alert' href='javascript:acceptAlert();'>OK</a>
+		<a role='button' id='cancel-alert' href='javascript:cancelAlert();'>Cancel</a>
+		<a role='button' id='close-alert' href='javascript:closeAlert();'>Close</a>
+	</div>
+</div>
 <div id='preview-box' class='preview-box hidden'>
 
 {{< markdownify >}}

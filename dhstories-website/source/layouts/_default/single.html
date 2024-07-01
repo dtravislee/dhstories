@@ -79,33 +79,43 @@
 			{{/* --- */}}
 			
 			{{- if .Site.Params.footerMeta -}}
-				<dl class='footer-meta' aria-label='Metadata'>
-					{{- if .Params.date -}}
-						<div class='meta-row'>
-							<dt>Published</dt>
-							<dd>{{- .Date.Format (`January 02, 2006`) -}}</dd>
-						</div>
-					{{- end -}}
-					{{/* Show edited date only if it differs from the post date */}}
-					{{- with .Lastmod -}}{{ if ne . $.Date -}}
-						<div class='meta-row'>
-							<dt>Edited</dt>
-							<dd>{{- .Format (`January 02, 2006`) -}}</dd>
-						</div>
-					{{- end -}}{{- end -}}
-					{{- with .FuzzyWordCount -}}
-						<div class='meta-row'>
-							<dt>Word count</dt>
-							<dd>{{- . -}}{{- ` words` -}}</dd>
-						</div>
-					{{- end -}}
-					{{- with .Params.tags -}}
-						<div class='meta-row'>
-							<dt>Tags</dt>
-							<dd><ul>{{- range . -}}{{- partial `tag` . -}}{{- end -}}</ul></dd>
-						</div>
-					{{- end -}}
-				</dl>
+				{{/* Show metadata only on non-list pages or if overwritten in frontmatter */}}
+				{{- if and (eq .Kind "page") (not .Params.noMeta) -}}
+					<a class='sr-only' href='#content'>{{- `Skip metadata` -}}</a>
+					<dl class='footer-meta' aria-label='Metadata'>
+						{{- if .Params.date -}}
+							<div class='meta-row'>
+								<dt>Published</dt>
+								<dd>{{- .Date.Format (`January 02, 2006`) -}}</dd>
+							</div>
+						{{- end -}}
+						{{/* Show edited date only if it differs from the post date */}}
+						{{- with .Lastmod -}}{{ if ne . $.Date -}}
+							<div class='meta-row'>
+								<dt>Edited</dt>
+								<dd>{{- .Format (`January 02, 2006`) -}}</dd>
+							</div>
+						{{- end -}}{{- end -}}
+						{{- with .FuzzyWordCount -}}
+							<div class='meta-row'>
+								<dt>Word count</dt>
+								<dd>{{- . -}}{{- ` words` -}}</dd>
+							</div>
+						{{- end -}}					
+						{{- with .ReadingTime -}}
+							<div class='meta-row'>
+								<dt>Read time</dt>
+								<dd>{{- . -}}{{- ` minutes` -}}</dd>
+							</div>
+						{{- end -}}
+						{{- with .Params.tags -}}
+							<div class='meta-row'>
+								<dt>Tags</dt>
+								<dd><ul>{{- range . -}}{{- partial `tag` . -}}{{- end -}}</ul></dd>
+							</div>
+						{{- end -}}
+					</dl>
+				{{- end -}}
 			{{- end -}}
 			
 			{{/* --- */}}

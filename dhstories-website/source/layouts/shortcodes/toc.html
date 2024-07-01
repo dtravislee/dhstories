@@ -1,11 +1,28 @@
 {{/* TOC SHORTCODE */}}
-{{/* Gets and formats the table of contents. */}}
+{{/* Builds a table of contents for the page using Hugo fragments. */}}
 
-{{- with .Page.TableOfContents -}}
-	<div class='toc' role='navigation' aria-labelledby='toc-title'>
+{{- define `contentslist` -}}
+	<ul>
+	{{- range . -}}
+		<li>
+			<a href='#{{- .ID -}}'>{{- .Title -}}</a>
+			{{- with .Headings -}}
+				{{- template `contentslist` . -}}
+			{{- end -}}
+		</li>
+	{{- end -}}
+	</ul>
+{{- end -}}
+
+{{- with .Page.Fragments.Headings -}}
+	<div class='toc'>
 		<a class='sr-only' href='#after-toc'>{{- `Skip table of contents` -}}</a>
 		<h2 id='toc-title'>{{- `Contents` -}}</h2>
-		{{- . -}}
+		<div role="navigation" aria-labelledby="toc-title">
+			{{- range . -}} {{/* Skip over H1 headings, if any */}}
+				{{- template `contentslist` .Headings -}}
+			{{- end -}}
+		</div>
 	</div>
 	<span id='after-toc'></span>
 {{- end -}}

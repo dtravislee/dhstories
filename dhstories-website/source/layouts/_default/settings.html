@@ -5,8 +5,7 @@
 {{/* --- */}}
 
 {{- define `js` -}}
-	{{- partial `jsgoloader` (dict `file` `js/multi/errorbox.js` `scope` . ) -}}
-	{{- partial `jsgoloader` (dict `file` `js/singles/settings.js` `scope` . ) -}}
+	{{- partial `jsgoloader` (dict `file` `js/settings.js` `scope` . ) -}}
 {{- end -}}
 
 {{/* --- */}}
@@ -19,7 +18,6 @@
 	{{- .Scratch.Add `css` (slice
 		(resources.Get "css/settings.css")
 		(resources.Get "css/opt/forms.css")
-		(resources.Get "css/opt/error-box.css")
 		(resources.Get "css/opt/fieldset.css")
 		)
 	-}}
@@ -36,7 +34,5 @@
 {{/* --- */}}
 
 {{- define `content` -}}
-	<div id='content'>
-		{{- partial `content` . -}}
-	</div>
+	{{- partial `content` . -}}
 {{- end -}}

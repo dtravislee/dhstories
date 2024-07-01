@@ -7,6 +7,9 @@ title = "Share Post"
 ###### Description (string) - For subtitle and social media metadata. (Optional - If omitted, will hide subtitle and use only auto-summary for social media metadata.)
 description = "Links for sharing works on this site"
 
+###### Hide Metadata (bool) - Whether to hide metadata for this post (except for description and title)
+hideMeta = true
+
 #### Layout - Layout to use for this content
 layout = "share"
 +++

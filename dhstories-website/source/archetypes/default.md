@@ -19,6 +19,9 @@ tags = [{{ range (sort .Site.Taxonomies.tags) }}"{{ .Page.Title }}", {{ end }}]
 ###### Hide Footer (bool) - Whether to hide the post footer (not the site footer!)
 hideFooter = false
 
+###### Hide Metadata (bool) - Whether to hide metadata for this post (except for description and title)
+hideMeta = false
+
 ###### Comments Links (url string) - Full URL to a comments page for this post.
 commentLink = ""
 

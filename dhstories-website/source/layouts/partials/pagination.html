@@ -15,7 +15,7 @@
 				<select id='pagenum' name='pagenum' class='select-box'>
 					{{- $pageNums := seq .TotalPages -1 1 -}}
 					{{- range $pageNums -}}
-						<option value='{{- . -}}' {{- if eq . $paginator.PageNumber -}}selected{{- end -}}>{{- `Page ` -}}{{- . -}}</option>
+						<option value='{{- . -}}' {{- if eq . $paginator.PageNumber -}}selected{{- end -}}>{{- . -}}</option>
 					{{- end -}}
 				</select>
 				<a href='javascript:goToPage();' aria-role='button' title='Go to the selected page'>Go</a>

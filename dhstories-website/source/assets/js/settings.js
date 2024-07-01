@@ -56,19 +56,16 @@ function getSettings() {
 					+ getInputState("size") + " " 
 					+ getInputState("line") + " "
 					+ getInputState("align");
-	console.log(settingsCode);
 }
 
 /* PREVIEW SETTINGS */
 /* Applies the current settings values to a preview box at the bottom of the page */
 
 function previewSettings() {
-	/* Reset any error message */
-	setError("", errorBoxId);
 	/* Get the settings as input by the user */
 	getSettings();
-	/* Apply settings classes to the settings page */
-	document.body.className = settingsCode;
+	/* Apply settings classes to the body element - temporarily */
+	applyStyle(settingsCode);
 	/* Show the preview box to give readers a better idea of the look */
 	document.getElementById("preview-box").className = "preview-box";
 }
@@ -77,14 +74,12 @@ function previewSettings() {
 /* Applies the current settings values and returns the user to the previous page */
 
 function updateSettings() {
-	/* Reset any error message */
-	setError("", errorBoxId);
 	/* Get the settings as input by the user */
 	getSettings();
 	/* Check that cookies are accepted by the user, either now (checkbox) or earlier (storage obj.)
 	/* if not, display an error and halt */
 	if (!cookiesOk) {
-		setError("<b>ERROR:</b> Unable to save settings. Be sure to accept cookies!", errorBoxId);
+		window.alert("ERROR: Unable to save settings. Be sure to accept cookies!");
 		return;
 	}
 	/* Set local storage or cookie values; display an error if this fails somehow (likely disabled storage) */
@@ -103,7 +98,7 @@ function updateSettings() {
 		}
 		catch(e) {
 			console.log(e);
-			setError("<b>!!ERROR:</b> Unable to save settings. You may have cookies and/or local storage disabled in your browser!", errorBoxId);
+			window.alert("ERROR: Unable to save settings. You may have cookies and/or local storage disabled in your browser!");
 		}
 	}
 }
@@ -141,7 +136,7 @@ document.getElementById("top-link").href = "javascript:window.location.replace('
 /* Do a few things if cookies have been accepted by the user beforehand... */
 if (cookiesPreOk) {
 	/* Update the cookie notice box (#cookie-notice) based on whether cookies are already allowed */
-	document.getElementById("cookie-notice").innerHTML = "Cookies for <i>Dragonhouse Stories</i> have been accepted on this device. <p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'>reset all settings</a>.</p>"
+	document.getElementById("cookie-notice").innerHTML = "<p>Cookies for <i>Dragonhouse Stories</i> have been accepted on this device.</p><p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'>reset all settings</a>.</p>"
 	/* Update default states of inputs based on existing styler settings
 	/* (Split into array, loop array, use array values as ID targets for GEBI and check the targets) */
 	var themeCode = getLocalObj("dhstories-theme");
