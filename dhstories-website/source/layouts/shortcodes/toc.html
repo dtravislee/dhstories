@@ -2,16 +2,47 @@
 {{/* Builds a table of contents for the page using Hugo fragments. */}}
 
 {{- define `contentslist` -}}
-	<ul>
-	{{- range . -}}
-		<li>
-			<a href='#{{- .ID -}}'>{{- .Title -}}</a>
-			{{- with .Headings -}}
-				{{- template `contentslist` . -}}
+	{{/* Set current TOC params in a dictionary */}}
+	{{- $tocParams := (dict `startLevel` .startLevel `endLevel` .endLevel `ordered` .ordered) -}}
+	{{/* Get the size of this level of headings (for inserting </ul> or </ol> elements) */}}
+	{{- $levelSize := len .context -}}
+	{{- range $index, $headings := .context -}}
+		{{/* If the current heading level is less than the start level */}}
+		{{- if lt $headings.Level $.startLevel -}}
+			{{/* Parse any sub-headings under the current heading */}}
+			{{- with $headings.Headings -}}
+				{{- template `contentslist` (merge $tocParams (dict `context` .)) -}}
 			{{- end -}}
-		</li>
+		{{/* Otherwise, parse the heading normally */}}
+		{{- else -}}
+			{{/* If it's the first heading of this level (index != 0), 
+				add a <ul> or <ol> element per config.toml */}}
+			{{- if not $index -}}
+				{{- if $.ordered -}}
+					<ol>
+				{{- else -}}
+					<ul>
+				{{- end -}}
+			{{- end -}}
+			{{/* Add the heading item as a listed link */}}
+				<li>
+					<a href='#{{- $headings.ID -}}'>{{- $headings.Title -}}</a>
+					{{/* If it has sub-headings, repeat the process for those */}}
+					{{- with $headings.Headings -}}
+						{{- template `contentslist` (merge $tocParams (dict `context` .)) -}}
+					{{- end -}}
+				</li>
+			{{/* If this is the last heading of this level, 
+				add a </ul> or </ol> element per config.toml */}}
+			{{- if ge (add $index 1) $levelSize -}}
+				{{- if $.ordered -}}
+					</ol>
+				{{- else -}}
+					</ul>
+				{{- end -}}
+			{{- end -}}
+		{{- end -}}
 	{{- end -}}
-	</ul>
 {{- end -}}
 
 {{- with .Page.Fragments.Headings -}}
@@ -19,9 +50,12 @@
 		<a class='sr-only' href='#after-toc'>{{- `Skip table of contents` -}}</a>
 		<h2 id='toc-title'>{{- `Contents` -}}</h2>
 		<div role="navigation" aria-labelledby="toc-title">
-			{{- range . -}} {{/* Skip over H1 headings, if any */}}
-				{{- template `contentslist` .Headings -}}
-			{{- end -}}
+			{{- template `contentslist` (dict 
+				`context` . 
+				`startLevel` $.Site.Params.startLevel 
+				`endLevel` $.Site.Params.endLevel 
+				`ordered` $.Site.Params.ordered
+				) -}}
 		</div>
 	</div>
 	<span id='after-toc'></span>

@@ -62,6 +62,11 @@ enableInlineShortcodes = true
 	## Robots.TXT file
 	robots = true
 	
+	##Table of contents
+	ordered = false
+	startLevel = 2
+	endLevel = 6
+	
 [menu]
 	[[menu.main]]
 		identifier = 'Dragonhouse Stories'
@@ -94,10 +99,8 @@ enableInlineShortcodes = true
 			class = 'js-only'
 			disable = false
 			
-	
-## Markup Settings
+## Markup Settings - unsafe toggle
 [markup]
-	## Unsafe Markdown Toggle
 	[markup.goldmark]
 		[markup.goldmark.renderer]
 			unsafe = true
