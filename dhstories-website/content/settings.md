@@ -72,21 +72,28 @@ layout = "settings"
 	</fieldset>
 	<fieldset>
 	<legend>Cookie consent</legend>
-		<div id='cookie-notice'><b>Note:</b> By checking the "I consent" box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two "cookies"—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.
-		<p>{{- partial `inputbox` (dict `type` "checkbox" `group` "cookie-consent" `label` "<b>I consent to the above cookie policy for <i>Dragonhouse Stories</i></b>" `id` "cookie-consent" `checked` false) -}}</p></div>
+		<div id='cookie-notice'>
+			<p><b>Note:</b> By checking the "I consent" box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two "cookies"—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.</p>
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "cookie-consent" `label` "<b>I consent to the above cookie policy for <i>Dragonhouse Stories</i></b>" `id` "cookie-consent" `checked` false) -}}
+		</div>
+		{{/* Consent accepted HTML */}}
+		<div id='accepted-consent' style='display:none;' aria-hidden=true>
+			<p>Cookies for <i>Dragonhouse Stories</i> have been accepted on this device.</p><p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'>reset all settings</a>.</p>
+		</div>
 	</fieldset>
-	<span class='settings-buttons'>
-		<a role='button' href='javascript:updateSettings();' class='go' title='Apply the current settings and return to the previous page'>Apply</a>
-		<a role='button' href='javascript:previewSettings();' class='demo' title='Demonstrate the current settings in a preview box'>Preview</a>
-		<a role='button' href='javascript:cancelSettings();' class='cancel' title='Discard the current settings and return to the previous page'>Cancel</a>
-	</span>
+	<p>
+		<a role='button' href='javascript:updateSettings();' class='form-button large' title='Apply the current settings and return to the previous page'>Apply</a>
+		<a role='button' href='javascript:previewSettings();' class='form-button large' title='Demonstrate the current settings in a preview box'>Preview</a>
+		<a role='button' href='javascript:cancelSettings();' class='form-button large' title='Discard the current settings and return to the previous page'>Cancel</a>
+	</p>
+	
 </form>
 {{</ settings.inline >}}
 
 <div id='alert-box' class='alert-box hidden'>
 	<h2>Alert title</h2>
 	<p>Alert body text</p>
-	<div class='alert-buttons>
+	<div class='alert-buttons'>
 		<a role='button' id='accept-alert' href='javascript:acceptAlert();'>OK</a>
 		<a role='button' id='cancel-alert' href='javascript:cancelAlert();'>Cancel</a>
 		<a role='button' id='close-alert' href='javascript:closeAlert();'>Close</a>

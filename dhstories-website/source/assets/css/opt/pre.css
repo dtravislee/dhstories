@@ -1,7 +1,0 @@
-/* CSS rules for preformatted text */
-/* Mostly used for code blocks - could be useful for poetry? */
-
-pre {
-	display: block;
-	white-space: pre;
-}

@@ -9,27 +9,6 @@
 {{- end -}}
 
 {{/* --- */}}
-{{/* CSS */}}
-{{/* --- */}}
-
-{{- define `css` -}}
-
-	{{/* MAIN CSS */}}
-	{{- .Scratch.Add `css` (slice
-		(resources.Get "css/settings.css")
-		(resources.Get "css/opt/forms.css")
-		(resources.Get "css/opt/fieldset.css")
-		)
-	-}}
-	
-	{{/* RETURN */}}
-	{{- range .Scratch.Get `css` -}}
-		{{- .Content | safeCSS -}}
-	{{- end -}}
-	
-{{- end -}}
-
-{{/* --- */}}
 {{/* CONTENT */}}
 {{/* --- */}}
 

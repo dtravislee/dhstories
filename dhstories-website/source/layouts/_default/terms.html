@@ -21,33 +21,6 @@
 {{- end -}}
 
 {{/* --- */}}
-{{/* CSS */}}
-{{/* --- */}}
-
-{{- define `css` -}}
-
-	{{/* MAIN CSS */}}
-	{{- .Scratch.Add `css` (slice
-		(resources.Get "css/taxonomy.css")
-		(resources.Get "css/opt/lists.css")
-		)
-	-}}
-	
-	{{/* CSS BLOCKS */}}
-	{{- partial `cssblocks/pagination` . -}}
-	
-	{{/* RETURN */}}
-	{{- range .Scratch.Get `css` -}}
-		{{- .Content | safeCSS -}}
-	{{- end -}}
-	
-	{{/* RESET */}}
-	{{/* To prevent duplicates on pagination */}}
-	{{- .Scratch.Delete `css` -}}
-	
-{{- end -}}
-
-{{/* --- */}}
 {{/* TERMS LIST */}}
 {{/* --- */}}
 

@@ -9,35 +9,9 @@
 {{- end -}}
 
 {{/* --- */}}
-{{/* CSS */}}
-{{/* --- */}}
-
-{{- define `css` -}}
-
-	{{/* LIST CSS BLOCK */}}
-	{{- partial `cssblocks/lists` . -}}
-
-	{{/* MAIN CSS */}}
-	{{- .Scratch.Add `css` (slice
-		(resources.Get "css/search.css")
-		(resources.Get "css/opt/fieldset.css")
-		(resources.Get "css/opt/forms.css")
-		)
-	-}}
-	
-	{{/* RETURN */}}
-	{{- range .Scratch.Get `css` -}}
-		{{- .Content | safeCSS -}}
-	{{- end -}}
-	
-{{- end -}}
-
-{{/* --- */}}
 {{/* CONTENT */}}
 {{/* --- */}}
 
 {{- define `content` -}}
-	<div id="content">
-		{{- partial `content` . -}}
-	</div>
+	{{- partial `content` . -}}
 {{- end -}}

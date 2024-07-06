@@ -1,0 +1,13 @@
+{{/* LISTED POST */}}
+{{/* Writes HTML for a post in a list - useful for related posts or list pages */}}
+
+{{/* Params: */}}
+{{/* context = the dot (.) */}}
+{{/* level = what level of heading tags to use (e.g. 2 -> h2) */}}
+
+<div role='article' class='listed-article'>
+	<h{{- .level | string -}}>
+		<a href='{{- .context.RelPermalink -}}'>{{- .context.Title -}}</a>
+	</h{{- .level -}}>
+	{{- partial `meta` .context -}}
+</div>

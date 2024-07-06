@@ -1,7 +1,8 @@
 /* CSS override rules for print view */
 
 /* Forced light mode */
+/* Using pure black / white for printer friendliness */
 * {
 	color: #000 !important;
-	background-color: transparent !important;
+	background-color: #fff !important;
 }

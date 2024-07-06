@@ -19,13 +19,10 @@
 {{/* ------ */}}
 {{- with .Params.date -}}
 	<p class='meta'>
+		{{- `Published: ` -}}
 		{{- .Format (`January 02, 2006`) -}}
 	</p>
 {{- end -}}
-
-{{/* ------ */}}
-{{/* EDIT DATE */}}
-{{/* ------ */}}
 
 {{/* Show edited date only if it differs from the post date */}}
 {{- with .Lastmod -}}
@@ -50,14 +47,18 @@
 {{/* CATEGORIES LIST */}}
 {{/* ------ */}}
 {{- with .Params.tags -}}
-	<div class='meta'>
-		<span class='tags-label'>Tags:</span>
-		<ul>
-			{{- range . -}}
-				{{- partial `tag` . -}}
+	<p class='meta'>
+		{{- `Tags: ` -}}
+		{{- $tagsLength := sub (len .) 1 -}}
+		{{- range $i, $tag := . -}}
+			<a href='{{- `/tags/` | relURL -}}{{- $tag | urlize -}}'>
+				{{- $tag | humanize | title -}}
+			</a>
+			{{- if lt $i $tagsLength -}}
+				{{- `, ` -}}
 			{{- end -}}
-		</ul>
-	</div>
+		{{- end -}}
+	</p>
 {{- end -}}
 
 {{- end -}}

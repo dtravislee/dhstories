@@ -42,22 +42,23 @@ enableInlineShortcodes = true
 	## Language
 	lang = 'en-us'
 	
-	## Footer metadata - whether to put metadata (eg. date, word count) in the footer
-	## (Purely because I cannot, for the life of me, decide...)
-	footerMeta = true
-	
 	## RSS Limit - number of posts in RSS
 	rss = 25
 	
 	## Pagination size
 	paginate = 2
 	
+	## Related pages maximum - set to 0 to disable related pages
+	related = 5
+	
 	## Taxonomy pagination size
 	taxPaginate = 20
 	
-	## Summary length - length of summaries in RSS and metadata, in characters
-	## Also applies to descriptions if they are set for a page
+	## Summary length - length of auto-summaries in RSS, in characters
 	sumLen = 150
+	
+	## Featured post - whether to include a featured post on the homepage
+	featured = false
 	
 	## Robots.TXT file
 	robots = true
@@ -98,6 +99,28 @@ enableInlineShortcodes = true
 		[[menu.main.params]]
 			class = 'js-only'
 			disable = false
+			
+## Related Posts Settings
+[related]
+	includeNewer = true
+	threshold = 50
+	toLower = true
+	[[related.indices]]
+		applyFilter = false
+		cardinalityThreshold = 0
+		name = 'keywords'
+		pattern = ''
+		toLower = false
+		type = 'basic'
+		weight = 100
+	[[related.indices]]
+		applyFilter = false
+		cardinalityThreshold = 0
+		name = 'tags'
+		pattern = ''
+		toLower = false
+		type = 'basic'
+		weight = 80
 			
 ## Markup Settings - unsafe toggle
 [markup]

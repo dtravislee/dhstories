@@ -1,38 +1,47 @@
 {{/* HTML content for articles */}}
 
 {{/* --- */}}
-{{/* CSS */}}
+{{/* NEXT / PREV */}}
 {{/* --- */}}
 
-{{- define `css` -}}
+{{/* Shows links to next / previous page or post. */}}
 
-	{{/* MAIN CSS */}}
-	{{- .Scratch.Add `css` (slice
-		(resources.Get "css/single.css")
-		(resources.Get "css/opt/metadata.css")
-		)
-	-}}
-	
-	{{/* CONDITIONAL CSS */}}
-	
-	{{/* Article footer styles */}}
-	{{- if not .Params.hideFooter -}}
-		{{- .Scratch.Add `css` (slice (resources.Get "css/opt/article-footer.css")) -}}
-		{{- if .Params.date -}}
-			{{- .Scratch.Add `css` (slice (resources.Get "css/opt/next-previous.css")) -}}
-		{{- end -}}
-		{{- if .Site.Params.footerMeta -}}
-			{{- .Scratch.Add `css` (slice (resources.Get "css/opt/footer-meta.css")) -}}
-		{{- end -}}
+{{/* To check, we try to grab the next / previous page, */}}
+{{/*	and if it doesn't exist, we fall back to grabbing the page we're on. */}}
+{{/* This is done so dates can be checked for single page navigation, */}}
+{{/*	as we don't want undated pages (e.g. about page) to be included in navigation. */}}
+{{/* Then, if we grabbed the fallback, we don't display the next / previous page. */}}
+{{/* To ensure correct spacing, we still write the "next" or "previous" box and title, */}}
+{{/*	but replace the link with generic "no entry found" text. */}}
+
+{{/* PARAMS: */}}
+{{/*	scope = the page for this link */}}
+{{/*	type = which page this points to, either "next" or "previous" */}}
+{{/*	kind = whether this is for a list page or a single page. */}}
+
+{{- define `nextprev` -}}
+	{{- $scope := .scope -}}
+	{{- $type := .type | lower -}}
+	{{- $target := cond (eq $type `prev`) $scope.Prev $scope.Next -}}
+
+	{{- with $target | default $scope -}}
+		<p class='np-{{- $type -}}' role='{{- $type -}}'>
+			<span class='np-title'>
+				{{- if eq $type `prev` -}}
+					{{- `Previous: ` -}}
+				{{- else if eq $type `next` -}}
+					{{- `Next: ` -}}
+				{{- end -}}
+			</span>
+			{{- if and .Params.date (ne . $scope) -}}
+				<a href='{{- .RelPermalink -}}'>{{- .Title -}}</a>
+			{{- else -}}
+				{{- `No ` -}} {{- cond (eq $type `prev`) `older` `newer` -}} {{- ` posts` -}}
+			{{- end -}}
+		</p>	
 	{{- end -}}
-	
-	{{/* RETURN */}}
-	{{- range .Scratch.Get `css` -}}
-		{{- .Content | safeCSS -}}
-	{{- end -}}
-	
 {{- end -}}
-
+			
 {{/* --- */}}
 {{/* CONTENT */}}
 {{/* --- */}}
@@ -45,77 +54,96 @@
 			{{/* --- */}}
 			{{/* FOOTER LINKS */}}
 			{{/* --- */}}
-			
-			{{/* Get ko-fi donation link */}}
-			{{- $kofi := `` -}}
-			{{- range .Site.Menus.main -}}
-				{{- if eq .Identifier `ko-fi` -}} 
-					{{- $kofi = .URL -}}
-				{{- end -}}
-			{{- end -}}
-			<p>
-				{{/* Write donation link if kofi variable is populated */}}
-				{{- `Enjoy this work? ` -}}
-				{{- with $kofi -}}
-					<a href='{{ . }}'>{{- `Support the Dragonhouse` -}}</a>{{- ` on Ko-Fi` -}}
-					<span class='js-only'>{{- ` and ` -}}
-				{{- end -}}
-				{{/* Add the share link, adjusting phrasing appropriately */}}
-				{{- if not $kofi -}}<span class='js-only'>{{- end -}}
-				<a href='/share/#&p={{- replace .RelPermalink `/` `` -}}&t={{- .Title | title -}}&d={{- partial `description` . | replaceRE `(?:$\s+|^\s+)` `` -}}'>
-					{{- if $kofi -}}{{- `share this` -}}
-					{{- else -}}{{- `Share it` -}}
+			<div class='shares'>
+				{{/* Get ko-fi donation link */}}
+				{{- $kofi := `` -}}
+				{{- range .Site.Menus.main -}}
+					{{- if eq .Identifier `ko-fi` -}} 
+						{{- $kofi = .URL -}}
 					{{- end -}}
-				</a>{{- ` with your friends` -}}</span>{{- `!` -}}
-			</p>
+				{{- end -}}
+				<p>
+					{{/* Write donation link if kofi variable is populated */}}
+					{{- `Enjoy this work? ` -}}
+					{{- with $kofi -}}
+						<a href='{{ . }}'>{{- `Support the Dragonhouse` -}}</a>{{- ` on Ko-Fi` -}}
+						<span class='js-only'>{{- ` and ` -}}
+					{{- end -}}
+					{{/* Add the share link, adjusting phrasing appropriately */}}
+					{{- if not $kofi -}}<span class='js-only'>{{- end -}}
+					<a href='/share/#&p={{- replace .RelPermalink `/` `` -}}&t={{- .Title | title -}}&d={{- partial `description` . | replaceRE `(?:$\s+|^\s+)` `` -}}'>
+						{{- if $kofi -}}{{- `share this` -}}
+						{{- else -}}{{- `Share it` -}}
+						{{- end -}}
+					</a>{{- ` with your friends` -}}</span>{{- `!` -}}
+				</p>
+				
+				{{/* COMMENTS */}}
+				{{- with .Params.commentLink -}}
+					<p><a href="{{- . -}}">Discuss <i>{{- $.Title -}}</i> here</a></p>
+				{{- end -}}
+			</div>
 			
-			{{/* COMMENTS */}}
-			{{- with .Params.commentLink -}}
-				<p><a href="{{- . -}}">Discuss <i>{{- $.Title -}}</i> here</a></p>
+			{{/* --- */}}
+			{{/* SERIES INFO */}}
+			{{/* --- */}}
+			
+			{{/* Check for dates in next / previous posts */}}
+			{{/* Posts without dates are "hidden" from viewers (i.e. need direct links) */}}
+			{{- $hasNext := false -}}
+			{{- $hasPrev := false -}}
+			{{- with .NextInSection -}}{{- $hasNext = .Params.date -}}{{- end -}}
+			{{- with .PrevInSection -}}{{- $hasPrev = .Params.date -}}{{- end -}}
+			{{- if or $hasNext $hasPrev -}}
+				<div class='series-info'>
+					{{- with .NextInSection -}}
+						<p><span class='series-lead'>Next in series: </span><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></p>
+					{{- end -}}
+					{{- with .PrevInSection -}}
+						<p><span class='series-lead'>Previous in series: </span><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></p>
+					{{- end -}}
+				</div>
 			{{- end -}}
 			
 			{{/* --- */}}
-			{{/* FOOTER METADATA */}}
+			{{/* FOOTER TAGS */}}
 			{{/* --- */}}
 			
-			{{- if .Site.Params.footerMeta -}}
-				{{/* Show metadata only on non-list pages or if overwritten in frontmatter */}}
-				{{- if and (eq .Kind "page") (not .Params.noMeta) -}}
-					<a class='sr-only' href='#content'>{{- `Skip metadata` -}}</a>
-					<dl class='footer-meta' aria-label='Metadata'>
-						{{- if .Params.date -}}
-							<div class='meta-row'>
-								<dt>Published</dt>
-								<dd>{{- .Date.Format (`January 02, 2006`) -}}</dd>
-							</div>
+			{{- with .Params.tags -}}
+				<h2 id='tags-heading'>Tags</h2>
+				<div class='tags-cloud'>
+					{{- range . -}}
+						<span class='cloud-tag'>
+							<a href='{{- `/tags/` | relURL -}}{{- . | urlize -}}'>
+								{{- . | humanize | title -}}
+							</a>
+						</span>
+					{{- end -}}
+				</div>
+			{{- end -}}
+			
+			{{/* --- */}}
+			{{/* RELATED PAGES */}}
+			{{/* --- */}}
+			
+			{{- $relatedPages := .Site.RegularPages.Related . -}}
+			{{- if and $relatedPages .Site.Params.related -}}
+				<h2>Related pages</h2>
+				<div class='related'>
+					{{- $successes := 0 -}}
+					{{- range $relatedPages -}}
+						{{/* Same logic as next/prev in series, but we want to avoid matches this time */}}
+						{{/* This keeps the "related" section from just flooding with entries in the series */}}
+						{{- if not (eq (substr .RelPermalink 0 -2) (substr $.RelPermalink 0 -2)) -}}
+							{{- partial `listedpost` (dict `context` . `level` 3) -}}
+							{{- $successes = $successes | add 1 -}}
 						{{- end -}}
-						{{/* Show edited date only if it differs from the post date */}}
-						{{- with .Lastmod -}}{{ if ne . $.Date -}}
-							<div class='meta-row'>
-								<dt>Edited</dt>
-								<dd>{{- .Format (`January 02, 2006`) -}}</dd>
-							</div>
-						{{- end -}}{{- end -}}
-						{{- with .FuzzyWordCount -}}
-							<div class='meta-row'>
-								<dt>Word count</dt>
-								<dd>{{- . -}}{{- ` words` -}}</dd>
-							</div>
-						{{- end -}}					
-						{{- with .ReadingTime -}}
-							<div class='meta-row'>
-								<dt>Read time</dt>
-								<dd>{{- . -}}{{- ` minutes` -}}</dd>
-							</div>
+						{{/* Stop getting posts once we hit the config-defined limit */}}
+						{{- if ge $successes $.Site.Params.related -}}
+							{{- break -}}
 						{{- end -}}
-						{{- with .Params.tags -}}
-							<div class='meta-row'>
-								<dt>Tags</dt>
-								<dd><ul>{{- range . -}}{{- partial `tag` . -}}{{- end -}}</ul></dd>
-							</div>
-						{{- end -}}
-					</dl>
-				{{- end -}}
+					{{- end -}}
+				</div>
 			{{- end -}}
 			
 			{{/* --- */}}
@@ -124,8 +152,8 @@
 				
 			{{- if .Params.date -}}
 				<div class='next-previous' role='navigation'>
-					{{- partial `nextprev` (dict `type` `prev` `scope` . ) -}}
-					{{- partial `nextprev` (dict `type` `next` `scope` . ) -}}
+					{{- template `nextprev` (dict `type` "prev" `scope` . ) -}}
+					{{- template `nextprev` (dict `type` "next" `scope` . ) -}}
 				</div>
 			{{- end -}}
 		</div>

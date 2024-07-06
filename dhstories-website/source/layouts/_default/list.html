@@ -23,48 +23,51 @@
 {{- end -}}
 
 {{/* --- */}}
-{{/* CSS */}}
-{{/* --- */}}
-
-{{- define `css` -}}
-	
-	{{/* CSS BLOCKS */}}
-	{{- partial `cssblocks/lists` . -}}
-	{{- partial `cssblocks/pagination` . -}}
-	
-	{{/* RETURN */}}
-	{{- range .Scratch.Get `css` -}}
-		{{- .Content | safeCSS -}}
-	{{- end -}}
-	
-	{{/* RESET */}}
-	{{/* To prevent duplicates on pagination */}}
-	{{- .Scratch.Delete `css` -}}
-	
-{{- end -}}
-
-{{/* --- */}}
 {{/* CONTENT */}}
 {{/* --- */}}
 
 {{- define `content` -}}
-	
+
 	{{- $pageNum := .Scratch.Get `pageNum` -}}
+
 	{{- if and (.Content) (lt $pageNum 2) -}}
 		{{- partial `content` . -}}
 	{{- else -}}
 		<div id='#content'></div>
 	{{- end -}}
 
-	{{- $paginator := .Scratch.Get `pages` -}}
-	
-	<div class='page-list'>
-		{{- range $paginator.Pages -}}
-			<div role='article' class='listed-article'>
-				<h2 itemprop='name'><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></h2>
-				{{- partial `meta` . -}}
+	{{/* Show featured post only on first homepage, if enabled and set up correctly */}}
+	{{- $featuredBlurb := .GetPage `/featured` -}}
+	{{- $featuredPostPath := $featuredBlurb.Params.featuredPost -}}
+	{{- $showFeatured := and 
+		($featuredBlurb)
+		($featuredPostPath)
+		(lt $pageNum 2) 
+		(.Site.Params.featured) 
+		.IsHome -}}
+	{{- if $showFeatured -}}
+		{{- with .GetPage $featuredPostPath -}}
+			<div class='featured'>
+				<h2>{{- $featuredBlurb.Title -}}</h2>
+				<div role='article' class='listed-article'>
+					<h3><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></h3>
+					<blockquote>{{- $featuredBlurb.Content -}}</blockquote>
+					<p><a href='{{- .RelPermalink -}}'>Read "{{- .Title -}}" here</a></p>
+					<hr/>
+				</div>
 			</div>
+			<h2>Recent posts</h2>
 		{{- end -}}
+	{{- end -}}
+	{{- $paginator := .Scratch.Get `pages` -}}
+	<div class='page-list'>
+	{{- range $paginator.Pages -}}
+		{{- if $showFeatured -}}
+			{{- partial `listedpost` (dict `context` . `level` 3) -}}
+		{{- else -}}
+			{{- partial `listedpost` (dict `context` . `level` 2) -}}
+		{{- end -}}
+	{{- end -}}
 	</div>
 	{{- partial `pagination` . -}}
 {{- end -}}

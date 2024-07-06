@@ -1,6 +1,49 @@
 {{/* Pagination is placed up front to be accessible to list.html and other blocks */}}
 {{- block `pagination` . -}}{{- end -}}
 
+{{/* --- */}}
+{{/* Global templates */}}
+{{/* --- */}}
+
+{{/* TITLE */}}
+{{/* Writes the title, with a page number if it's part of a pagination scheme */}}
+{{- define `title` -}}
+	{{- $title := .Title | title -}}
+	{{- with .Scratch.Get `pageNum` -}}
+		{{- if gt . 1 -}}
+			{{- $title = print ($title) ` - Page ` . -}}
+		{{- end -}}
+	{{- end -}}
+
+	{{- $title -}}
+{{- end -}}
+
+{{/* JS/GO LOADER */}}
+{{/* Gets Javascript that uses Go's templating language and outputs the Go-parsed result. */}}
+{{/* Parses files via Hugo's ExecuteAsTemplate function. */}}
+
+{{/* Fun fact: Hugo is "smart" with the cache files ExecuteAsTemplate generates. */}}
+{{/* That is, it will discard the files if, and only if, they are made unnecessary. */}}
+{{/* This function pulls the raw .Content from the file, so Hugo grabs it and discards the file. */}}
+{{/* But if you change it to .Permalink, Hugo will keep the file. */}}
+{{/* Just be sure to clean your publish directory if you switch back and forth. */}}
+
+{{/* PARAMS: */}}
+{{/*	scope = the page for this link */}}
+{{/*	file = the path of the Javascript file */}}
+
+{{- define `loadjs` -}}
+	{{- $scope := .scope -}}
+	{{- $file := .file -}}
+
+	{{- with $scope -}}
+		{{- $cache := print (replace .RelPermalink `/` ``) "_cache.js" -}}
+		{{- with resources.Get $file | resources.ExecuteAsTemplate $cache . -}}
+			{{- .Content | safeJS -}}
+		{{- end -}}
+	{{- end -}}
+{{- end -}}
+
 <!doctype html>
 <html lang='{{- .Site.Params.lang | default `en` -}}' itemscope itemtype='https://schema.org/WebPage'>
 	<head>
@@ -16,63 +59,18 @@
 				{{- ` - ` -}}
 				{{- .Site.Params.description -}}
 			{{- else -}}
-				{{- partial `title` . -}}
+				{{- template `title` . -}}
 				{{- ` | ` -}}
 				{{- .Site.Params.title | title -}}
 			{{- end -}}
 		</title>
 		<style>
-			{{/* Base styles */}}
-			{{- with resources.Get "css/base.css" -}}{{- .Content | safeCSS -}}{{- end -}}
-			{{/* Page-type styles */}}
-			{{- block `css` . -}}{{- end -}}
-			{{/* Content styles */}}
-			{{- if .Content -}}
-				{{/* Paragraphs - Always loaded when any content is present */}}
-				{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/p.css")) -}}
-				{{/* Headings */}}
-				{{- range $seq := seq 2 6 -}}
-					{{- $query := print `<h` $seq -}}
-					{{- $src := print `css/opt/h` $seq `.css` -}}
-					{{- if findRE $query $.Content 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get $src)) -}}
+			{{- with . -}}
+				{{- $cache := print (replace .RelPermalink `/` ``) "_cache.scss" -}}
+				{{- with resources.Get `scss/base.scss` | resources.ExecuteAsTemplate $cache . -}}
+					{{- with . | toCSS -}}
+						{{ .Content | safeCSS -}}
 					{{- end -}}
-				{{- end -}}
-				{{/* Other markdown styles */}}
-				{{- with .Content -}}
-					{{- if findRE `<figure` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/figures.css")) -}}
-					{{- end -}}
-					{{- if findRE `<li` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/lists.css")) -}}
-					{{- end -}}
-					{{- if findRE `<dl` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/def-lists.css")) -}}
-					{{- end -}}
-					{{- if findRE `<code` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/code.css")) -}}
-					{{- end -}}
-					{{- if findRE `<del` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/del.css")) -}}
-					{{- end -}}
-					{{- if findRE `<hr` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/hr.css")) -}}
-					{{- end -}}
-					{{- if findRE `<sup` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/footnotes.css")) -}}
-					{{- end -}}
-					{{- if findRE `<blockquote` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/quotes.css")) -}}
-					{{- end -}}
-					{{- if findRE `<table` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/tables.css")) -}}
-					{{- end -}}
-					{{- if findRE `<pre` . 1 -}}
-						{{- $.Scratch.Add `content-css` (slice (resources.Get "css/opt/pre.css")) -}}
-					{{- end -}}
-				{{- end -}}
-				{{- range .Scratch.Get `content-css` -}}
-					{{- .Content | safeCSS -}}
 				{{- end -}}
 			{{- end -}}
 		</style>
@@ -107,9 +105,9 @@
 		</div>
 		<div role='main' id='main'>
 			<div class='article-header'>
-				<h1>{{- partial `title` . -}}</h1>
+				<h1>{{- template `title` . -}}</h1>
 				{{- with .Description -}}<p class='meta' aria-label='Subtitle'>{{- . -}}</p>{{- end -}}
-				{{- if not .Site.Params.footerMeta -}}{{- partial `meta` . -}}{{- end -}}
+				{{- partial `meta` . -}}
 			</div>
 			{{- block `content` . -}}{{- end -}}
 		</div>
@@ -131,15 +129,11 @@
 		{{/* This eases up on the scripting itself (fewer event handlers e.g.) */}}
 		{{/*	And is recommended by Yahoo! Developer: https://developer.yahoo.com/performance/rules.html#js_bottom */}}
 		{{/* Global onload scripts and functions */}}
-		{{- with resources.Get `js/jsshow.js` -}}
-			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
-		{{- end -}}
-		{{- with resources.Get `js/stylebody.js` -}}
-			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
-		{{- end -}}
-		{{- with resources.Get `js/styler.js` -}}
-			<script type='text/javascript'>{{- .Content | safeJS -}}</script>
-		{{- end -}}
+		<script type='text/javascript'>
+			{{- with resources.Get `js/base.js` -}}
+				{{- .Content | safeJS -}}
+			{{- end -}}
+		</script>
 		{{- block `js` . -}}{{- end -}}
 	</body>
 </html>

@@ -1,7 +1,7 @@
 {{/* INPUTBOX */}}
 {{/* inputbox: takes box type (checked or radio), id, checkbox name, label, and checked status as inputs (in dict format) */}}
 {{/* dict `type` "inputType" `group` "groupName" `label` "boxLabel" `id` "boxId" `checked` true/false */}}
-<div class='input-toggleable' id='{{- .id -}}-container'>
+<div class='{{- `input ` -}}{{- .type -}}'>
 	<input type='{{- .type -}}' id='{{- .id -}}' name='{{- .group -}}' value='{{- .id -}}' {{- if .checked -}}checked{{- end -}}>
 	<label for='{{- .id -}}'>{{- .label | safeHTML -}}</label>
 </div>

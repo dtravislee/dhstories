@@ -1,7 +1,0 @@
-/* CSS rules for horizontal rules / section breaks */
-
-hr {	
-	margin: 1em 0;
-	display: block;
-	border-bottom: 2px solid #aaa;
-}

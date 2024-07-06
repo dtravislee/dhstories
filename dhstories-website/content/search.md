@@ -26,26 +26,16 @@ layout = "search"
 	<label for='search-input' >Enter keywords to search and click "{{- $buttonName -}}":</label>
 	<input type='text' id='search-input' class='text-input long'/>
 	<p class='search-tip'>
-		{{- $regexNote := "Regex on Wikipedia - opens in new tab" -}}
-		<b>Tip:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable regex by surrounding expressions with <code>/forward slashes/</code>.</p>
-	<p id='error-box' class='error-box hidden'></p>
-	<p class='search-buttons'>
-		<a role='button' href='javascript:search();' class='search-button'>{{- $buttonName -}}</a>
-		<a role='button' href='javascript:toggleAdvanced();' class='search-button' id='search-adv'>Advanced Options</a>
+		<b>Tip:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable regex by surrounding expressions with <code>/forward slashes/</code>.
+	</p>
+	<p>
+		<a role='button' href='javascript:search();' class='form-button large' title='Start the search'>{{- $buttonName -}}</a>
+		<a role='button' href='javascript:toggleAdvanced();' class='form-button large' id='search-adv' title='Open advanced search options'>Advanced Options</a>
 	</p>
 	
 {{/* --- */}}
 {{/* Advanced options */}}
 {{/* --- */}}	
-
-	{{/* inputbox: takes box type (checked or radio), id, checkbox name, label, and checked status as inputs (in dict format) */}}
-	{{/* dict `type` "inputType" `group` "groupName" `label` "boxLabel" `id` "boxId" `checked` true/false */}}
-	{{- define `inputbox` -}}
-		<div id='{{- .id -}}-container'>
-			<input type='{{- .type -}}' id='{{- .id -}}' name='{{- .group -}}' value='{{- .id -}}' {{- if .checked -}}{{- ` checked` -}}{{- end -}}>
-			<label for='{{- .id -}}'>{{- .label -}}</label>
-		</div>
-	{{- end -}}
 
 	<div id='advanced-opt' class=''>
 		<h2>Advanced Search</h2>
@@ -61,19 +51,19 @@ layout = "search"
 			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Content" `id` "loc-text" `checked` true) -}}
 			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Read time" `id` "loc-time" `checked` true) -}}
 			<p>
-				<a aria-role='button' class='search-button advanced' href='javascript:locAll();'>Select all fields</a>
-				<a aria-role='button' class='search-button advanced' href='javascript:locNone();'>Deselect all fields</a>
+				<a aria-role='button' class='form-button' href='javascript:locAll();'>Select all fields</a>
+				<a aria-role='button' class='form-button' href='javascript:locNone();'>Deselect all fields</a>
 			</p>
 		</fieldset>
-			{{/* Create tags list */}}
-			{{- define "taglist" -}}
-				{{ range (sort $.Site.Taxonomies.tags) }}
-					{{ with .Page }}
-						{{- $urlSafeTitle := .RelPermalink | path.BaseName -}}
-						{{- partial `inputbox` (dict `type` "checkbox" `group` .Type `label` .Title `id` $urlSafeTitle `checked` true) -}}
-					{{- end -}}
+		{{/* Create tags list */}}
+		{{- define "taglist" -}}
+			{{ range (sort $.Site.Taxonomies.tags) }}
+				{{ with .Page }}
+					{{- $urlSafeTitle := .RelPermalink | path.BaseName -}}
+					{{- partial `inputbox` (dict `type` "checkbox" `group` .Type `label` .Title `id` $urlSafeTitle `checked` true) -}}
 				{{- end -}}
 			{{- end -}}
+		{{- end -}}
 		<fieldset>
 			<legend>Tags</legend>
 			<p>Look for results in the following categories:</p>
@@ -81,10 +71,10 @@ layout = "search"
 				{{- template "taglist" . -}}
 			</div>
 			<p>
-				<a aria-role='button' class='search-button advanced' href='javascript:locAll();'>Select all tags</a>
-				<a aria-role='button' class='search-button advanced' href='javascript:locNone();'>Deselect all tags</a>
+				<a aria-role='button' class='form-button' href='javascript:locAll();'>Select all tags</a>
+				<a aria-role='button' class='form-button' href='javascript:locNone();'>Deselect all tags</a>
 			</p>
-			<a href='javascript:resetFields("tags");' class='reset-button'>Reset Tags</a>
+			<a href='javascript:resetFields("tags");' class='reset'>Reset Tags</a>
 		</fieldset>
 		{{/* Date picker: takes id and Hugo context as inputs (in dict format) */}}
 		{{/* dict `id` "Id" (usually "before" or "after") `context` . */}}
@@ -93,21 +83,21 @@ layout = "search"
 			{{- $months := seq 12 1 -}}
 			{{- $years := seq (add (time.Now.Year) 1) (sub (int .context.Site.Params.startYear) 1) -}}
 				{{/* Add a little breadth in the year counter to account for user misinterpretations */}}
-			<select aria-labelledby='{{- .id -}}-day-label' id='{{- .id -}}-day' name='{{- .id -}}' class='select-box date'>
+			<select aria-labelledby='{{- .id -}}-day-label' id='{{- .id -}}-day' name='{{- .id -}}' class='date'>
 				{{- range $days -}}
 					<option value='{{- . -}}'>{{- . -}}</option>
 				{{- end -}}
 				<option value=''>Any</option>
 				<option id='{{- .id -}}-day-label' value='' selected>Select day</option>
 			</select>
-			<select aria-labelledby='{{- .id -}}-month-label' id='{{- .id -}}-month' name='{{- .id -}}' class='select-box date'>
+			<select aria-labelledby='{{- .id -}}-month-label' id='{{- .id -}}-month' name='{{- .id -}}' class='date'>
 				{{- range $months -}}
 					<option value='{{- . -}}'>{{- dateFormat "January" (printf "2006-%02d-02" . ) -}}</option>
 				{{- end -}}
 				<option value=''>Any</option>
 				<option id='{{- .id -}}-month-label' value='' selected>Select month</option>
 			</select>
-			<select aria-labelledby='{{- .id -}}-month-label' id='{{- .id -}}-year' name='{{- .id -}}' class='select-box date'>
+			<select aria-labelledby='{{- .id -}}-month-label' id='{{- .id -}}-year' name='{{- .id -}}' class='date'>
 				{{- range $years -}}
 					<option value='{{- . -}}'>{{- . -}}</option>
 				{{- end -}}
@@ -118,10 +108,10 @@ layout = "search"
 		<fieldset id='dates'>
 			<legend>Date</legend>
 			<p>Find posts published before the date:</p>
-			<div>{{- template `datepicker` (dict `id` "before" `context` .) -}}</div>
+			<div class='input'>{{- template `datepicker` (dict `id` "before" `context` .) -}}</div>
 			<p>Find posts published after the date:</p>
-			<div>{{- template `datepicker` (dict `id` "after" `context` .) -}}</div>
-			<a href='javascript:resetFields("dates");' class='reset-button'>Reset Dates</a>
+			<div class='input'>{{- template `datepicker` (dict `id` "after" `context` .) -}}</div>
+			<a href='javascript:resetFields("dates");' class='reset'>Reset Dates</a>
 		</fieldset>
 		{{- define "readtimelist" -}}
 			{{- $readtimes := slice -}} {{/* Empty starter array / slice */}}
@@ -143,21 +133,21 @@ layout = "search"
 		{{- end -}}
 		<fieldset id='words'>
 			<legend>Read time</legend>
-			<p><label for='readtime-more'>Look for posts longer than: </label><select id='readtime-more' name='readtime-more' class='select-box words'>{{- template "readtimelist" . -}}</select></p>
-			<p><label for='readtime-less'>Look for posts shorter than: </label><select id='readtime-less' name='readtime-less' class='select-box words'>{{- template "readtimelist" . -}}</select></p>
-			<a href='javascript:resetFields("words");' class='reset-button'>Reset Read Times</a>
+			<p><label for='readtime-more'>Look for posts longer than: </label><select id='readtime-more' name='readtime-more' class='words'>{{- template "readtimelist" . -}}</select></p>
+			<p><label for='readtime-less'>Look for posts shorter than: </label><select id='readtime-less' name='readtime-less' class='words'>{{- template "readtimelist" . -}}</select></p>
+			<a href='javascript:resetFields("words");' class='reset'>Reset Read Times</a>
 		</fieldset>
 		<fieldset id='sort'>
 			<legend>Results order</legend>
 			<p>Sort search results by:</p>
 			{{- partial `inputbox` (dict `type` "radio" `group` "sort-rule" `label` "Newest first" `id` "new-first" `checked` true) -}}
 			{{- partial `inputbox` (dict `type` "radio" `group` "sort-rule" `label` "Oldest first" `id` "old-first" `checked` false) -}}
-			<a href='javascript:resetFields("sort");' class='reset-button'>Reset Results Order</a>
+			<a href='javascript:resetFields("sort");' class='reset'>Reset Results Order</a>
 		</fieldset>
-		<p class='search-buttons'>
-			<a role='button' href='javascript:search();' class='search-button'>{{- $buttonName -}}</a>
-			<a role='button' href='javascript:toggleAdvanced();' class='search-button' >Close Advanced Options</a>
-			<a role='button' href='javascript:resetFields("everything");' class='search-button'>Reset All</a>
+		<p>
+			<a role='button' href='javascript:search();' class='form-button large'>{{- $buttonName -}}</a>
+			<a role='button' href='javascript:toggleAdvanced();' class='form-button large' >Close Advanced Options</a>
+			<a role='button' href='javascript:resetFields("everything");' class='form-button large'>Reset All</a>
 		</p>
 	</div>
 </form>
