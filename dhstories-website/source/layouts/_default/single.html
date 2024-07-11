@@ -62,20 +62,21 @@
 						{{- $kofi = .URL -}}
 					{{- end -}}
 				{{- end -}}
-				<p>
+				{{/* Share + donation links are JS only */}}
+				{{/* It's POSSIBLE Ko-Fi works without JavaScript, but...too unlikely to bother. */}}
+				<p class='js-only'>
 					{{/* Write donation link if kofi variable is populated */}}
 					{{- `Enjoy this work? ` -}}
 					{{- with $kofi -}}
 						<a href='{{ . }}'>{{- `Support the Dragonhouse` -}}</a>{{- ` on Ko-Fi` -}}
-						<span class='js-only'>{{- ` and ` -}}
+						{{- ` and ` -}}
 					{{- end -}}
 					{{/* Add the share link, adjusting phrasing appropriately */}}
-					{{- if not $kofi -}}<span class='js-only'>{{- end -}}
 					<a href='/share/#&p={{- replace .RelPermalink `/` `` -}}&t={{- .Title | title -}}&d={{- partial `description` . | replaceRE `(?:$\s+|^\s+)` `` -}}'>
 						{{- if $kofi -}}{{- `share this` -}}
 						{{- else -}}{{- `Share it` -}}
 						{{- end -}}
-					</a>{{- ` with your friends` -}}</span>{{- `!` -}}
+					</a>{{- ` with your friends` -}}{{- `!` -}}
 				</p>
 				
 				{{/* COMMENTS */}}
@@ -111,15 +112,15 @@
 			
 			{{- with .Params.tags -}}
 				<h2 id='tags-heading'>Tags</h2>
-				<div class='tags-cloud'>
+				<ul class='tags-cloud'>
 					{{- range . -}}
-						<span class='cloud-tag'>
+						<li class='cloud-tag'>
 							<a href='{{- `/tags/` | relURL -}}{{- . | urlize -}}'>
 								{{- . | humanize | title -}}
 							</a>
-						</span>
+						</li>
 					{{- end -}}
-				</div>
+				</ul>
 			{{- end -}}
 			
 			{{/* --- */}}

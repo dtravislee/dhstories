@@ -6,6 +6,7 @@
 
 {{- define `js` -}}
 	{{- partial `jsgoloader` (dict `file` `js/share.js` `scope` . ) -}}
+	{{- partial `jsgoloader` (dict `file` `js/to-top.js` `scope` . ) -}}
 {{- end -}}
 
 {{/* --- */}}

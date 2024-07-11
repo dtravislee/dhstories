@@ -7,31 +7,34 @@
 	<a class='sr-only' href='#footer'>Skip Pagination</a>
 	<div role='navigation' aria-label='Pagination' class='pagination'>
 		{{- `Page ` -}} {{- .PageNumber -}} {{- ` of ` -}} {{- .TotalPages -}}
-		<span class='js-only'>
-			<form action='javascript:goToPage();'>
-				{{/* Len (print .TotalPages) = number of characters the total number of pages take up. */}}
-				{{/*	E.g. 250 = 3 characters, 15 = 2 characters. */}}
-				<label for='pagenum'>{{- `Jump to page:` -}}</label>
-				<select id='pagenum' name='pagenum' class='select-box'>
-					{{- $pageNums := seq .TotalPages -1 1 -}}
-					{{- range $pageNums -}}
-						<option value='{{- . -}}' {{- if eq . $paginator.PageNumber -}}selected{{- end -}}>{{- . -}}</option>
-					{{- end -}}
-				</select>
-				<a href='javascript:goToPage();' aria-role='button' title='Go to the selected page'>Go</a>
-			</form>
-		</span>
 		<div class='pagilinks'>
 			{{- if .HasPrev -}}
-				<a class='first' href='{{- .First.URL -}}'><span aria-hidden='true'>&lt;&lt;</span> First Page</a>
-				<a class='previous' href='{{- .Prev.URL -}}'><span aria-hidden='true'>&lt;</span> Previous Page</a>
+				{{- $first := `Go to first page` -}}
+				<span class='pagilink'><a href='{{- .First.URL -}}' aria-label='$first' title='$first'>&lt;&lt;</a></span>
+				{{- $prev := `Go to previous page` -}}
+				<span class='pagilink'><a href='{{- .Prev.URL -}}' aria-label='$prev' title='$prev'>&lt;</a></span>
 			{{- end -}}
-			{{- if and .HasPrev .HasNext -}}
-				<span class='pagibar'>{{- ` | ` -}}</span>
-			{{- end -}}
+			<span class='pagilink-spanner'></span>
 			{{- if .HasNext -}}
-				<a class='next' href='{{- .Next.URL -}}'>Next Page <span aria-hidden='true'>&gt;</span></a>
-				<a class='last' href='{{- .Last.URL -}}'>Last Page <span aria-hidden='true'>&gt;&gt;</span></a>
+				{{- $next := `Go to next page` -}}
+				<span class='pagilink'><a href='{{- .Next.URL -}}' aria-label='$next' title='$next'>&gt;</a></span>
+				{{- $last := `Go to last page` -}}
+				<span class='pagilink'><a href='{{- .Last.URL -}}' aria-label='$last' title='$last'>&gt;&gt;</a></span>
 			{{- end -}}
+		</div>
+		<div>
+			<a href='#pagelist-end' class='sr-only'>Skip page list</a>
+			<ul>
+				{{- range seq 1 .TotalPages -}}
+					<li class='page-link' 
+						{{- if eq $paginator.PageNumber . -}}
+							aria-current='page'><span class='selected' aria-label='Page {{- . -}}'>{{- . -}}</span>
+						{{- else -}}
+							><a href='{{- $.RelPermalink -}}page/{{- . -}}' aria-label='Go to page {{- . -}}'>{{- . -}}</a>
+						{{- end -}}
+					</li>
+				{{- end -}}
+			</ul>
+			<span id='pagelist-end'></span>
 		</div>
 {{- end -}}{{- end -}}

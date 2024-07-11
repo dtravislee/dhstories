@@ -13,31 +13,38 @@ hideMeta = true
 layout = "settings"
 +++
 
-<noscript>JavaScript must be enabled to change site theme settings!</noscript>
-
 {{< settings.inline >}}
 
-{{/* Radiobutton: takes id, radio group name, label, and checked status as inputs (in dict format) */}}
-{{/* dict `type` "radio" `group` "groupName" `label` "buttonLabel" `id` "buttonId" `checked` true/false */}}
-{{- define `radiobutton` -}}
-	<div id='{{- .id -}}-container'>
-		<input type='radio' id='{{- .id -}}' name='{{- .group -}}' value='{{- .id -}}' {{- if .checked -}}{{- ` checked` -}}{{- end -}}>
-		<label for='{{- .id -}}'>{{- .label -}}</label>
-	</div>
+<noscript>JavaScript must be enabled to change site theme settings!</noscript>
+
+{{/* Settings Box */}}
+{{/* Intermediary function between settings.md and inputbox.html */}}
+{{/* Sets the .checked parameter for inputbox based on whether the ID matches any of the default parameters set in config.toml. This allows users to set the default theme / settings via config.toml */}}
+{{/* Requires dict as input: */}}
+{{/* dict `type` "inputType" `group` "groupName" `label` "boxLabel" `id` "boxId" `context` . */}}
+{{- define `settingsbox` -}}
+	{{- $isChecked := false -}}
+	{{- range .context.Site.Params.themes -}}
+		{{- if eq . $.id -}}
+			{{- $isChecked = true -}}
+			{{- break -}}
+		{{- end -}}
+	{{- end -}}
+	{{- partial `inputbox` (dict `type` .type `group` .group `label` .label `id` .id `checked` $isChecked) -}}
 {{- end -}}
 
 {{- $containerName := `-container` -}}
 <form class='js-only' action='javascript:updateSettings();'>
 	<fieldset>
 		<legend>Theme</legend>
-		{{- partial `inputbox` (dict `type` "radio" `group` "theme" `label` "Light colours" `id` "light" `checked` true) -}}
-		{{- partial `inputbox` (dict `type` "radio" `group` "theme" `label` "Dark colours" `id` "dark" `checked` false) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "theme" `label` "Light colours" `id` "light" `context` .) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "theme" `label` "Dark colours" `id` "dark" `context` .) -}}
 	</fieldset>
 	<fieldset>
 		<legend>Font style</legend>
-		{{- partial `inputbox` (dict `type` "radio" `group` "font" `label` "Serif" `id` "serif" `checked` true) -}}
-		{{- partial `inputbox` (dict `type` "radio" `group` "font" `label` "Sans-serif" `id` "sans" `checked` false) -}}
-		{{- partial `inputbox` (dict `type` "radio" `group` "font" `label` "Monospace" `id` "mono" `checked` false) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Serif" `id` "serif" `context` .) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Sans-serif" `id` "sans" `context` .) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Monospace" `id` "mono" `context` .) -}}
 	</fieldset>
 	<fieldset>
 		<legend>Font size</legend>
@@ -51,9 +58,9 @@ layout = "settings"
 	</fieldset>
 	<fieldset>
 		<legend>Text alignment</legend>
-		{{- partial `inputbox` (dict `type` "radio" `group` "align" `label` "Left-align" `id` "left" `checked` true) -}}
-		{{- partial `inputbox` (dict `type` "radio" `group` "align" `label` "Justify" `id` "justify" `checked` false) -}}
-		{{- partial `inputbox` (dict `type` "radio" `group` "align" `label` "Right-align" `id` "right" `checked` false) -}}		
+		{{- template `settingsbox` (dict `type` "radio" `group` "align" `label` "Left-align" `id` "left" `context` .) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "align" `label` "Justify" `id` "justify" `context` .) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "align" `label` "Right-align" `id` "right" `context` .) -}}		
 	</fieldset>
 	<fieldset>
 		<legend>Line spacing</legend>
@@ -73,32 +80,32 @@ layout = "settings"
 	<fieldset>
 	<legend>Cookie consent</legend>
 		<div id='cookie-notice'>
-			<p><b>Note:</b> By checking the "I consent" box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read two "cookies"—small text files—to and from your device. These two cookies, respectively, track your acceptance of this notice and store your theme preferences for use throughout the site. They are maintained on your current device, and only your current device, until you choose to remove them.</p>
+			<p><b>Note:</b> By checking the "I consent" box, you agree to let <i>Dragonhouse Stories</i> (dhstories.com) write and read three "cookies"—small text files—to and from your device. These three cookies:</p>
+			<ol>
+				<li>Track your acceptance of this notice,</i>
+				<li>Store your current theme preferences for use throughout the site, and</li>
+				<li>Save your previous theme preferences if you want to revert changes made.</li>
+			</ol>
+			<p>These cookies are maintained on your current device, and only your current device, until you choose to remove them.</p>
 			{{- partial `inputbox` (dict `type` "checkbox" `group` "cookie-consent" `label` "<b>I consent to the above cookie policy for <i>Dragonhouse Stories</i></b>" `id` "cookie-consent" `checked` false) -}}
+			<p id='cookie-error' class='hidden'>Cookies must be accepted before applying settings.</p>
 		</div>
 		{{/* Consent accepted HTML */}}
 		<div id='accepted-consent' style='display:none;' aria-hidden=true>
 			<p>Cookies for <i>Dragonhouse Stories</i> have been accepted on this device.</p><p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'>reset all settings</a>.</p>
 		</div>
 	</fieldset>
+	<p id='storage-error' class='hidden'>ERROR: Unable to save settings. You may have cookies and/or local storage disabled in your browser!</p>
+	<p id='settings-ok' class='hidden'> Settings OK! Returning to previous page... <a href='javascript:undoSettings();'>Undo</a></p>
 	<p>
-		<a role='button' href='javascript:updateSettings();' class='form-button large' title='Apply the current settings and return to the previous page'>Apply</a>
-		<a role='button' href='javascript:previewSettings();' class='form-button large' title='Demonstrate the current settings in a preview box'>Preview</a>
-		<a role='button' href='javascript:cancelSettings();' class='form-button large' title='Discard the current settings and return to the previous page'>Cancel</a>
+		<a role='button' href='javascript:updateSettings();' class='form-button large' title='Apply the current settings and return to the previous page' aria-label='Apply and return to last page'>Apply</a>
+		<a role='button' href='javascript:previewSettings();' class='form-button large' title='Demonstrate the current settings in a preview box below'>Preview</a>
+		<a role='button' href='javascript:cancelSettings();' class='form-button large' title='Discard the current settings and return to the previous page' aria-label='Cancel and return to last page'>Cancel</a>
+		<a role='button' href='javascript:undoSettings();' class='form-button large' title='Revert to your earlier settings'>Undo</a>
 	</p>
-	
 </form>
 {{</ settings.inline >}}
 
-<div id='alert-box' class='alert-box hidden'>
-	<h2>Alert title</h2>
-	<p>Alert body text</p>
-	<div class='alert-buttons'>
-		<a role='button' id='accept-alert' href='javascript:acceptAlert();'>OK</a>
-		<a role='button' id='cancel-alert' href='javascript:cancelAlert();'>Cancel</a>
-		<a role='button' id='close-alert' href='javascript:closeAlert();'>Close</a>
-	</div>
-</div>
 <div id='preview-box' class='preview-box hidden'>
 
 {{< markdownify >}}

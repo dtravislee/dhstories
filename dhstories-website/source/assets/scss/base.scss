@@ -1,70 +1,105 @@
 /* CSS rules for every page */
 /* We surround rule groups with {} to be able to minimize sections in Notepad++ */
+
 /* Page type - for a variety of template functions */
 {{- $pageType := .Layout | default .Kind -}}
+
+
 
 /* *** */
 /* VARIABLES */
 /* *** */
-//{
-/* Colours */
-$white: #fafafa; /* For background or text */
-$silver: #aaa; /* For layout lines */
-$black: #252525; /* For text or background */
-$gold: #daa520; /* For links */
 
-/* Borders */
-$border-silver: 2px solid $silver;
-$border-gold: 2px solid $gold; /* For links */
+/* Colours - Global */
+/* These are the same whether on lightmode or darkmode */
+/* Typically used for generic background and generic text */
+$white: #fafafa;
+$black: #252525;
+
+/* Colours - Theme-specific */
+/* Use map-get(variable name, "colour name") to retrieve values */
+/* E.g. $white => #fafafa */
+$theme-colours-light: (
+	"silver": #919191, /* For layout lines */
+	"gold": #B68A1B, /* For links */
+	"green": #00A800, /* All-OK box on settings page */
+	"red": #E00000 /* Error box and error text on settings page */
+);
+$theme-colours-dark: (
+	"silver": #aaa,
+	"gold": #DAA520,
+	"green": #00ff00,
+	"red": #FF4545
+);
 
 /* Sizes */
 $sml-font: 0.9em;
 $big-font: 1.2em;
-//}
 
 /* *** */
 /* MIXINS */
 /* *** */
-//{
-	@mixin lists {
-		ul, ol { 
-			@extend %block;
-			list-style: initial; 
-		}
-		li { 
-			margin: 1em 0 1em 2em;
-			padding-left: 0.5em; 
-			display: list-item;
+
+@mixin lists {
+	ul, ol { 
+		@extend %block;
+	}
+	li { 
+		margin: 1em 0 1em 2em;
+		padding-left: 0.5em; 
+		display: list-item;
+	}
+}
+@mixin quotes {
+	/* Resets */
+	blockquote, q { 
+		quotes: none; 
+		&:before, &:after {
+			content: '';
+			content: none;
 		}
 	}
-	@mixin quotes {
-		/* Resets */
-		blockquote, q { 
-			quotes: none; 
-			&:before, &:after {
-				content: '';
-				content: none;
+	blockquote {
+		/* Quote border spacing */
+		@extend %para-margin;
+		$quote-space: 1.25em;
+		@include border-setter(2px, solid, "silver", left);
+		margin-left: $quote-space;
+		padding-left: $quote-space; 
+	}
+}
+@mixin float-text($direction) {
+	text-align: $direction;
+	float: $direction;
+}
+/* Theme borders - sets border colours appropriate for light / dark themes */
+/*	$size: thickness of border (px, em, etc.) */
+/*	$style: type of border (dashed, solid, etc.) */
+/*	$colour: border colour - as a "colours" variable (not darkmode colours!) */
+/*	$sides: all, top, right, bottom, or left - as many as desired */
+@mixin border-setter($size, $style, $colour, $sides...) {
+	@if index($sides, all) {
+		body.light & { border: $size $style map-get($theme-colours-light, $colour); }
+		body.dark & { border: $size $style map-get($theme-colours-dark, $colour); }
+	}
+	@else {
+		body.light & {
+			@for $i from 1 through length($sides) {
+				border-#{nth($sides, $i)}: $size $style map-get($theme-colours-light, $colour);
 			}
 		}
-		blockquote {
-			/* Quote border spacing */
-			@extend %para-margin;
-			$quote-space: 1.25em;
-			border-left: $border-silver;
-			margin-left: $quote-space;
-			padding-left: $quote-space; 
+		body.dark & {
+			@for $i from 1 through length($sides) {
+				border-#{nth($sides, $i)}: $size $style map-get($theme-colours-dark, $colour);
+			}
 		}
 	}
-	@mixin float-text($direction) {
-		text-align: $direction;
-		float: $direction;
-	}
-//}
+}
 
 /* *** */
 /* PLACEHOLDERS */
 /* *** */
-//{
+
 /* Fonts */
 %serif {
 	font-family: "Iowan Old Style",
@@ -125,24 +160,23 @@ $big-font: 1.2em;
 		as this will break list marker placement. I'm not sure why...
 		Something to do with said list items obtaining hasLayout is my best guess, since removing zoom:1—which should prevent hasLayout—seems to fix the problem. See: https://haslayout.net/haslayout.html */
 	}
+%il-block-list {
+	@extend %il-block;
+	list-style: none;
+}
 	
 /* Spacings */
 %para-margin { margin: 1em 0; }
 
 /* Borders & boxes */
 %inset-box { 
-	border: 2px inset $silver; 
+	@include border-setter(2px, inset, "silver", all);
 	&:active, &:focus {
 		@extend %focus;
 	}
 }
-
-/* Select elements */
-%select {
-	@extend %inset-box;
-	&, & option {
-		@extend %theming;
-	}
+%silver-box {
+	@include border-setter(2px, solid, "silver", all);
 }
 
 /* Section headings */
@@ -183,7 +217,7 @@ $big-font: 1.2em;
 %hr { 
 	@extend %block;
 	@extend %para-margin;
-	border-bottom: $border-silver; 
+	@include border-setter(2px, solid, "silver", bottom);
 }
 
 /* Preformatted text (code and pre elements) */
@@ -200,27 +234,27 @@ $big-font: 1.2em;
 }
 
 /* Focus border styling */
-%focus { border: $border-silver; }
+%focus { @include border-setter(2px, inset, "silver", all); }
 
 /* Themes */
-body {
+body.light {
 	&, & %light-theme { background-color: $white; color: $black; }
 	& %light-text { color: $black; }
-	&.dark {
-		&, & %dark-theme { background-color: $black; color: $white; }
-		& %dark-text { color: $white; }
-	}
+}
+body.dark {
+	&, & %dark-theme { background-color: $black; color: $white; }
+	& %dark-text { color: $white; }
 }
 %theming { 
 	@extend %light-theme;
 	@extend %dark-theme;
 }
-//}
+
 
 /* *** */
 /* CONTENT STYLES */
 /* *** */
-//{
+
 /* Load only if page has any content */
 
 {{- with .Content -}}
@@ -247,11 +281,11 @@ body {
 		{{- if findRE `<figure` . 1 -}}
 			figure { 
 				@extend %block;
-				border: $border-silver;
+				@extend %silver-box;
 				& img {
 					@extend %center-block;
+					@extend %silver-box;
 					margin: 0.5em;
-					border: $silver;
 					max-width: 75%;
 					margin-left: auto;
 					margin-right: auto; 
@@ -292,14 +326,13 @@ body {
 			code { 
 				@extend %mono;
 				@extend %sml-font;
-				border-radius: 0.5em;
 				padding: 0 0.1em;
 			}
 			.codeblock {
 				@extend %mono;
+				@extend %silver-box;
 				padding: 0 0.25em;
 				overflow: auto;
-				border: $border-silver;
 				margin-bottom: 1em;
 				tab-size: 4;
 				/* padding-top: 1em!ie7;
@@ -350,7 +383,7 @@ body {
 			}
 			th { @extend %bold-font; }
 			th, td {	
-				border: $border-silver;
+				@extend %silver-box;
 				padding: 0.25em 0.5em;
 				vertical-align: middle; 
 			}
@@ -362,21 +395,14 @@ body {
 {{- if or (.Description) (.Params.date) (and .Lastmod (ne .Lastmod .Date)) (.Params.tags) -}}
 	.meta {
 		@extend %sml-font;
-		& ul {
-			@extend %il-block;
-			& li { 
-				@extend %il-block;
-				margin: 0 0.5 0 0; 
-			}
-		}
 	}
 {{- end -}}
-//}
+
 
 /* *** */
 /* RESETS */
 /* *** */
-//{
+
 :root {	
 	color-scheme: light dark;
 	supported-color-schemes: light dark; 
@@ -391,35 +417,29 @@ body {
 	box-sizing: border-box;
 	font-size: 100%;
 }
-//}
+
+html { font-size: 18px; }
+body { padding: 0 0.5em; }
 
 /* *** */
 /* THEME */
 /* *** */
-//{
-/* Defaults have no class selector, so if you want to change the default,
-	add an appropriate class selector to the current default
-	and remove the class selector from your desired default 
-	Best practice: add the removed class name as a comment! */
-
-/* Defaults */
-html { font-size: 18px; }
-body { padding: 0 0.5em; line-height: 1.3; }
+/* Theme defaults are set in config.toml */
 
 /* Text alignments */
-body { text-align: left; } /* left */
+body.left { text-align: left; }
 body.justify { text-align: justify; }
 body.right { text-align: right; }
 /* Fonts*/
-body { @extend %serif; } /* serif */
+body.serif { @extend %serif; }
 body.sans { @extend %sans; }
 body.mono { @extend %mono; }
-//}
+
 
 /* *** */
 /* BASE STYLES */
 /* *** */
-//{
+
 /* Site banner */
 .site-nav { 
 	@extend %caps-font;
@@ -427,7 +447,7 @@ body.mono { @extend %mono; }
 	margin: 0.25em 0 0 0;
 }
 .site-nav li {
-	@extend %il-block;
+	@extend %il-block-list;
 	margin: 0 0.5em 0 0;
 }
 
@@ -461,7 +481,7 @@ body.mono { @extend %mono; }
 		clip: auto;
 		height: auto;
 		padding: 0.5em;
-		margin: 0;
+		margin: 0.5em 0;
 		position: static;
 		width: auto; 
 	}
@@ -471,7 +491,7 @@ body.mono { @extend %mono; }
 h1 { 
 	@extend %unbolded;
 	font-size: 1.5em; 
-	border-bottom: 6px double $silver;
+	@include border-setter(6px, double, "silver", bottom);
 	/* Small paddings for smaller line spacings */
 	padding-bottom: 1px;
 	margin-bottom: 3px;
@@ -486,7 +506,7 @@ a {
 	text-decoration: none;
 	cursor: pointer;
 	padding: 2px 2px 0 2px;
-	border-bottom: $border-gold;
+	@include border-setter(2px, solid, "gold", bottom);
 	line-height: 1;
 	
 	/* Ensure elements in a tags render no background and break a tag borders */
@@ -494,9 +514,9 @@ a {
 	
 	&:hover, &:focus {
 		padding: 0;
-		border: $border-silver;
+		@extend %silver-box;
 	}
-	&:active { background-color: $silver; }
+	&:active { background-color: map-get($theme-colours-light, "silver"); }
 }
 
 /* FOOTER */
@@ -514,19 +534,21 @@ a {
 	right: 0;
 	padding: 0.25em;
 }
-//}
+
 
 /* *** */
 /* PAGE STYLES */
 /* *** */
-//{
+
 /* We design it this way rather than separate files to ensure
 	that every extension maps to the same placeholder class.
 	If we did separate files, we could have rule duplications. */
 
 /* Tags page */
 {{- if eq "taxonomy" $pageType -}}
-	@include lists;
+	#main {
+		@include lists;
+	}
 {{- end -}}
 
 /* List pages, including "related links" */
@@ -537,7 +559,7 @@ a {
 	h3 { @extend %h3; }
 	.listed-article { 
 		padding: 1em 0; 
-		&+.listed-article { border-top: $border-silver; }
+		&+.listed-article { @include border-setter(2px, solid, "silver", top);}
 	}
 {{- end -}}
 {{- if and (eq "home" $pageType) (.Site.Params.featured) -}}
@@ -550,7 +572,7 @@ a {
 	fieldset { 
 		@extend %para-margin;
 		@extend %block;
-		border: $border-silver; 
+		@extend %silver-box; 
 		padding: 0.75em 0.5em;
 	}
 	legend { 
@@ -561,7 +583,13 @@ a {
 	}
 
 	/* Text inputs */
-	select { @extend %select; }
+	select { 
+		@extend %inset-box;
+		margin: 0.5em 0;
+		&, & option {
+			@extend %theming;
+		} 
+	}
 
 	/* Checkbox / radio inputs */
 	.input {
@@ -595,6 +623,24 @@ a {
 		padding: 0.5em; 
 		margin-top: 1em;
 	}
+	/* Cookies error note */
+	#cookie-error {
+		body.light & { color: map-get($theme-colours-light, "red"); }
+		body.dark & { color: map-get($theme-colours-dark, "red"); }
+	}
+	
+	/* Storage error note */
+	#storage-error {
+		@include border-setter(3px, dashed, "red", all);
+		padding: 0.25em;
+	}
+	
+	/* All-OK notice */
+	#settings-ok {
+		@include border-setter(3px, solid, "green", all);
+		padding: 0.25em;
+	}
+	
 {{- end -}}
 {{- if eq "search" $pageType -}}
 	/* Text inputs */
@@ -627,7 +673,7 @@ a {
 	/* Tags selector */
 	.tag-container {
 		@extend %para-margin;
-		border: $border-silver;
+		@extend %silver-box;
 		padding: 0.5em 1em;
 		overflow-y: auto;
 		max-height: 15em;
@@ -639,7 +685,7 @@ a {
 	{{- if not .Params.hideFooter -}}
 
 		/* Base footer styles */
-		.article-footer { border-top: $border-silver; }
+		.article-footer { @include border-setter(2px, solid, "silver", top);}
 		.shares p { @extend %para-margin; }
 		
 		/* Next-previous links */
@@ -651,8 +697,7 @@ a {
 			.next-previous p {	
 				width: 45%;
 				padding: 0.5em 0;
-				border-bottom: $border-silver;
-				border-top: $border-silver;
+				@include border-setter(2px, solid, "silver", bottom, top);
 			}
 			.np-prev { @include float-text(left); }
 			.np-next { @include float-text(right); }
@@ -671,13 +716,13 @@ a {
 		{{- if or $hasNext $hasPrev -}}
 			.series-info { 
 				@extend %para-margin;
-				border: $border-silver; 
+				@extend %silver-box; 
 				padding: 0 1.25em;
 				& .series-lead { @extend %bold-font; }
 				& p { 
 					padding: 1em 0.75em; 
 					&+p {
-						border-top: $border-silver;
+						@include border-setter(2px, solid, "silver", top);
 					}
 				}
 			}
@@ -688,39 +733,53 @@ a {
 			.tags-cloud { 
 				@extend %para-margin; 
 				& .cloud-tag {
-					@extend %il-block;
+					@extend %il-block-list;
+					@extend %silver-box;
 					$tag-size: 0.5em;
 					margin: $tag-size;
 					padding: $tag-size;
-					border: $border-silver;
 				}
 			}
 		{{- end -}}
 	{{- end -}}
 {{- end -}}
 
+/* 404 page */
+/* Has no markdown file, so we can just chuck this in as-is. */
+{{- if eq "404" $pageType -}}
+	p { @extend %para-margin; }
+{{- end -}}
+
 /* Pages needing pagination */
 {{- if gt (.Scratch.Get `pages`).TotalPages 1 -}}
 	/* Pagination body */
 	.pagination { 
+		@extend %center-text;
 		margin-top: 1em;
-		& form {
-			$left-spacing: 0.5em;
-			display: inline; 
-			margin-left: $left-spacing;
-			padding-left: $left-spacing;
-			border-left: $border-silver;
-			& select { @extend %select; }
-		}
 	} 
 	
-	/* Pagination Links */
-	.pagilinks { 
-		margin-top: 0.5em; 
-		/* Spacing between pagination links and page selector */
-		& a, & .pagibar {
-			margin-right: 0.25em;
+	/* Pagination Links */	
+	.pagilink-spanner {
+		@extend %il-block;
+		height: 0;
+		width: 3em;
+		margin: 0.25em;
+		@include border-setter(2px, solid, "silver", bottom);
+	}
+	.pagilink {
+		@extend %il-block;
+		@extend %silver-box;
+		padding: 0.25em 0;
+		width: 3em;
+		margin: 0.25em;
+	}
+	
+	/* Page selector links */
+	.page-link {
+		@extend .pagilink;
+		& .selected { 
+			@extend %bold-font; 
+			padding: 2px;
 		}
-	} 
+	}
 {{- end -}}
-//}

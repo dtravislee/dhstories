@@ -63,14 +63,23 @@ enableInlineShortcodes = true
 	## Robots.TXT file
 	robots = true
 	
-	##Table of contents
+	## Table of contents
 	ordered = false
 	startLevel = 2
 	endLevel = 6
 	
+	## Theme defaults
+	[params.themes]
+		defaultColour = "light" ## dark / light
+		defaultFont = "serif" ## serif / sans / mono
+		defaultSize = 100 ## font-size(%): from 50 to 200 in increments of 10
+		defaultSpacing = 130 ## line-height(%): from 100 to 200 in increments of 10
+		defaultAlign = "left" ## left / right / justify
+
 [menu]
 	[[menu.main]]
-		identifier = 'Dragonhouse Stories'
+		identifier = 'home'
+		name = 'Dragonhouse Stories'
 		url = '/'
 		weight = 1
 	[[menu.main]]
