@@ -13,8 +13,8 @@
 /* Colours - Global */
 /* These are the same whether on lightmode or darkmode */
 /* Typically used for generic background and generic text */
-$white: #fffffa;
-$black: #252520;
+$white: #fafafa;
+$black: #252525;
 
 /* Colours - Theme-specific */
 /* Use map-get(variable name, "colour name") to retrieve values */
@@ -431,7 +431,7 @@ body.justify { text-align: justify; }
 body.right { text-align: right; }
 /* Fonts - Body text */
 body.serif, // All serif 
-body.news // Sans headings
+body.news, // Sans headings
 body.blog // Mono headings
 	{ @extend %serif; }
 body.sans, // All sans
@@ -450,8 +450,8 @@ h1, h2, h3, h4, h5, h6, legend, .site-nav {
 	body.news &, // Serif body text
 	body.play & // Mono body text
 		{ @extend %sans; }
-	body.coder & // Sans body text
-	body.blog // Serif body text
+	body.coder &, // Sans body text
+	body.blog & // Serif body text
 		{ @extend %mono; }
 }
 
@@ -475,7 +475,6 @@ h1, h2, h3, h4, h5, h6, legend, .site-nav {
 .tagline { 
 	@extend %sml-font; 
 	@extend %ital-font;
-	margin-top: 0.25em; 
 }
 
 /* Main column */
