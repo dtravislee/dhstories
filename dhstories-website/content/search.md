@@ -17,6 +17,7 @@ layout = "search"
 <noscript>JavaScript must be enabled to search the site!</noscript>
 
 {{< search.inline >}}
+
 {{- $buttonName := "Begin Search" -}}
 
 {{/* --- */}}
@@ -28,31 +29,31 @@ layout = "search"
 	<p class='search-tip'>
 		<b>Tip:</b> For exact matches, enclose phrases in <code>"quotation marks"</code>. Exclude keywords by adding a dash to the beginning of a <code>-keyword</code>. Enable regex by surrounding expressions with <code>/forward slashes/</code>.
 	</p>
-	<p>
-		<a role='button' href='javascript:search();' class='form-button large' title='Start the search'>{{- $buttonName -}}</a>
-		<a role='button' href='javascript:toggleAdvanced();' class='form-button large' id='search-adv' title='Open advanced search options'>Advanced Options</a>
+	<p class='large-form-buttons'>
+		<a role='button' href='javascript:startSearch();' class='form-button' title='Start the search'><span>{{- $buttonName -}}</span></a>
+		<a role='button' id='top-advanced-button' href='javascript:showAdvanced();' class='form-button' id='search-adv' title='Open advanced search options'><span>Advanced Options</span></a>
 	</p>
 	
 {{/* --- */}}
 {{/* Advanced options */}}
 {{/* --- */}}	
 
-	<div id='advanced-opt' class=''>
+	<div id='advanced-opt' class='hidden'>
 		<h2>Advanced Search</h2>
 		<fieldset>
 			<legend>Search in</legend>
 			<p>Look for the search query in:</p>
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Title" `id` "loc-title" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Subtitle" `id` "loc-desc" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Date" `id` "loc-date" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Edited date" `id` "loc-edited" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "URL" `id` "loc-link" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Tags" `id` "loc-tags" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Content" `id` "loc-text" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "search-loc" `label` "Read time" `id` "loc-time" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Title" `id` "loc-title" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Subtitle" `id` "loc-description" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Date" `id` "loc-date" `checked` true) -}} {{/* Also searches for edited dates */}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Text" `id` "loc-content" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Tags" `id` "loc-tags" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "URL" `id` "loc-url" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Read time" `id` "loc-readtime" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Word count" `id` "loc-words" `checked` true) -}}
 			<p>
-				<a aria-role='button' class='form-button' href='javascript:locAll();'>Select all fields</a>
-				<a aria-role='button' class='form-button' href='javascript:locNone();'>Deselect all fields</a>
+				<a aria-role='button' class='form-button' href='javascript:checkboxAll("fields", true);'><span>Select all fields</span></a>
+				<a aria-role='button' class='form-button' href='javascript:checkboxAll("fields", false);'><span>Deselect all fields</span></a>
 			</p>
 		</fieldset>
 		{{/* Create tags list */}}
@@ -60,7 +61,7 @@ layout = "search"
 			{{ range (sort $.Site.Taxonomies.tags) }}
 				{{ with .Page }}
 					{{- $urlSafeTitle := .RelPermalink | path.BaseName -}}
-					{{- partial `inputbox` (dict `type` "checkbox" `group` .Type `label` .Title `id` $urlSafeTitle `checked` true) -}}
+					{{- partial `inputbox` (dict `type` "checkbox" `group` "tags" `label` .Title `id` $urlSafeTitle `checked` true) -}}
 				{{- end -}}
 			{{- end -}}
 		{{- end -}}
@@ -71,47 +72,68 @@ layout = "search"
 				{{- template "taglist" . -}}
 			</div>
 			<p>
-				<a aria-role='button' class='form-button' href='javascript:locAll();'>Select all tags</a>
-				<a aria-role='button' class='form-button' href='javascript:locNone();'>Deselect all tags</a>
+				<a aria-role='button' class='form-button' href='javascript:checkboxAll("tags", true);'><span>Select all tags</span></a>
+				<a aria-role='button' class='form-button' href='javascript:checkboxAll("tags", false);'><span>Deselect all tags</span></a>
 			</p>
-			<a href='javascript:resetFields("tags");' class='reset'>Reset Tags</a>
 		</fieldset>
 		{{/* Date picker: takes id and Hugo context as inputs (in dict format) */}}
 		{{/* dict `id` "Id" (usually "before" or "after") `context` . */}}
 		{{- define "datepicker" -}}
+			{{- $monthMax := 12 -}}
 			{{- $days := seq 31 1 -}}
 			{{- $months := seq 12 1 -}}
-			{{- $years := seq (add (time.Now.Year) 1) (sub (int .context.Site.Params.startYear) 1) -}}
+			{{- $earliestYear := sub (int .context.Site.Params.startYear) 1 -}}
+			{{- $latestYear := add (time.Now.Year) 1 -}}
+			{{- $years := seq $latestYear $earliestYear -}}
 				{{/* Add a little breadth in the year counter to account for user misinterpretations */}}
-			<select aria-labelledby='{{- .id -}}-day-label' id='{{- .id -}}-day' name='{{- .id -}}' class='date'>
+			<select aria-label='Select day' id='{{- .id -}}-day' name='{{- .id -}}' class='date'>
 				{{- range $days -}}
-					<option value='{{- . -}}'>{{- . -}}</option>
+					<option value='{{- printf "%02d" . -}}'
+						{{/* Pre-select day 1 if this is "after" a date,
+							or day 31 if this is "before" a date */}}
+						{{- if or 
+							(and (eq $.id "before") (eq . 31))
+							(and (eq $.id "after") (eq . 1)) -}}
+							{{- ` selected` -}}
+						{{- end -}}
+						>{{- printf "%02d" . -}}</option>
 				{{- end -}}
-				<option value=''>Any</option>
-				<option id='{{- .id -}}-day-label' value='' selected>Select day</option>
 			</select>
-			<select aria-labelledby='{{- .id -}}-month-label' id='{{- .id -}}-month' name='{{- .id -}}' class='date'>
+			<select aria-label='Select month' id='{{- .id -}}-month' name='{{- .id -}}' class='date'>
 				{{- range $months -}}
-					<option value='{{- . -}}'>{{- dateFormat "January" (printf "2006-%02d-02" . ) -}}</option>
+					<option value='{{- printf "%02d" . -}}'
+						{{/* Pre-select month 1 (January) if this is "after" a date,
+							or month 12 (December) if this is "before" a date */}}
+						{{- if or 
+							(and (eq $.id "before") (eq . 12))
+							(and (eq $.id "after") (eq . 1)) -}}
+							{{- ` selected` -}}
+						{{- end -}}
+					>{{- dateFormat "January" (printf "2006-%02d-02" . ) -}}</option>
 				{{- end -}}
-				<option value=''>Any</option>
-				<option id='{{- .id -}}-month-label' value='' selected>Select month</option>
 			</select>
-			<select aria-labelledby='{{- .id -}}-month-label' id='{{- .id -}}-year' name='{{- .id -}}' class='date'>
+			<select aria-label='Select year' id='{{- .id -}}-year' name='{{- .id -}}' class='date'>
 				{{- range $years -}}
-					<option value='{{- . -}}'>{{- . -}}</option>
+					<option value='{{- . -}}'
+					{{/* Pre-select the earliest year if this is "after" a date,
+							or the latest year if this is "before" a date */}}
+						{{- if or 
+							(and (eq $.id "before") (eq . $latestYear))
+							(and (eq $.id "after") (eq . $earliestYear)) -}}
+							{{- ` selected` -}}
+						{{- end -}}
+					>{{- . -}}</option>
 				{{- end -}}
-				<option value=''>Any</option>
-				<option id='{{- .id -}}-year-label' value='' selected>Select year</option>
 			</select>
 		{{- end -}}
-		<fieldset id='dates'>
+		<fieldset>
 			<legend>Date</legend>
-			<p>Find posts published before the date:</p>
+			<p>Find posts published on or before the date:</p>
 			<div class='input'>{{- template `datepicker` (dict `id` "before" `context` .) -}}</div>
-			<p>Find posts published after the date:</p>
+			<p>Find posts published on or after the date:</p>
 			<div class='input'>{{- template `datepicker` (dict `id` "after" `context` .) -}}</div>
-			<a href='javascript:resetFields("dates");' class='reset'>Reset Dates</a>
+			<p class='search-tip'>Note: Invalid dates will round down, e.g. 31 November -> 30 November</p>
+			<p class='reset'><a href='javascript:resetDates();'><span>Reset Dates</span></a></p>
 		</fieldset>
 		{{- define "readtimelist" -}}
 			{{- $readtimes := slice -}} {{/* Empty starter array / slice */}}
@@ -131,23 +153,24 @@ layout = "search"
 			{{- end -}}
 			<option value='' selected>Any length</option>
 		{{- end -}}
-		<fieldset id='words'>
+		<fieldset>
 			<legend>Read time</legend>
-			<p><label for='readtime-more'>Look for posts longer than: </label><select id='readtime-more' name='readtime-more' class='words'>{{- template "readtimelist" . -}}</select></p>
-			<p><label for='readtime-less'>Look for posts shorter than: </label><select id='readtime-less' name='readtime-less' class='words'>{{- template "readtimelist" . -}}</select></p>
-			<a href='javascript:resetFields("words");' class='reset'>Reset Read Times</a>
+			<p><label for='readtime-more'>Look for posts longer than: </label></p>
+			<select id='readtime-more' name='readtime' class='words'>{{- template "readtimelist" . -}}</select>
+			<p><label for='readtime-less'>Look for posts shorter than: </label></p>
+			<select id='readtime-less' name='readtime' class='words'>{{- template "readtimelist" . -}}</select>
+			<p class='reset'><a href='javascript:resetWords();'><span>Reset read times</span></a></p>
 		</fieldset>
 		<fieldset id='sort'>
 			<legend>Results order</legend>
 			<p>Sort search results by:</p>
 			{{- partial `inputbox` (dict `type` "radio" `group` "sort-rule" `label` "Newest first" `id` "new-first" `checked` true) -}}
 			{{- partial `inputbox` (dict `type` "radio" `group` "sort-rule" `label` "Oldest first" `id` "old-first" `checked` false) -}}
-			<a href='javascript:resetFields("sort");' class='reset'>Reset Results Order</a>
 		</fieldset>
-		<p>
-			<a role='button' href='javascript:search();' class='form-button large'>{{- $buttonName -}}</a>
-			<a role='button' href='javascript:toggleAdvanced();' class='form-button large' >Close Advanced Options</a>
-			<a role='button' href='javascript:resetFields("everything");' class='form-button large'>Reset All</a>
+		<p class='large-form-buttons'>
+			<a role='button' href='javascript:startSearch();' class='form-button'><span>{{- $buttonName -}}</span></a>
+			<a role='button' id='bottom-advanced-button' href='javascript:hideAdvanced();' class='form-button'><span>Close Advanced Options</span></a>
+			<a role='button' href='javascript:resetAllAdvanced();' class='form-button'><span>Reset All</span></a>
 		</p>
 	</div>
 </form>

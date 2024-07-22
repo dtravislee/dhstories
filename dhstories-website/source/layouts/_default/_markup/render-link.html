@@ -4,5 +4,5 @@
 	{{- with .Title -}} title='{{- . -}}'{{- end -}}
 	{{- if $u.IsAbs -}} rel="external"{{- end -}}
 	>
-	{{- .Text | safeHTML -}}
+	{{- `<span>` | safeHTML -}}{{- .Text | safeHTML -}}{{- `</span>` | safeHTML -}}
 </a>

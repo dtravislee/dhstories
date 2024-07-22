@@ -7,7 +7,7 @@
 
 <div role='article' class='listed-article'>
 	<h{{- .level | string -}}>
-		<a href='{{- .context.RelPermalink -}}'>{{- .context.Title -}}</a>
+		<a href='{{- .context.RelPermalink -}}'><span>{{- .context.Title -}}</span></a>
 	</h{{- .level -}}>
 	{{- partial `meta` .context -}}
 </div>

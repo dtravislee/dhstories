@@ -27,21 +27,21 @@ layout = "share"
 
 <p>Share "{{- $title -}}" to:</p>
 <ul>
-	<li><a href='https://www.blogger.com/blog-this.g?u={{- $url -}}&n={{- $title -}}&t={{- $desc -}}&hellip;' target='_blank'>{{- `Blogger` -}}</a></li>
-	<li><a href='https://digg.com/submit?url={{- $url -}}&title={{- $title -}}' target='_blank'>{{- `Digg` -}}</a></li>
-	<li><a href='mailto:?subject={{- $title -}}%20%3A%20{{- $url -}}&amp;body={{- $desc -}}&hellip;%0D%0ARead More%3A%20{{- $url -}}'>{{- `Email` -}}</a></li>
-	<li><a href='https://www.facebook.com/sharer/sharer.php?u={{- $url -}}&quote={{- $title -}}' target='_blank'>{{- `Facebook` -}}</a></li>
-	<li><a href='https://news.ycombinator.com/submitlink?u={{- $url -}}&t={{- $title -}}' target='_blank'>{{- `HackerNews` -}}</a></li>
-	<li><a href='https://www.linkedin.com/shareArticle?mini=true&amp;url={{- $url -}}&amp;title={{- $title -}}&amp;summary={{- $desc -}}&hellip;&amp;source={{- $url -}}' target='_blank'>{{- `LinkedIn` -}}</a></li>
-	<li><a href='https://mix.com/add?url={{- $url -}}' target='_blank'>{{- `Mix` -}}</a></li>
-	<li><a href='https://pinterest.com/pin/create/button/?url={{- $url -}}&amp;description={{- $desc -}}' target='_blank'>{{- `Pinterest` -}}</a></li>
-	<li><a href='https://reddit.com/submit/?url={{- $url -}}&amp;resubmit=true&amp;title={{- $title -}}' target='_blank'>{{- `Reddit` -}}</a></li>
-	<li><a href='http://www.stumbleupon.com/submit?url={{- $url -}}&title={{- $title -}}' target='_blank'>{{- `StumbleUpon` -}}</a></li>
-	<li><a href='https://telegram.me/share/url?text={{- $title -}}%0D%0A{{- $desc -}}&hellip;&amp;url={{- $url -}}' target='_blank'>{{- `Telegram` -}}</a></li>
-	<li><a href='https://www.tumblr.com/widgets/share/tool?canonicalUrl={{- $url -}}&title={{- $title -}}&caption={{- $desc -}}' target='_blank'>{{- `Tumblr` -}}</a></li>
-	<li><a href='https://twitter.com/intent/tweet/?text={{- $title -}}&amp;url={{- $url -}}&via=dtravislee' target='_blank'>{{- `Twitter / X.com` -}}</a></li>
-	<li><a href='https://vk.com/share.php?url={{- $url -}}' target='_blank'>{{- `VK` -}}</a></li>
-	<li><a href='whatsapp://send?text={{- $title -}}%0D%0A{{- $desc -}}&hellip;%0D%0ASource%20{{- $url -}}'>{{- `WhatsApp` -}}</a></li>
-	<li><a href='https://www.xing.com/app/user?op=share&url={{- $url -}}' target='_blank'>{{- `Xing` -}}</a></li>
+	<li><a href='https://www.blogger.com/blog-this.g?u={{- $url -}}&n={{- $title -}}&t={{- $desc -}}&hellip;' target='_blank'><span>{{- `Blogger` -}}</span></a></li>
+	<li><a href='https://digg.com/submit?url={{- $url -}}&title={{- $title -}}' target='_blank'><span>{{- `Digg` -}}</span></a></li>
+	<li><a href='mailto:?subject={{- $title -}}%20%3A%20{{- $url -}}&amp;body={{- $desc -}}&hellip;%0D%0ARead More%3A%20{{- $url -}}'><span>{{- `Email` -}}</span></a></li>
+	<li><a href='https://www.facebook.com/sharer/sharer.php?u={{- $url -}}&quote={{- $title -}}' target='_blank'><span>{{- `Facebook` -}}</span></a></li>
+	<li><a href='https://news.ycombinator.com/submitlink?u={{- $url -}}&t={{- $title -}}' target='_blank'><span>{{- `HackerNews` -}}</span></a></li>
+	<li><a href='https://www.linkedin.com/shareArticle?mini=true&amp;url={{- $url -}}&amp;title={{- $title -}}&amp;summary={{- $desc -}}&hellip;&amp;source={{- $url -}}' target='_blank'><span>{{- `LinkedIn` -}}</span></a></li>
+	<li><a href='https://mix.com/add?url={{- $url -}}' target='_blank'><span>{{- `Mix` -}}</span></a></li>
+	<li><a href='https://pinterest.com/pin/create/button/?url={{- $url -}}&amp;description={{- $desc -}}' target='_blank'><span>{{- `Pinterest` -}}</span></a></li>
+	<li><a href='https://reddit.com/submit/?url={{- $url -}}&amp;resubmit=true&amp;title={{- $title -}}' target='_blank'><span>{{- `Reddit` -}}</span></a></li>
+	<li><a href='http://www.stumbleupon.com/submit?url={{- $url -}}&title={{- $title -}}' target='_blank'><span>{{- `StumbleUpon` -}}</span></a></li>
+	<li><a href='https://telegram.me/share/url?text={{- $title -}}%0D%0A{{- $desc -}}&hellip;&amp;url={{- $url -}}' target='_blank'><span>{{- `Telegram` -}}</span></a></li>
+	<li><a href='https://www.tumblr.com/widgets/share/tool?canonicalUrl={{- $url -}}&title={{- $title -}}&caption={{- $desc -}}' target='_blank'><span>{{- `Tumblr` -}}</span></a></li>
+	<li><a href='https://twitter.com/intent/tweet/?text={{- $title -}}&amp;url={{- $url -}}&via=dtravislee' target='_blank'><span>{{- `Twitter / X.com` -}}</span></a></li>
+	<li><a href='https://vk.com/share.php?url={{- $url -}}' target='_blank'><span>{{- `VK` -}}</span></a></li>
+	<li><a href='whatsapp://send?text={{- $title -}}%0D%0A{{- $desc -}}&hellip;%0D%0ASource%20{{- $url -}}'><span>{{- `WhatsApp` -}}</span></a></li>
+	<li><a href='https://www.xing.com/app/user?op=share&url={{- $url -}}' target='_blank'><span>{{- `Xing` -}}</span></a></li>
 </ul>
 {{< /share.inline >}}

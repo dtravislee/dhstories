@@ -34,7 +34,7 @@
 				{{- end -}}
 			</span>
 			{{- if and .Params.date (ne . $scope) -}}
-				<a href='{{- .RelPermalink -}}'>{{- .Title -}}</a>
+				<a href='{{- .RelPermalink -}}'><span>{{- .Title -}}</span></a>
 			{{- else -}}
 				{{- `No ` -}} {{- cond (eq $type `prev`) `older` `newer` -}} {{- ` posts` -}}
 			{{- end -}}
@@ -68,20 +68,20 @@
 					{{/* Write donation link if kofi variable is populated */}}
 					{{- `Enjoy this work? ` -}}
 					{{- with $kofi -}}
-						<a href='{{ . }}'>{{- `Support the Dragonhouse` -}}</a>{{- ` on Ko-Fi` -}}
+						<a href='{{ . }}'><span>{{- `Support the Dragonhouse` -}}</span></a>{{- ` on Ko-Fi` -}}
 						{{- ` and ` -}}
 					{{- end -}}
 					{{/* Add the share link, adjusting phrasing appropriately */}}
-					<a href='/share/#&p={{- replace .RelPermalink `/` `` -}}&t={{- .Title | title -}}&d={{- partial `description` . | replaceRE `(?:$\s+|^\s+)` `` -}}'>
+					<a href='/share/#&p={{- replace .RelPermalink `/` `` -}}&t={{- .Title | title -}}&d={{- partial `description` . | replaceRE `(?:$\s+|^\s+)` `` -}}'><span>
 						{{- if $kofi -}}{{- `share this` -}}
 						{{- else -}}{{- `Share it` -}}
 						{{- end -}}
-					</a>{{- ` with your friends` -}}{{- `!` -}}
+					</span></a>{{- ` with your friends` -}}{{- `!` -}}
 				</p>
 				
 				{{/* COMMENTS */}}
 				{{- with .Params.commentLink -}}
-					<p><a href="{{- . -}}">Discuss <i>{{- $.Title -}}</i> here</a></p>
+					<p><a href="{{- . -}}"><span>Discuss <i>{{- $.Title -}}</i> here</span></a></p>
 				{{- end -}}
 			</div>
 			
@@ -98,10 +98,10 @@
 			{{- if or $hasNext $hasPrev -}}
 				<div class='series-info'>
 					{{- with .NextInSection -}}
-						<p><span class='series-lead'>Next in series: </span><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></p>
+						<p><span class='series-lead'>Next in series: </span><a href='{{- .RelPermalink -}}'><span>{{- .Title -}}</span></a></p>
 					{{- end -}}
 					{{- with .PrevInSection -}}
-						<p><span class='series-lead'>Previous in series: </span><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></p>
+						<p><span class='series-lead'>Previous in series: </span><a href='{{- .RelPermalink -}}'><span>{{- .Title -}}</span></a></p>
 					{{- end -}}
 				</div>
 			{{- end -}}
@@ -116,7 +116,7 @@
 					{{- range . -}}
 						<li class='cloud-tag'>
 							<a href='{{- `/tags/` | relURL -}}{{- . | urlize -}}'>
-								{{- . | humanize | title -}}
+								<span>{{- . | humanize | title -}}</span>
 							</a>
 						</li>
 					{{- end -}}

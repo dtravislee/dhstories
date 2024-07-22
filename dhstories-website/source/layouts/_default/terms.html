@@ -25,7 +25,7 @@
 	<ul>
 		{{- range $paginator.Pages -}}
 		<li class='list-tag'>
-			<a href='{{- .RelPermalink -}}'>{{- .Title -}}</a>
+			<a href='{{- .RelPermalink -}}'><span>{{- .Title -}}</span></a>
 			{{- with .Pages -}}
 				{{- ` – ` -}} {{- len . -}}
 				{{- if gt (len .) 1 -}}

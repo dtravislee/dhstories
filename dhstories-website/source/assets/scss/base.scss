@@ -13,21 +13,23 @@
 /* Colours - Global */
 /* These are the same whether on lightmode or darkmode */
 /* Typically used for generic background and generic text */
-$white: #fafafa;
-$black: #252525;
+$white: #fffffa;
+$black: #252520;
 
 /* Colours - Theme-specific */
 /* Use map-get(variable name, "colour name") to retrieve values */
 /* E.g. $white => #fafafa */
 $theme-colours-light: (
-	"silver": #919191, /* For layout lines */
-	"gold": #B68A1B, /* For links */
+	"silver": #565656, /* Layout lines */
+	"hl-silver": #c5c5c5, /* Highlights, e.g. selected pagination - not as strong contrast as regular silver */
+	"gold": #947200, /* Links */
 	"green": #00A800, /* All-OK box on settings page */
 	"red": #E00000 /* Error box and error text on settings page */
 );
 $theme-colours-dark: (
-	"silver": #aaa,
-	"gold": #DAA520,
+	"silver": #B0B0B0,
+	"hl-silver": #484848, 
+	"gold": #DAA500,
 	"green": #00ff00,
 	"red": #FF4545
 );
@@ -63,7 +65,7 @@ $big-font: 1.2em;
 		/* Quote border spacing */
 		@extend %para-margin;
 		$quote-space: 1.25em;
-		@include border-setter(2px, solid, "silver", left);
+		@include border-setter(3px, double, "silver", left);
 		margin-left: $quote-space;
 		padding-left: $quote-space; 
 	}
@@ -172,11 +174,12 @@ $big-font: 1.2em;
 %inset-box { 
 	@include border-setter(2px, inset, "silver", all);
 	&:active, &:focus {
-		@extend %focus;
+		@include border-setter(1px, inset, "silver", all);
+		padding: 1px;
 	}
 }
 %silver-box {
-	@include border-setter(2px, solid, "silver", all);
+	@include border-setter(1px, solid, "silver", all);
 }
 
 /* Section headings */
@@ -217,7 +220,7 @@ $big-font: 1.2em;
 %hr { 
 	@extend %block;
 	@extend %para-margin;
-	@include border-setter(2px, solid, "silver", bottom);
+	@include border-setter(1px, solid, "silver", bottom);
 }
 
 /* Preformatted text (code and pre elements) */
@@ -232,9 +235,6 @@ $big-font: 1.2em;
 	margin-left: auto;
 	margin-right: auto;
 }
-
-/* Focus border styling */
-%focus { @include border-setter(2px, inset, "silver", all); }
 
 /* Themes */
 body.light {
@@ -359,7 +359,7 @@ body.dark {
 		{{- if findRE `<sup` . 1 -}}
 			sup { 
 				vertical-align: super; 
-				& a { @extend %sml-font; } 
+				@extend %sml-font;
 			} 
 		{{- end -}}
 		
@@ -408,7 +408,6 @@ body.dark {
 	supported-color-schemes: light dark; 
 }
 * { 
-	color: inherit;
 	margin: 0;
     padding: 0;
     border: 0;
@@ -430,11 +429,31 @@ body { padding: 0 0.5em; }
 body.left { text-align: left; }
 body.justify { text-align: justify; }
 body.right { text-align: right; }
-/* Fonts*/
-body.serif { @extend %serif; }
-body.sans { @extend %sans; }
-body.mono { @extend %mono; }
-
+/* Fonts - Body text */
+body.serif, // All serif 
+body.news // Sans headings
+body.blog // Mono headings
+	{ @extend %serif; }
+body.sans, // All sans
+body.wiki, // Serif headings
+body.coder // Mono headings
+	{ @extend %sans; }
+body.mono, // All mono
+body.type, // Serif headings
+body.play // Sans headings
+	{ @extend %mono; }
+/* Fonts - Heading text */
+h1, h2, h3, h4, h5, h6, legend, .site-nav {
+	body.wiki &, // Sans body text
+	body.type &  // Mono body text
+		{ @extend %serif; }
+	body.news &, // Serif body text
+	body.play & // Mono body text
+		{ @extend %sans; }
+	body.coder & // Sans body text
+	body.blog // Serif body text
+		{ @extend %mono; }
+}
 
 /* *** */
 /* BASE STYLES */
@@ -444,10 +463,11 @@ body.mono { @extend %mono; }
 .site-nav { 
 	@extend %caps-font;
 	font-size: 1.35em; 
-	margin: 0.25em 0 0 0;
+	margin: 0.5em 0 0 0;
 }
 .site-nav li {
 	@extend %il-block-list;
+	overflow: visible;
 	margin: 0 0.5em 0 0;
 }
 
@@ -491,32 +511,48 @@ body.mono { @extend %mono; }
 h1 { 
 	@extend %unbolded;
 	font-size: 1.5em; 
-	@include border-setter(6px, double, "silver", bottom);
+	@include border-setter(3px, double, "silver", bottom);
 	/* Small paddings for smaller line spacings */
 	padding-bottom: 1px;
 	margin-bottom: 3px;
 }
 
 /* Links */
-/* Link styling (replacing bottom padding with a gold border) */
 a {	
-	@extend %il-block;
 	@extend %light-text;
 	@extend %dark-text;
-	text-decoration: none;
+	text-decoration: underline;
 	cursor: pointer;
-	padding: 2px 2px 0 2px;
-	@include border-setter(2px, solid, "gold", bottom);
-	line-height: 1;
-	
-	/* Ensure elements in a tags render no background and break a tag borders */
-	& * { background-color: transparent !important; }
-	
-	&:hover, &:focus {
+	font-size: 50%;
+	& span {
+		padding: 1px; // To account for box on hover
+		font-weight: normal; 
+		font-size: 200%;
+	}
+	&:hover span, &:focus span {
 		padding: 0;
 		@extend %silver-box;
 	}
-	&:active { background-color: map-get($theme-colours-light, "silver"); }
+	
+	/* Lightmode styles */
+	body.light & { 
+		color: map-get($theme-colours-light, "gold");
+		&:hover, &:focus { 
+			& span { background-color: map-get($theme-colours-light, "hl-silver"); }
+		}
+		&:active span { 
+			background-color: $black;
+			color: $white;
+		}
+		& span { color: $black; }
+	}
+	
+	/* Darkmode styles */
+	body.dark & { 
+		color: map-get($theme-colours-dark, "gold");
+		&:hover span { background-color: map-get($theme-colours-dark, "hl-silver"); }
+		& span { color: $white; }
+	}
 }
 
 /* FOOTER */
@@ -532,7 +568,7 @@ a {
 	position: fixed;
 	bottom: 0;
 	right: 0;
-	padding: 0.25em;
+	padding: 0.5em;
 }
 
 
@@ -559,11 +595,12 @@ a {
 	h3 { @extend %h3; }
 	.listed-article { 
 		padding: 1em 0; 
-		&+.listed-article { @include border-setter(2px, solid, "silver", top);}
+		&+.listed-article { @include border-setter(1px, solid, "silver", top);}
 	}
 {{- end -}}
 {{- if and (eq "home" $pageType) (.Site.Params.featured) -}}
 	@include quotes;
+	.featured { margin: 2em 0; }
 {{- end -}}
 
 /* Forms pages */
@@ -573,7 +610,7 @@ a {
 		@extend %para-margin;
 		@extend %block;
 		@extend %silver-box; 
-		padding: 0.75em 0.5em;
+		padding: 0 0.5em;
 	}
 	legend { 
 		@extend %big-font;
@@ -585,7 +622,6 @@ a {
 	/* Text inputs */
 	select { 
 		@extend %inset-box;
-		margin: 0.5em 0;
 		&, & option {
 			@extend %theming;
 		} 
@@ -600,22 +636,22 @@ a {
 	}
 
 	/* Form buttons */
+	.large-form-buttons {
+		margin-top: 0.5em;
+		margin-bottom: 0.5em;
+		font-size: 1.2em;
+	}
 	.form-button {
 		&+& {
 			margin-left: 0.5em;
 		}
-		&.large {
-			margin-top: 0.5em;
-			margin-bottom: 0.5em;
-			font-size: 1.2em;
-		}
 	}
-
-	/* Form fieldset paragraphs */
-	#content fieldset p { margin: 0; }
 
 	/* Hidden form elements (e.g. preview containers, alert boxes...) */
 	.hidden { display: none; }
+	
+	/* Specific form tweaks (usually end-of-form spacing) */
+	#cookie-notice .input.checkbox, #sort .input.radio+.input.radio, #line, #size { margin-bottom: 1.5em; }
 {{- end -}}
 {{- if eq "settings" $pageType -}}
 	/* Preview box */
@@ -631,13 +667,13 @@ a {
 	
 	/* Storage error note */
 	#storage-error {
-		@include border-setter(3px, dashed, "red", all);
+		@include border-setter(2px, dashed, "red", all);
 		padding: 0.25em;
 	}
 	
 	/* All-OK notice */
 	#settings-ok {
-		@include border-setter(3px, solid, "green", all);
+		@include border-setter(2px, solid, "green", all);
 		padding: 0.25em;
 	}
 	
@@ -657,9 +693,7 @@ a {
 	.search-tip { @extend %sml-font; }
 
 	/* Reset buttons */
-	.reset { 
-		float: right;
-	}
+	.reset { text-align: right; }
 
 	/* Select box positionings */
 	select {
@@ -685,7 +719,7 @@ a {
 	{{- if not .Params.hideFooter -}}
 
 		/* Base footer styles */
-		.article-footer { @include border-setter(2px, solid, "silver", top);}
+		.article-footer { @include border-setter(1px, solid, "silver", top);}
 		.shares p { @extend %para-margin; }
 		
 		/* Next-previous links */
@@ -697,7 +731,7 @@ a {
 			.next-previous p {	
 				width: 45%;
 				padding: 0.5em 0;
-				@include border-setter(2px, solid, "silver", bottom, top);
+				@include border-setter(1px, solid, "silver", bottom, top);
 			}
 			.np-prev { @include float-text(left); }
 			.np-next { @include float-text(right); }
@@ -722,7 +756,7 @@ a {
 				& p { 
 					padding: 1em 0.75em; 
 					&+p {
-						@include border-setter(2px, solid, "silver", top);
+						@include border-setter(1px, solid, "silver", top);
 					}
 				}
 			}
@@ -756,30 +790,35 @@ a {
 	.pagination { 
 		@extend %center-text;
 		margin-top: 1em;
+		p { margin: 0.25em 0; }
 	} 
 	
 	/* Pagination Links */	
+	$pagilink-width: 3.5em;
+	$pagilink-spacing: 0.25em;
 	.pagilink-spanner {
 		@extend %il-block;
-		height: 0;
-		width: 3em;
-		margin: 0.25em;
-		@include border-setter(2px, solid, "silver", bottom);
+		height: 3px;
+		width: $pagilink-width;
+		margin: $pagilink-spacing;
+		@include border-setter(1px, solid, "silver", bottom, top);
 	}
 	.pagilink {
 		@extend %il-block;
 		@extend %silver-box;
-		padding: 0.25em 0;
-		width: 3em;
-		margin: 0.25em;
+		padding: 0.5em 0;
+		width: $pagilink-width;
+		margin: $pagilink-spacing;
+		a {	min-width: 80%; }
 	}
 	
 	/* Page selector links */
 	.page-link {
 		@extend .pagilink;
-		& .selected { 
+		&.selected { 
 			@extend %bold-font; 
-			padding: 2px;
+			body.light & { background-color: map-get($theme-colours-light, "hl-silver") }
+			body.dark & { background-color: map-get($theme-colours-dark, "hl-silver") }
 		}
 	}
 {{- end -}}

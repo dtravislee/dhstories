@@ -3,47 +3,37 @@
 
 {{/* Variable declarations */}}
 
-{{- $pages := .Site.RegularPages.Reverse -}}
-{{- $paginator := (.Paginate (where (where $pages `Params.hide` `=` nil) `Params.date` `!=` nil) .Site.Params.paginate) -}}
+{{/* Paginator object */}}
+{{- $paginator := (.Paginate (where (where .Site.RegularPages.Reverse `Params.hide` `=` nil) `Params.date` `!=` nil) .Site.Params.paginate) -}}
+{{/* Array of posts */}}
 {{- $posts := slice -}}
-{{- $tags := slice -}}
-
-{{/* Page counter */}}
-{{/* Writes total pages and current page to the JSON file */}}
-{{/* Note that this means the first proper post is at index 1, not index 0 */}}
-
-{{- $pages := dict 
-	"TotalPages" $paginator.TotalPages
-	"CurrentPages" $paginator.PageNumber -}}
-{{- $posts = $posts | append $pages -}}
+{{/* Tags for a given post */}}
+{{- $tags := `` -}}
 
 {{/* JSON populator */}}
 {{/* Uses pagination to split JSON files per page */}}
 {{/*	so that search functions needn't pull the entire site index just to get 10 results */}}
 
 {{- range $paginator.Pages -}}
-	{{/* Get tags for the post, if any exist */}}
+	{{/* Get tags for the post, if any exist, as a string */}}
 	{{- with .Params.tags -}}
-		{{- $tags = slice -}} {{/* Resets the tags variable */}}
-		{{- range . -}}
-			{{- $tags = $tags | append . -}}
-		{{- end -}}
+		{{- $tags = delimit . "; " | replaceRE `{` "&lbrace;" | replaceRE `}` "&rbrace;" -}}
+	{{- else -}}
+		{{- $tags = `` -}}
 	{{- end -}}
 	{{- $item := dict
-		"Title" .Title
-		"Day" (.Date.Format (`02`))
-		"Month" (.Date.Format (`01`))
-		"Year" (.Date.Format (`2006`))
-		"Date" (.Date.Format (`2006-01-02`))
-		"Date" (.Date.Format (`January 02, 2006`))
-		"Edited" (.Lastmod.Format (`January 02, 2006`))
-		"Link" .RelPermalink
-		"Text" .Plain
-		"Tags" $tags
-		"Description" .Description
-		"ReadTime" .ReadingTime
-		"Words" .WordCount 
-		"WordsFuzzy" .FuzzyWordCount -}}
+		"title" (.Title | replaceRE `{` "&lbrace;" | replaceRE `}` "&rbrace;")
+		"day" (.Date.Format (`02`))
+		"month" (.Date.Format (`01`))
+		"year" (.Date.Format (`2006`))
+		"date" (.Date.Format (`January 02, 2006`))
+		"edited" (.Lastmod.Format (`January 02, 2006`))
+		"url" .RelPermalink
+		"content" (.Plain | replaceRE `{` "&lbrace;" | replaceRE `}` "&rbrace;")
+		"tags" $tags
+		"description" (.Description | replaceRE `{` "&lbrace;" | replaceRE `}` "&rbrace;")
+		"readtime" (string .ReadingTime)
+		"words" (string .FuzzyWordCount ) -}}
 	{{- $posts = $posts | append $item -}}
 {{- end -}}
 

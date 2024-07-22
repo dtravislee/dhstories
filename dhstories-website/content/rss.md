@@ -33,7 +33,7 @@ You can subscribe to all content via the "feed for all posts" link below. You ca
 			{{- with $value.Page.OutputFormats.Get "rss" -}}
 				<li>
 					{{/* Then link to the RSS output using the page's title. */}}
-					<a href="{{- .Permalink -}}">{{- $value.Page.Title -}}</a>
+					<a href="{{- .Permalink -}}"><span>{{- $value.Page.Title -}}</span></a>
 					{{/* For section lists only... */}}
 					{{- if $value.Page.IsSection -}}
 						{{/* See if it has other sections... */}}
@@ -50,11 +50,11 @@ You can subscribe to all content via the "feed for all posts" link below. You ca
 
 {{/* Get RSS feed for all site posts. */}}
 {{- $home := .Site.GetPage `/` -}}
-{{- with $home.Page.OutputFormats.Get "rss" -}}<p><a href="{{- .Permalink -}}">{{- `Feed for all posts` -}}</a></p>{{- end -}}
+{{- with $home.Page.OutputFormats.Get "rss" -}}<p><a href="{{- .Permalink -}}"><span>{{- `Feed for all posts` -}}</span></a></p>{{- end -}}
 {{/* Range through all taxonomies present in the site, listing their members. */}}
 {{ range $taxonomyname, $taxonomy := .Site.Taxonomies }}
 	{{- $taxon := $.Site.GetPage $taxonomyname -}}
-	{{- with $taxon.Page.OutputFormats.Get "rss" -}}<p><a href="{{- .Permalink -}}">{{- `Feed for all ` -}}{{- $taxonomyname -}}</a></p>{{- end -}}
+	{{- with $taxon.Page.OutputFormats.Get "rss" -}}<p><a href="{{- .Permalink -}}"><span>{{- `Feed for all ` -}}{{- $taxonomyname -}}</span></a></p>{{- end -}}
 	{{- template `rss-list` (dict `Target` $taxonomy) -}}
 {{- end -}}
 {{< /rss.inline >}}

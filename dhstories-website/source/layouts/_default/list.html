@@ -40,12 +40,10 @@
 	{{- if $showFeatured -}}
 		{{- with .GetPage $featuredPostPath -}}
 			<div class='featured'>
-				<h2>{{- $featuredBlurb.Title -}}</h2>
-				<div role='article' class='listed-article'>
-					<h3><a href='{{- .RelPermalink -}}'>{{- .Title -}}</a></h3>
+				<h2>{{- $featuredBlurb.Title -}}{{- `: ` -}}{{- .Title -}}</h2>
+				<div role='article'>
 					<blockquote>{{- $featuredBlurb.Content -}}</blockquote>
-					<p><a href='{{- .RelPermalink -}}'>Read "{{- .Title -}}" here</a></p>
-					<hr/>
+					<p><a href='{{- .RelPermalink -}}'><span>Read "{{- .Title -}}" here</span></a></p>
 				</div>
 			</div>
 			<h2>Recent posts</h2>

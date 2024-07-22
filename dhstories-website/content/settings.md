@@ -41,14 +41,14 @@ layout = "settings"
 		{{- template `settingsbox` (dict `type` "radio" `group` "theme" `label` "Dark colours" `id` "dark" `context` .) -}}
 	</fieldset>
 	<fieldset>
-		<legend>Font style</legend>
+		<legend>Font</legend>
 		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Serif" `id` "serif" `context` .) -}}
 		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Sans-serif" `id` "sans" `context` .) -}}
 		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Monospace" `id` "mono" `context` .) -}}
 	</fieldset>
 	<fieldset>
-		<legend>Font size</legend>
-		<label for='size'>{{- `Select a font size:` -}}</label>
+		<legend>Text size</legend>
+		<p><label for='size'>{{- `Select a font size:` -}}</label></p>
 		<select id='size' name='size' class='select-box'>
 			{{- $fontSizes := seq 200 -10 50 -}}
 			{{- range $fontSizes -}}
@@ -64,7 +64,7 @@ layout = "settings"
 	</fieldset>
 	<fieldset>
 		<legend>Line spacing</legend>
-		<label for='line'>{{- `Select a line height:` -}}</label>
+		<p><label for='line'>{{- `Select a line height:` -}}</label></p>
 		<select id='line' name='line' class='select-box'>
 			{{- $lineSizes := seq 200 -10 100 -}}
 			{{- range $lineSizes -}}
@@ -75,7 +75,7 @@ layout = "settings"
 					{{- if eq . 200 -}}{{- ` (double-spaced)` -}}{{- end -}}
 				</option>
 			{{- end -}}
-		</select>	
+		</select>
 	</fieldset>
 	<fieldset>
 	<legend>Cookie consent</legend>
@@ -92,16 +92,16 @@ layout = "settings"
 		</div>
 		{{/* Consent accepted HTML */}}
 		<div id='accepted-consent' style='display:none;' aria-hidden=true>
-			<p>Cookies for <i>Dragonhouse Stories</i> have been accepted on this device.</p><p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'>reset all settings</a>.</p>
+			<p>Cookies for <i>Dragonhouse Stories</i> have been accepted on this device.</p><p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'><span>reset all settings</span></a>.</p>
 		</div>
 	</fieldset>
 	<p id='storage-error' class='hidden'>ERROR: Unable to save settings. You may have cookies and/or local storage disabled in your browser!</p>
-	<p id='settings-ok' class='hidden'> Settings OK! Returning to previous page... <a href='javascript:undoSettings();'>Undo</a></p>
-	<p>
-		<a role='button' href='javascript:updateSettings();' class='form-button large' title='Apply the current settings and return to the previous page' aria-label='Apply and return to last page'>Apply</a>
-		<a role='button' href='javascript:previewSettings();' class='form-button large' title='Demonstrate the current settings in a preview box below'>Preview</a>
-		<a role='button' href='javascript:cancelSettings();' class='form-button large' title='Discard the current settings and return to the previous page' aria-label='Cancel and return to last page'>Cancel</a>
-		<a role='button' href='javascript:undoSettings();' class='form-button large' title='Revert to your earlier settings'>Undo</a>
+	<p id='settings-ok' class='hidden'> Settings OK! Returning to previous page... <a href='javascript:undoSettings();'><span>Undo</span></a></p>
+	<p class='large-form-buttons'>
+		<a role='button' href='javascript:updateSettings();' class='form-button large' title='Apply the current settings and return to the previous page' aria-label='Apply and return to last page'><span>Apply</span></a>
+		<a role='button' href='javascript:previewSettings();' class='form-button large' title='Demonstrate the current settings in a preview box below'><span>Preview</span></a>
+		<a role='button' href='javascript:cancelSettings();' class='form-button large' title='Discard the current settings and return to the previous page' aria-label='Cancel and return to last page'><span>Cancel</span></a>
+		<a role='button' href='javascript:undoSettings();' class='form-button large' title='Revert to your earlier settings'><span>Undo</span></a>
 	</p>
 </form>
 {{</ settings.inline >}}
@@ -128,7 +128,7 @@ And a test with ~~some strikethrough text~~
 - Using some more items
 - To give a good example
 
-Some <a>links</a> and `inline code` alongside a big code block:
+Some <a><span>links</span></a> and `inline code` alongside a big code block:
 
 ```
 This is some code

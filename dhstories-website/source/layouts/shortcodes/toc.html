@@ -26,7 +26,7 @@
 			{{- end -}}
 			{{/* Add the heading item as a listed link */}}
 				<li>
-					<a href='#{{- $headings.ID -}}'>{{- $headings.Title -}}</a>
+					<a href='#{{- $headings.ID -}}'><span>{{- $headings.Title -}}</span></a>
 					{{/* If it has sub-headings, repeat the process for those */}}
 					{{- with $headings.Headings -}}
 						{{- template `contentslist` (merge $tocParams (dict `context` .)) -}}
@@ -47,7 +47,7 @@
 
 {{- with .Page.Fragments.Headings -}}
 	<div class='toc'>
-		<a class='sr-only' href='#after-toc'>{{- `Skip table of contents` -}}</a>
+		<a class='sr-only' href='#after-toc'><span>{{- `Skip table of contents` -}}</span></a>
 		<h2 id='toc-title'>{{- `Contents` -}}</h2>
 		<div role="navigation" aria-labelledby="toc-title">
 			{{- template `contentslist` (dict 

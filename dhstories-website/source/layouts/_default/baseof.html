@@ -100,7 +100,7 @@
 		{{- .Site.Params.themes.defaultAlign -}}{{- ` ` -}}
 		'>
 		<div role='banner' class='site-header'>
-			<a class='sr-only' href='#main'>{{- `Skip to contents` -}}</a>
+			<a class='sr-only' href='#main'><span>{{- `Skip to contents` -}}</span></a>
 			<ul class='site-nav' aria-label='Site navigation'>
 				{{- range where .Site.Menus.main "Params.disable" "!=" true -}}
 					<li {{ with .Params.class -}}class='{{- . -}}'{{- end -}}>
@@ -111,7 +111,7 @@
 								#{{- $.RelPermalink | safeURL -}}
 								{{- if $.IsHome -}}{{- `/` | safeURL -}}{{- end -}}
 							{{- end -}}
-						'>{{- .Name | default .Identifier -}}</a>
+						'><span>{{- .Name | default .Identifier -}}</span></a>
 					</li>
 				{{- end -}}
 			</ul>
@@ -120,8 +120,14 @@
 		<div role='main' id='main'>
 			<div class='article-header'>
 				<h1>{{- template `title` . -}}</h1>
-				{{- with .Description -}}<p class='meta' aria-label='Subtitle'>{{- . -}}</p>{{- end -}}
-				{{- partial `meta` . -}}
+				{{/* Only show the skip link if there's any metadata to worry about skipping */}}
+				{{- if or (.Params.date) (and .Lastmod (ne .Lastmod .Date)) (.Params.tags) -}}
+					<a class='sr-only' href='#after-meta'><span>{{- `Skip metadata` -}}</span></a>
+					{{- partial `meta` . -}}
+					<span id="after-meta"></span>
+				{{- else -}}
+					{{- partial `meta` . -}}
+				{{- end -}}
 			</div>
 			{{- block `content` . -}}{{- end -}}
 		</div>
@@ -137,7 +143,7 @@
 				{{- .Site.Params.author -}}{{- ` – ` -}}{{- .Site.Params.copyright -}}
 				</p>
 			{{- $topLink := cond (in (slice "/settings/" "/search/" "/share/") .RelPermalink) `javascript:toTop();` `#` -}}
-			<p class='to-top'><a id="top-link" href='{{- $topLink | safeURL -}}'>{{- `Back to Top` -}}</a></p>
+			<p class='to-top'><a id="top-link" href='{{- $topLink | safeURL -}}'><span>{{- `Back to Top` -}}</span></a></p>
 		</div>
 		{{/* JavaScript */}}
 		{{/* We place it here to let scripts run after the rest of the DOM loads. */}}

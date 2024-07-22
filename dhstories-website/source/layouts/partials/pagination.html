@@ -4,33 +4,36 @@
 {{- $paginator := .Scratch.Get `pages` -}}
 
 {{- if gt $paginator.TotalPages 1 -}}{{- with $paginator -}}
-	<a class='sr-only' href='#footer'>Skip Pagination</a>
+	<a class='sr-only' href='#footer'><span>Skip Pagination</span></a>
 	<div role='navigation' aria-label='Pagination' class='pagination'>
-		{{- `Page ` -}} {{- .PageNumber -}} {{- ` of ` -}} {{- .TotalPages -}}
+		<p>{{- `Page ` -}} {{- .PageNumber -}} {{- ` of ` -}} {{- .TotalPages -}}</p>
 		<div class='pagilinks'>
 			{{- if .HasPrev -}}
-				{{- $first := `Go to first page` -}}
-				<span class='pagilink'><a href='{{- .First.URL -}}' aria-label='$first' title='$first'>&lt;&lt;</a></span>
-				{{- $prev := `Go to previous page` -}}
-				<span class='pagilink'><a href='{{- .Prev.URL -}}' aria-label='$prev' title='$prev'>&lt;</a></span>
+				<span class='pagilink'>
+					<a href='{{- .First.URL -}}' title='Go to first page'><span>First</span></a>
+				</span><span class='pagilink'>
+					<a href='{{- .Prev.URL -}}' title='Go to previous page'><span>Prev</span></a>
+				</span>
 			{{- end -}}
 			<span class='pagilink-spanner'></span>
 			{{- if .HasNext -}}
-				{{- $next := `Go to next page` -}}
-				<span class='pagilink'><a href='{{- .Next.URL -}}' aria-label='$next' title='$next'>&gt;</a></span>
-				{{- $last := `Go to last page` -}}
-				<span class='pagilink'><a href='{{- .Last.URL -}}' aria-label='$last' title='$last'>&gt;&gt;</a></span>
+				<span class='pagilink'>
+					<a href='{{- .Next.URL -}}' title='Go to next page'><span>Next</span></a>
+				</span><span class='pagilink'>
+					<a href='{{- .Last.URL -}}' title='Go to last page'><span>Last</span></a>
+				</span>
 			{{- end -}}
 		</div>
 		<div>
-			<a href='#pagelist-end' class='sr-only'>Skip page list</a>
+			<a href='#pagelist-end' class='sr-only'><span>Skip page list</span></a>
+			<p>Jump to page:</p>
 			<ul>
 				{{- range seq 1 .TotalPages -}}
-					<li class='page-link' 
+					<li class='page-link 
 						{{- if eq $paginator.PageNumber . -}}
-							aria-current='page'><span class='selected' aria-label='Page {{- . -}}'>{{- . -}}</span>
+							{{- ` selected` -}}' aria-current='page'><span title='Page {{ . -}}'>{{- . -}}</span>
 						{{- else -}}
-							><a href='{{- $.RelPermalink -}}page/{{- . -}}' aria-label='Go to page {{- . -}}'>{{- . -}}</a>
+							'><a href='{{- $.RelPermalink -}}page/{{- . -}}' title='Go to page {{ . -}}'><span>{{- . -}}</span></a>
 						{{- end -}}
 					</li>
 				{{- end -}}
