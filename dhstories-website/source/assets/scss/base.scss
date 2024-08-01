@@ -4,8 +4,6 @@
 /* Page type - for a variety of template functions */
 {{- $pageType := .Layout | default .Kind -}}
 
-
-
 /* *** */
 /* VARIABLES */
 /* *** */
@@ -14,7 +12,7 @@
 /* These are the same whether on lightmode or darkmode */
 /* Typically used for generic background and generic text */
 $white: #fafafa;
-$black: #252525;
+$black: #202020;
 
 /* Colours - Theme-specific */
 /* Use map-get(variable name, "colour name") to retrieve values */
@@ -429,30 +427,17 @@ body { padding: 0 0.5em; }
 body.left { text-align: left; }
 body.justify { text-align: justify; }
 body.right { text-align: right; }
-/* Fonts - Body text */
-body.serif, // All serif 
-body.news, // Sans headings
-body.blog // Mono headings
-	{ @extend %serif; }
-body.sans, // All sans
-body.wiki, // Serif headings
-body.coder // Mono headings
-	{ @extend %sans; }
-body.mono, // All mono
-body.type, // Serif headings
-body.play // Sans headings
-	{ @extend %mono; }
-/* Fonts - Heading text */
+
+/* Base fonts */
+body.serif { @extend %serif; }
+body.sans { @extend %sans; }
+body.mono { @extend %mono; }
+
+/* Title fonts */
 h1, h2, h3, h4, h5, h6, legend, .site-nav {
-	body.wiki &, // Sans body text
-	body.type &  // Mono body text
-		{ @extend %serif; }
-	body.news &, // Serif body text
-	body.play & // Mono body text
-		{ @extend %sans; }
-	body.coder &, // Sans body text
-	body.blog & // Serif body text
-		{ @extend %mono; }
+	body.title-serif & { @extend %serif; }
+	body.title-sans & { @extend %sans; }
+	body.title-mono & { @extend %mono; }
 }
 
 /* *** */
@@ -780,7 +765,7 @@ a {
 /* 404 page */
 /* Has no markdown file, so we can just chuck this in as-is. */
 {{- if eq "404" $pageType -}}
-	p { @extend %para-margin; }
+	#main p { @extend %para-margin; }
 {{- end -}}
 
 /* Pages needing pagination */

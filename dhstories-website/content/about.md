@@ -53,6 +53,14 @@ If he was a dragon,[^Note 2] he would hoard ideas, notions, dreams, and other ab
 
 To get in touch with the author, use [this contact form](https://forms.gle/dnFrmqeiwqLEzqXe9).
 {{< comment >}}
+
+They may also be reached on:
+
+- [Twitter: @dtravislee](https://twitter.com/dtravislee)
+- [Reddit: /u/dtravislee](https://reddit.com/user/dtravislee)
+- [Facebook: D. Travis Lee](https://facebook.com)
+- Discord: dtravislee
+
 ## Support
 
 If you would like to support these works, check out [the Dragonhouse on Ko-Fi](https://ko-fi.com/).

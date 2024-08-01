@@ -15,7 +15,7 @@ hider.parentNode.removeChild(hider);
 
 // Applies settings to the body element
 // Includes a mix of class names and inline styles
-// Used on global styler.js and in settings.js (for previews)
+// Used in site styler below and in settings.js (for previews)
 
 // inputCode = styleCode in other files
 
@@ -93,6 +93,6 @@ if (cookiePermission) {
 	// Get the theme code
 	/* NOTE: Theme codes are space-separated values: (color) (font) (size) */
 	var styleCode = getLocalObject("dhstories-theme");
-	// Apply theme code to the document body (only if not null)
+	// Apply theme code to the document body (only if not null - fallback to baseStyleCode)
 	if (styleCode) { applyStyle(styleCode); }
 }

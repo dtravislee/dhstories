@@ -9,6 +9,7 @@
 
 /* GLOBAL VARIABLES */
 
+var baseURL = "{{- $.Site.BaseURL -}}"
 var cookiesPreOk = getLocalObject("dhstories-cookies"); /* Whether cookies have been approved before */
 var cookiesOk = cookiesPreOk; /* Initializing cookiesOk with pre-approval, if it exists */
 var scSaveIndicator = "sc="; /* Prefix of the settings code in the hash when clicking "Cancel" */
@@ -16,8 +17,9 @@ var defaultSet = false; /* Indicator of whether the default input states have be
 var consentErrorElem = document.getElementById("cookie-error");
 var storageErrorElem = document.getElementById("storage-error");
 var allOkElem = document.getElementById("settings-ok");
-var nextPageHash = window.location.hash.match(/\/.*\//)[0];
-var nextPage = window.location.origin + nextPageHash;
+var nextPageHash = window.location.hash.match(/\/.*\//);
+var nextPage = baseURL;
+if (nextPageHash) { nextPage = baseURL + nextPageHash[0]; }
 var i, dump, settingsCode, submitSettings;
 
 /* GET INPUT STATE */
@@ -48,6 +50,7 @@ function getSettings() {
 	}
 	settingsCode = getInputState("theme") + " " 
 					+ getInputState("font") + " " 
+					+ getInputState("title-font") + " " 
 					+ getInputState("size") + " " 
 					+ getInputState("line") + " "
 					+ getInputState("align");
@@ -115,7 +118,6 @@ function updateSettings() {
 	}
 	/* Set local storage or cookie values; display an error if this fails somehow (likely disabled storage) */
 	try {
-		console.log(settingsCode);
 		/* Get any current settings */
 		var currentSettings = getLocalObject("dhstories-theme");
 		/* Try to store the settings, using any current settings as the old settings */
@@ -189,37 +191,20 @@ function undoSettings() {
 	window.location.reload(); /* Refresh this page */
 }
 
-/* SHOW MORE FONTS */
-/* Shows extra fonts that mix the standard three, e.g. serif headings with sans-serif body text */
-function showMoreFonts() {
-	/* Remove the "hidden" class from the extra fonts container */
-	document.getElementById("more-fonts").className = "";
-	/* Then, remove the toggle button that shows extra fonts */
-	var toggler = document.getElementById("more-fonts-toggle");
-	toggler.parentNode.removeChild(toggler);
-}
-
 /* INITIAL STATE SETTER */
 /* Update default states of inputs based on given startCode 
 /* (Split into array, loop array, use array values as ID targets for GEBI and check the targets) */
 /* PARAMS: startCode = string, formatted same as settingsCode */
 
 function setStartSettings(startCode) {
-	var baseFonts = "serif sans mono"; /* Basic font values */
-	var doMoreFonts = true; /* Whether we need to open more fonts options */
 	var startCodeArray = startCode.split(" ");
 	for (i = 0; i < startCodeArray.length; i++) {
 		var thisCode = startCodeArray[i];
-		console.log(thisCode);
 		var inputElement = document.getElementById(thisCode);
 		var inputTagName = inputElement.tagName.toLowerCase();
 		if (inputTagName == "input") { inputElement.checked = true; }
 		else if (inputTagName == "option") { inputElement.selected = true; }
-		/* Finish by checking if this code is one of the base font values */
-		/* If so, turn off doMoreFonts so the extra fonts remain hidden */
-		if (doMoreFonts && baseFonts.search(thisCode) != -1) { doMoreFonts = false; }
 	}
-	if (doMoreFonts) { showMoreFonts(); } /* Opens the "more fonts" box, if needed */
 	defaultSet = true; /* Indicates defaults have been set, so later calls do not override this */
 }
 

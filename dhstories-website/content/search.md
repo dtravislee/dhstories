@@ -137,28 +137,37 @@ layout = "search"
 		</fieldset>
 		{{- define "readtimelist" -}}
 			{{- $readtimes := slice -}} {{/* Empty starter array / slice */}}
-			{{- range .Site.RegularPages -}}
+			{{- range .context.Site.RegularPages -}}
 				{{- if .Date -}} {{/* Only get readtimes from pages with the date parameter set */}}
 					{{- $readtimes = $readtimes | append (.ReadingTime) -}}
 				{{- end -}}
 			{{- end -}}
-			{{- $maxTime := math.Max $readtimes -}}
-			{{- $increment := 5 -}}
+			{{- $increment := 3 -}}
+			{{/* Max time is bumped by one increment to overestimate - same as date year */}}
+			{{- $maxTime := add $increment (math.Max $readtimes) -}}
 			{{- $wordsPerMin := 200 -}}{{/* See: https://gohugo.io/methods/page/readingtime/ */}}
 			{{/* We round down to simulate FuzzyWordCount's rounding */}}
-			{{- $readtimeList := seq $increment $increment $maxTime -}}
+			{{- $readtimeList := slice 1 | append (seq $increment $increment $maxTime) -}}
 			{{/* Outputs */}}
 			{{- range (collections.Reverse $readtimeList) -}}
-				<option value='{{- . -}}'>{{- . -}}{{- ` minutes` -}}{{- ` (around ` -}}{{- mul . $wordsPerMin -}}{{- ` words)` -}}</option>
+				<option value='{{- . -}}'
+					{{- if or 
+						(and (eq $.type "less") (eq . $maxTime)) 
+						(and (eq $.type "more") (eq . 1)) -}}
+							{{- ` selected` -}}
+					{{- end -}}
+				>
+					{{- . -}}{{- ` minute` -}}{{- if ne . 1 -}}{{- `s` -}}{{- end -}}
+					{{- ` (around ` -}}{{- mul . $wordsPerMin -}}{{- ` words)` -}}
+				</option>
 			{{- end -}}
-			<option value='' selected>Any length</option>
 		{{- end -}}
 		<fieldset>
 			<legend>Read time</legend>
 			<p><label for='readtime-more'>Look for posts longer than: </label></p>
-			<select id='readtime-more' name='readtime' class='words'>{{- template "readtimelist" . -}}</select>
+			<select id='readtime-more' name='readtime' class='words'>{{- template "readtimelist" (dict `type` "more" `context` .) -}}</select>
 			<p><label for='readtime-less'>Look for posts shorter than: </label></p>
-			<select id='readtime-less' name='readtime' class='words'>{{- template "readtimelist" . -}}</select>
+			<select id='readtime-less' name='readtime' class='words'>{{- template "readtimelist" (dict `type` "less" `context` .) -}}</select>
 			<p class='reset'><a href='javascript:resetWords();'><span>Reset read times</span></a></p>
 		</fieldset>
 		<fieldset id='sort'>

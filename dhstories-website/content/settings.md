@@ -41,20 +41,17 @@ layout = "settings"
 		{{- template `settingsbox` (dict `type` "radio" `group` "theme" `label` "Dark colours" `id` "dark" `context` .) -}}
 	</fieldset>
 	<fieldset>
-		<legend>Font</legend>
+		<legend>Main font</legend>
 		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Serif" `id` "serif" `context` .) -}}
 		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Sans-serif" `id` "sans" `context` .) -}}
 		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Monospace" `id` "mono" `context` .) -}}
-		<p id='more-fonts-toggle'><a href='javascript:showMoreFonts()'><span>Show more font options</span></a></p>
-		<div id='more-fonts' class='hidden'>
-		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Wiki (sans-serif with serif headings)" `id` "wiki" `context` .) -}} 
-		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Typewriter (monospace with serif headings)" `id` "type" `context` .) -}} 
-		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Newsroom (serif with sans-serif headings)" `id` "news" `context` .) -}} 
-		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Playwright (monospace with sans-serif headings)" `id` "play" `context` .) -}} 
-		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Coder (sans-serif with monospace headings)" `id` "coder" `context` .) -}} 
-		{{- template `settingsbox` (dict `type` "radio" `group` "font" `label` "Weblog (serif with monospace headings)" `id` "blog" `context` .) -}}
-		</div>
-
+	</fieldset>
+	<fieldset>
+		<legend>Title font</legend>
+		{{- template `settingsbox` (dict `type` "radio" `group` "title-font" `label` "Same as main font" `id` "same" `context` .) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "title-font" `label` "Serif" `id` "title-serif" `context` .) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "title-font" `label` "Sans-serif" `id` "title-sans" `context` .) -}}
+		{{- template `settingsbox` (dict `type` "radio" `group` "title-font" `label` "Monospace" `id` "title-mono" `context` .) -}}
 	</fieldset>
 	<fieldset>
 		<legend>Text size</legend>

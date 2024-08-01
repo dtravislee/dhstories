@@ -22,25 +22,28 @@ var query, 			// The main search query
 /* Index variables */
 
 var posts,			// Current set of posts pulled from JSON files, as object array
-	startIndex,		// 0-based index number the search starts at
-	jsonIndex;		// Current json file, split into an array of posts
+	jsonIndex,		// Current json file, split into an array of posts
+	indexURL,		// URL to current json file
+	startIndex;		// Current page number of the paginated index files - starts at page 1
+// Global counter for posts
+var postCount = 1;
 // Base URL as provided by Hugo
 var baseURL = "{{- $.Site.BaseURL -}}";
 // Total number of posts in the search index
-var postCount = {{- len (where (where .Site.RegularPages.Reverse `Params.hide` `=` nil) `Params.date` `!=` nil) -}};
+var totalPostCount = {{- len (where (where .Site.RegularPages.Reverse `Params.hide` `=` nil) `Params.date` `!=` nil) -}};
 // Number of posts per individual json index
 var paginationSize = {{- .Site.Params.paginate -}};
-// Number of index pages (calculated based on total posts and index size)
-var indexCount = Math.ceil(postCount / paginationSize);
+// Total number of index pages (calculated based on total posts and index size)
+var maxIndex = Math.ceil(totalPostCount / paginationSize);
 
 /* Results variables */
 
-// Number of results acquired so far
-var resultCount = 0;
-// Array of result objects
-var resultObjects = [];
-// HTML container hosting results
-var resultsContainer = document.getElementById("results-container");
+var maxResults = paginationSize; // Maximum number of results per search call
+var resultCount, // Number of results acquired so far, in total
+	currentResultCount, // Number of results acquired in this call of continueSearch()
+	resultInIndex, // Reference of result in current index (in case we hit the max amid an index)
+	resultObjects; // Array of result objects
+var resultsContainer = document.getElementById("results-container"); // HTML container hosting results
 
 /* Advanced Options variables */
 
@@ -53,29 +56,15 @@ var closeAdvanced = document.getElementById(bottomAdvancedID).outerHTML;
 // Advanced options container ID
 var advID = "advanced-opt";
 // Whether advanced options have been opened and need processing
-var doAdvanced = false;
-
-/* Hash code variables - used for saving search results */
-
-var encodedQuery, 		// Full URL-compliant hash code
-	fieldsEncoded, 		// Encoded reference for checked fields-to-search
-	tagsEncoded, 		// Encoded reference for checked tags
-	beforeDateString,	// DD-MM-YYY formatted string of beforeDate object
-	afterDateString;	// DD-MM-YYY formatted string of afterDate object
-	/* Read times and sort order are provided as-is */
+var doAdvanced = 0;
 
 // The base used for encoding fields-to-search
-// Since the number of fields will be far less than 64, where toString and parseInt can lack precision,
+// Since the number of fields should be far less than 64, where toString and parseInt can lack precision,
 //	we just use how many fields there are
 var fieldsEncodingRadix = document.getElementsByName("fields").length;
 // The base used for encoding tags, from 2 to 36 inclusive
+// Higher numbers means greater compression
 var tagsEncodingRadix = 36;	
-	
-
-/* NOTE: In order to encode sections and tags, split the string up 
-Use groups of 32 in base 32, groups of 16 in hexadecimal
--Mind any overflow in this case: pad with 0s and be sure to abort at the end of the checkboxes list, NOT the end of the string.
-(General idea is to range through the boxes array, and for each index of the box, get the index of the binary representation to determine true or false)
 
 //********>
 // POST OBJECT
@@ -88,22 +77,13 @@ Use groups of 32 in base 32, groups of 16 in hexadecimal
 
 function Post(rawJson) {
 	
-	// Searchable attributes
-	this.content = this._sanitizeText(this._getKeyValue("content"));
-	this.date = this._getKeyValue("date");
-	this.description = this._sanitizeText(this._getKeyValue("description"));
-	this.edited = this._getKeyValue("edited");
-	this.readtime = this._getKeyValue("readtime");
-	this.tags = this._sanitizeText(this._getKeyValue("tags"));
-	this.title = this._sanitizeText(this._getKeyValue("title"));
-	this.url = this._getKeyValue("url");
-	this.words = this._getKeyValue("words");
+	// Post number / ID
+	this.num = postCount;
+	postCount++; // Increment counter for each retrieved post
 	
-	// Datepart attributes
-	this.year = this._getKeyValue("year");
-	this.month = this._getKeyValue("month");
-	this.day = this._getKeyValue("day");
-	this.time = parseDateparts();
+	/*---*/
+	/* PRIVATE FUNCTIONS */
+	/*---*/
 	
 	/* SANITIZE TEXT (string) */
 	/* (private function) */
@@ -145,44 +125,75 @@ function Post(rawJson) {
 		/* Execute the Regex as a search on the raw JSON fragment */
 		var resultArray = kvRegex.exec(rawJson);
 		
-		/* If a result is found... */
-		if (resultArray) {
-			
-			/* Initialize a result variable to return */
-			var result = '';
-			
-			/* Get the key-value pair (first result in resultArray) */
-			var kvPair = resultArray[0];
-			
-			/* Extract the value in the key-value pair by:
-				1. Trimming the leading key segment, and
-				2. Cutting trailing quotation marks, commas, semicolons, whitespace, etc. */
-			var keyRegex = new RegExp('^"' + key + '":\\s*"');
-			result = kvPair.replace(keyRegex, "").replace(/"(;|,)*\s*$/, "");
-
-			/* Finally, return the result value */
-			return result;
-		}
+		/* If a result is not found, return null */
+		if (! resultArray) { return null; }
+		
+		/* Otherwise... */
+		
+		/* Get the key-value pair (first result in resultArray) */
+		var kvPair = resultArray[0];
+		
+		/* Extract and return the value in the key-value pair by:
+			1. Trimming the leading key segment, and
+			2. Cutting trailing quotation marks, commas, semicolons, whitespace, etc. */
+		var keyRegex = new RegExp('^"' + key + '":\\s*"');
+		return kvPair.replace(keyRegex, "").replace(/"(;|,)*\s*$/, "");
 	}
 	
 	/* PARSE DATEPARTS */
-	/* Takes the object's date parts (year, month, day) and returns a string */
-	/* String is milliseconds since Jan 1, 1970 */
+	/* Takes the object's date parts (year, month, day) and returns a date object */
 	this._parseDateparts = function() {
 		var rawDate = new Date(this.year, (this.month-1), this.day);
-		return rawDate.getTime();
+		return rawDate;
 	}
 	
-	/* GET DATE BEFORE (string - milliseconds since Jan 1, 1970)*/
+	/*---*/
+	/* ATTRIBUTES */
+	/*---*/
+	
+	// Searchable attributes
+	this.content = this._sanitizeText(this._getKeyValue("content"));
+	this.date = this._getKeyValue("date");
+	this.description = this._sanitizeText(this._getKeyValue("description"));
+	this.edited = this._getKeyValue("edited");
+	this.readtime = this._getKeyValue("readtime");
+	this.tags = this._sanitizeText(this._getKeyValue("tags"));
+	this.title = this._sanitizeText(this._getKeyValue("title"));
+	this.url = this._getKeyValue("url");
+	this.words = this._getKeyValue("words");
+	
+	// Datepart attributes
+	this.year = this._getKeyValue("year");
+	this.month = this._getKeyValue("month");
+	this.day = this._getKeyValue("day");
+	this.time = this._parseDateparts();
+	
+	/*---*/
+	/* PUBLIC FUNCTIONS */
+	/*---*/
+	
+	/* GET DATE BEFORE (integer - milliseconds since Jan 1, 1970)*/
 	/* Returns bool: whether the post was published on or before the date provided as argument */
 	this.getDateBefore = function(inputTime) {
 		return (this.time <= inputTime);
 	}
 	
-	/* GET DATE AFTER (string - milliseconds since Jan 1, 1970)*/
+	/* GET DATE AFTER (integer - milliseconds since Jan 1, 1970)*/
 	/* Returns bool: whether the post was published on or after the date provided as argument */
 	this.getDateAfter = function(inputTime) {
 		return (this.time >= inputTime);
+	}
+	
+	/* GET READ TIME MORE (integer - read time in minutes)*/
+	/* Returns bool: whether the post read time is longer than, or equal to, the input time */
+	this.getReadtimeMore = function(inputTime) {
+		return (this.readtime >= inputTime);
+	}
+	
+	/* GET READ TIME LESS (integer - read time in minutes)*/
+	/* Returns bool: whether the post is read time shorter than, or equal to, the input time */
+	this.getReadtimeLess = function(inputTime) {
+		return (this.readtime <= inputTime);
 	}
 	
 	/* FIND IN POST (key-string, query-string) */
@@ -205,7 +216,8 @@ function Post(rawJson) {
 	}
 	
 	/* WRITE TO HTML */
-	/*	Writes this post object as HTML, formatted the same as _default/list.html */
+	/* Writes this post object as HTML, formatted the same as _default/list.html */
+	/* Returns the outputted HTML */
 	this.writeToHtml = function () {
 		var output = "<div role='article'>"
 			+ "<h2><a href='"
@@ -247,7 +259,7 @@ function Post(rawJson) {
 			output += "</p>";
 		}
 		output += "</div>";
-		results.innerHTML = output;
+		return output;
 	}
 }
 
@@ -259,6 +271,12 @@ function Post(rawJson) {
 /* Gets and sanitizes the user-input query */
 /* Returns a string array representing the query keywords */
 function getQuery() {
+	
+	/* Get the input value first */
+	var queryValue = document.getElementById("search-input").value;
+	
+	/* If the value is empty, return null before further processing */
+	if (!queryValue) { return null; }
 	
 	/* Use an empty array variable to store the final result */
 	var result = [];
@@ -291,10 +309,12 @@ function getQuery() {
 	return result;
 }
 
-/* GET CHECKBOX ARRAY */
+/* GET CHECKBOX ARRAY (name - string) */
 /* Gets the results of a group of checkboxes by a shared name */
 /* Returns array of strings, one for each checked box */
-function getCheckboxArray(name) {
+/* Params:
+	name = value of name attribute of checkbox group */
+function getCheckboxSet(name) {
 	
 	/* Initiate an empty array variable to store the result */
 	var result = [];
@@ -315,7 +335,7 @@ function getCheckboxArray(name) {
 
 /* GET DATE SELECTOR */
 /* Gets the date from a group of select boxes sharing the same name */
-/* Returns integer provided by Date.getTime() (milliseconds since Jan 1 1970) */
+/* Returns a date object */
 function getDateSelector(name) {
 	
 	/* Initiate variable to hold date parts */
@@ -349,17 +369,17 @@ function getDateSelector(name) {
 		}
 	
 	/* Return the time format of the date object */
-	return dateObject.getTime();
+	return dateObject;
 }
 
-/* GET READ TIME */
+/* GET READ TIME (type - string, one of "more" or "less" */
 /* Gets the selected read time */
 /* Params: one of "more" or "less", as a string */
 function getReadTime(type) {
 	return document.getElementById("readtime-" + type).value;
 }
 
-/* GET RADIO SET RESULT */
+/* GET RADIO SET RESULT (name - string) */
 /* Returns the value of a radio button group */
 /* Param: Name of radio button group */
 function getRadioSet(name) {
@@ -373,43 +393,47 @@ function getRadioSet(name) {
 	}
 }
 
-/* GET POSTS */
-/* Gets posts by pulling a json index file,
-	then writing data to post objects */
-/* Returns array of post objects, or null if there is a connection issue */
-/* Params: Page = the page number of the desired index */
-	/* (Page number is related to pagination number on the homepage) */
-function getPosts(page) {
-	var url = baseURL + "/index.json" // Set the URL
+/* GET JSON (url - string) */
+/* Retrieves the raw content of a JSON file
+	when given a URL to the target file */
+/* Params: 
+	url = a url pointed to a well-formatted JSON file */
+function getJson(url) {
 	var req = new XMLHttpRequest(); // Initialize the HTTP request
 	req.open("GET", url); // Try to get the index file based on the URL
 	req.onreadystatechange = function() { // For each statechange...
-		console.log(req.readyState);
-		if (req.readyState == 4) { // See if the data stream is complete and
-			if (req.status == "200") { // If we get an OK status code, then...
-				/* Initialize a variable for holding the resulting array */
-				var result = [];
-				
-				/* Get the raw responseText from the json file,
-					split on the character set "},{" */
-				/* Other curly braces are escaped in making the json file,
-					so this substring ought to appear only between json items */
-				var rawJson = req.responseText.split("},{");
-				
-				/* Send each json fragment to the posts object constructor */
-					/* And add the new object to the result array */
-				for (var i = 0; i < rawJson.length; i++) {
-				}
-				
-				return result;
-			}
-			else { // Otherwise, we ran into some kind of connection error, so display an error and do nothing
-				resultsContainer.innerHTML = "<b>Connection error!</b> Check that you are connected to the internet!";
-				return null;
-			}
+		if (req.readyState == 4) { // See if the data stream is complete and if so...
+			if (req.status != "200") { return null; } // Return null if there is a connection error
+			return req.responseText;
 		}
 	}
 	req.send(null);
+}
+
+/* GET POSTS (rawJson - string) */
+/* Creates array of post objects out of a raw JSON output */
+/* Returns array of post objects, or null if the JSON input is blank */
+/* Params: 
+	rawJson = raw output from a getJson() call containing post information 
+		(see index.json for more) */
+function getPosts(rawJson) {
+
+	/* Initialize a variable for holding the resulting array */
+	var result = [];
+	
+	/* Split the json on the character set "},{" */
+	/* Other curly braces should be escaped in making the json file,
+		so this substring ought to appear only between json items */
+	var rawPosts = rawJson.split("},{");
+	
+	/* Send each fragment to the posts object constructor */
+		/* And add the new object to the result array */
+	for (var i = 0; i < rawPosts.length; i++) {
+		result.push(new Post(rawJson[i]));
+	}
+	
+	/* Return the array */
+	return result;
 }
 
 //********>
@@ -418,7 +442,7 @@ function getPosts(page) {
 
 /* Resets and (de)select all functions */
 
-/* SET ALL CHECKBOXES */
+/* SET ALL CHECKBOXES (name - string, checked - bool) */
 /* Sets all checkboxes with a given name to be checked (true) or unchecked (false) */
 /* Params:
 	name (string) = The name of the checkbox collection
@@ -457,14 +481,16 @@ function resetDates(){
 /* Note that "defaults" means what the page loads from a blank slate,
 	not what the selectors are set to when navigating back from a result. */
 function resetWords() {
-	/* Get the selectors */
-	var readtimes = document.getElementsByName("readtime");
-	/* Set each selector to the largest possible index,
-		at which the option is "any length" */
-	/* (This is so that incrementing uses the up arrow key) */
-	for (var i = 0; i < readtimes.length; i++){
-		readtimes[i].selectedIndex = readtimes[i].options.length-1;
-	}
+	
+	/* Get the read time select lists */
+	var readtimeMore = document.getElementById("readtime-more");
+	var readtimeLess = document.getElementById("readtime-less");
+	
+	/* Set the "more than" read time to the smallest value */
+	/* and the "less than" read time to the largest value */
+	/* Values start largest at index 0, so the smallest value is at the largest index */
+	readtimeMore.selectedIndex = readtimeMore.options.length-1;
+	readtimeLess.selectedIndex = 0;
 }
 
 /* RESET ALL */
@@ -509,6 +535,11 @@ function hideAdvanced() {
 // OTHER FUNCTIONS
 //********>
 
+/* NOTE: In order to encode sections and tags, split the string up 
+Use groups of 32 in base 32, groups of 16 in hexadecimal
+-Mind any overflow in this case: pad with 0s and be sure to abort at the end of the checkboxes list, NOT the end of the string.
+(General idea is to range through the boxes array, and for each index of the box, get the index of the binary representation to determine true or false)
+
 /* Random bits and bobs used in the search process */
 
 /* ENCODE BINARY (binary - string, base - number)*/
@@ -525,5 +556,229 @@ function encodeBinary(number, base) {
 	return (parseInt(number, base)).toString(2);
 }
 
-function siteSearch() {
+/* GET CHECKBOX AS BINARY (name - string) */
+/* Gets binary representation of an array of checkboxes */
+/*	1 = checked, 0 = unchecked */
+/* Returns binary string with a 1 appended to the front (to avoid truncation) */
+/* Params:
+	name = value of name attribute of checkbox group */
+function getCheckboxBinary(name) {
+
+	/* Initialize result variable */
+	/* We initialize with 1 so that leading 0s do not get truncated */
+	var result = "1";
+	
+	/* Pull all the field checkboxes */
+	var boxes = document.getElementsByName(name);
+	
+	/* Range through the field checkboxes
+		if it is checked, append 1 to the result
+		if it is unchecked, append 0 to the result */
+	for (var i = 0; i < boxes.length; i++) {
+		if (boxes[i].checked) { result += "1"; }
+		else { result += "0"; }
+	}
+	
+	/* Return the resultant binary string */
+	return result;
 }
+
+//********>
+// SEARCH FUNCTIONS
+//********>
+
+/* POPULATE VARIABLES */
+/* Populates variables per user input query and advanced options */
+function popVars() { 
+	query = getQuery();
+	if (doAdvanced) {
+		lookIn = getCheckboxSet("fields");
+		tags = getCheckboxSet("tags");
+		beforeDate = getDateSelector("before");
+		afterDate = getDateSelector("after");
+		longerThan = getReadTime("more");
+		shorterThan = getReadTime("less");
+		newestFirst = getRadioSet("sort-rule") == "new-first" ? 1:0;
+	}
+	// Posts sort old-to-new, so if the search looks for newest posts first,
+	//	it has to start at the largest index rather than the smallest
+	// (This helps with caching indices, since new posts won't alter index json files)
+	startIndex = newestFirst ? maxIndex:1;
+}
+
+/* ENCODE QUERY HASH */
+/* Encodes search form variables / state as a URI fragment string */
+/*	so that returning to the search page loads the results as it was */
+/* Returns URI fragment string */
+function encodeQueryHash() {
+	
+	/* Initialize result variable */
+	var result = "q=";
+	
+	/* Range through query variable, adding each query item to result as a string */
+	/* Queries use encodeURIComponent to prevent read issues (e.g. if a & exists in the query) */
+	if (query) {
+		for (var i = 0; i < query.length; i++) {
+			result += encodeURIComponent(query[i]);
+			if (i != query.length-1) { result += "+"; } // Use + to demarcate individual queries
+		}
+	}
+	
+	/* Advanced queries have nifty shorthands as follows:
+		f = fields (to search in)
+		t = tags
+		b = before (date)
+		a = after (date)
+		m = more than (x words / minutes)
+		l = less than (x words / minutes)
+		n = newest first (result order)
+		c = count (of results gathered)
+	*/
+	if (doAdvanced) {
+		/* Search In state */
+		result += "&f=" + encodeBinary(getCheckboxBinary("fields"), fieldsEncodingRadix);
+		/* Tags state */
+		result += "&t=" + encodeBinary(getCheckboxBinary("tags"), tagsEncodingRadix);
+		/* Date states */
+		result += "&b=" + beforeDate.getDate() + "-" + beforeDate.getMonth() + "-" + beforeDate.getFullYear();
+		result += "&a=" + afterDate.getDate() + "-" + afterDate.getMonth() + "-" + afterDate.getFullYear();
+		/* Read time states */
+		if (longerThan) { result += "&m=" + longerThan; }
+		if (shorterThan) { result += "&l=" + shorterThan; }
+		/* Results order states */
+		result += "&n=" + newestFirst;
+	}
+	
+	/* Number of results retrieved so far */
+	/* Used when there is a saved query and we are reloading the page */
+	/*	such as when navigating back from clicking a result */
+	result += "&c=" + resultCount;
+	
+	/* Return resulting URI fragment string */
+	return result;
+	
+}
+
+/* GET SEARCH RESULTS */
+/* Applies a search query to a given post object */
+/* Returns bool: true if the query matches, false otherwise */
+/* Params:
+	post = a target post object */
+function getSearchResults(post) {
+	
+	/* Basic search */
+	if (!doAdvanced) {
+		if (!query) { return true; } // Default to true if no query is entered
+		for (var i = 0; i < query.length; i++) {
+			if (post.findInPost("content", query[i])) { continue; }
+			if (post.findInPost("date", query[i])) { continue; }
+			if (post.findInPost("description", query[i])) { continue; }
+			if (post.findInPost("edited", query[i])) { continue; }
+			if (post.findInPost("readtime", query[i])) { continue; }
+			if (post.findInPost("tags", query[i])) { continue; }
+			if (post.findInPost("title", query[i])) { continue; }
+			if (post.findInPost("url", query[i])) { continue; }
+			if (post.findInPost("words", query[i])) { continue; }
+			return false; // Return false if a query item isn't found anywhere
+		}
+		return true; // If all queries are found in the post, return true
+	}
+	
+	/* Advanced search */
+	/* We tackle this bottom-to-top in the advanced search form */
+	if (!getReadtimeMore(longerThan)) { return false; }
+	if (!getReadtimeLess(shorterThan)) { return false; }
+	if (!getDateBefore(beforeDate)) { return false; }
+	if (!getDateAfter(afterDate)) { return false; }
+	for (var i = 0; i < tags.length; i++) {
+		if (!post.findInPost("tags", tags[i])) { return false; }
+	}
+	/* For every query item, look in every checked field for it, return false if it is never found */
+	for (var i = 0; i < query.length; i++) {
+		for (var j = 0; j < lookIn.length; j++) {
+			if (post.findInPost(lookIn[j], query[i])) { break; }
+			if (j = lookIn.length-1) { return false; } 
+		}
+	}
+	return true; // Returns if it passes every other test
+}
+
+/* SEARCH IN INDEX */
+/* Applies a search query to posts in an index in a given order */
+/* Params:
+	startPos = the position from which to start searching through the index
+	endPos = the position at which to halt the search */
+/* Note that startPost can be greater than endPos, leading to a reverse direction search */
+function searchInIndex(startPos, endPos){
+	var i = startPos;
+	while (currentResultCount < maxResults) {
+		if (getSearchResults(posts[i])) { // Push matching results and increment counters
+			resultObjects.push(posts[i]); 
+			resultCount++;
+			currentResultCount++;
+		} 
+		if (i != endPos) { break; } // Break if this is the last item of the index
+		i = startPos > endPos ? i--:i++; // Increment or decrement whether we're going forwards or backwards
+	}
+}
+
+/* START SEARCH */
+/* Begins a user search query */
+function startSearch() {
+	popVars(); 	// Populate main variables
+	window.location.hash = encodeQueryHash(); // Encode the query as a URI fragment in the browser URI
+	continueSearch(); // Perform an initial search
+}
+
+/* CONTINUES SEARCH */
+/* Iterates a search query, e.g. when the user clicks "load more results" */
+function continueSearch() {
+	/* Reset the resultsObject array */
+	resultObjects = [];
+	/* If we left off in the middle of an index, finish that first */
+	if (0 < resultInIndex < paginationSize) {
+		// Set end point based on whether new or old first
+		// (Note that new posts are at the end!)
+		var endPos = newestFirst ? (paginationSize-1):0;
+		// Finish the search on the current index
+		searchInIndex(resultInIndex, endPos); 
+	}
+	/* Only pull more results if still needed (and said results exist) */
+	while (currentResultCount < maxResults && 1 <= startIndex <= maxIndex) {
+		
+		/* Get the next index URL */
+		/* Index page 1 has a different URL structure - keep note! */
+		indexURL = baseURL + "/index.json"
+		if (startIndex > 1) { indexURL = baseURL + "/page/" + startIndex + "/index.json"; }
+		
+		/* Populate the posts array */
+		posts = getPosts(getJson(indexURL));
+		
+		/* Set start and end positions for index searching, based on whether we look for newest posts first */
+		var startPos = newestFirst ? 0:(paginationSize-1);
+		var endPos = newestFirst ? (paginationSize-1):0;
+		searchInIndex(startPos, endPos);
+		
+		/* Increment or decrement the index number whether we're going forwards or backwards */
+		startIndex = newestFirst ? startIndex--:startIndex++;
+	}
+	// Update the count record in the URI hash
+	window.location.hash = window.location.hash.replace(/&c=[0-9]+/g, "&c=" + resultCount);
+	
+	// Finally, write the collected results to the results container
+	for (var i = 0; i < resultObjects.length; i++) {
+		resultsContainer.innherHTML += resultObjects[i].writeToHtml();
+	}
+}
+
+/* If we decide to paginate:
+	-go through all the posts to get results
+	-Instead of writing all the results as HTML, write only the index number and post number in that index
+	-Then, based on what posts need to show, use those numbers to pull the data from the index files again
+	(Does require a few added HTTP request calls but, with caching, that should be okay...)
+BUT Finish this version first, then duplicate and change it, just in case we want to revert it!
+
+Maybe pre-load search indices too. We could still pre-load...
+-But that could mean more server calls...
+-Unless cached...?
+*/

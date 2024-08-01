@@ -72,6 +72,7 @@ enableInlineShortcodes = true
 	[params.themes]
 		defaultColour = "light" ## dark / light
 		defaultFont = "serif" ## serif / sans / mono
+		defaultTitle = "same" ## same / title-serif / title-sans / title-mono
 		defaultSize = 100 ## font-size(%): from 50 to 200 in increments of 10
 		defaultSpacing = 130 ## line-height(%): from 100 to 200 in increments of 10
 		defaultAlign = "left" ## left / right / justify
