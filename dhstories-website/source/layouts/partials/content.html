@@ -3,11 +3,11 @@
 
 <div id="content">
 {{/* Pull footnote return and rebuild with more generic / ascii "return" */}}
-{{- $footnoteReturn := `(?:<a href=(?:\"|')(#fnref:)([0-9])(?:\'|")([^>]*)>)(?:.*)(?:</a>)` -}}
+{{- $footnoteReturn := `(?:<a href=(?:\"|')(#fnref:)([0-9]*)(?:\'|")([^>]*)>)(?:.*)(?:</a>)` -}}
 {{- $newFootnoteReturn := `<sup><a href='${1}${2}' ${3} title='Return to reference ${2}'><span>[return to ${2}]</span></a></sup>` -}}
 
 {{/* Pull footnote reference and rebuild with proper characters and ARIA accessibility features */}}
-{{- $footnoteRef := `(?:<a href=(?:\"|')(#fn:)([0-9])(?:\'|")([^>]*)>)(?:[0-9]*)(?:</a>)` -}}
+{{- $footnoteRef := `(?:<a href=(?:\"|')(#fn:)([0-9]*)(?:\'|")([^>]*)>)(?:[0-9]*)(?:</a>)` -}}
 {{- $newFootnoteRef := `<a href='${1}${2}' ${3} title='Jump to footnote ${2}'><span>[note ${2}]</span></a>` -}}
 
 {{/* Remove footnote-ref classes */}}

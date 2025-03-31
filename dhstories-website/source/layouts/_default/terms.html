@@ -18,11 +18,16 @@
 
 {{- define `content` -}}
 
-	{{- partial "content" . -}}
-
 	{{- $paginator := .Scratch.Get `pages` -}}
+	{{- $pageNum := .Scratch.Get `pageNum` -}}
 	
-	<ul>
+	{{- if and (.Content) (lt $pageNum 2) -}}
+		{{- partial `content` . -}}
+	{{- else -}}
+		<div id='content'></div>
+	{{- end -}}
+	
+	<ul class='tags-list'>
 		{{- range $paginator.Pages -}}
 		<li class='list-tag'>
 			<a href='{{- .RelPermalink -}}'><span>{{- .Title -}}</span></a>

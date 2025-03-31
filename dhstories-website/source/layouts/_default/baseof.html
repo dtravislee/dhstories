@@ -8,7 +8,7 @@
 {{/* TITLE */}}
 {{/* Writes the title, with a page number if it's part of a pagination scheme */}}
 {{- define `title` -}}
-	{{- $title := .Title | title -}}
+	{{- $title := .Title -}}
 	{{- with .Scratch.Get `pageNum` -}}
 		{{- if gt . 1 -}}
 			{{- $title = print ($title) ` - Page ` . -}}
@@ -55,30 +55,31 @@
 		{{- end -}}
 		<title>
 			{{- if .IsHome -}}
-				{{- .Site.Params.title | title -}}
+				{{- .Site.Params.title -}}
 				{{- ` - ` -}}
 				{{- .Site.Params.description -}}
 			{{- else -}}
 				{{- template `title` . -}}
 				{{- ` | ` -}}
-				{{- .Site.Params.title | title -}}
+				{{- .Site.Params.title -}}
 			{{- end -}}
 		</title>
+		
 		<style>
 			{{- with . -}}
 				{{- $cache := print (replace .RelPermalink `/` ``) "_cache.scss" -}}
 				{{- $opts := dict "transpiler" "dartsass" -}}
-				{{- with resources.Get `scss/base.scss` | resources.ExecuteAsTemplate $cache . -}}
+				{{- with resources.Get `css/base.scss` | resources.ExecuteAsTemplate $cache . -}}
 					{{- with . | toCSS $opts -}}
 						{{ .Content | safeCSS -}}
 					{{- end -}}
 				{{- end -}}
 			{{- end -}}
 		</style>
-		<style id='js-hide'>.js-only { display: none; }</style>
 		{{- with resources.Get `css/print.css` -}}
 			<style media='print'>{{- .Content | safeCSS -}}</style>
 		{{- end -}}
+		<style id='js-hide'>.js-only { display: none; }</style>
 		
 		{{/* Get description or summary, trimming excess leading and trailing whitespace. */}}
 		{{- $desc := (partial `description` .) | replaceRE `(?:$\s+|^\s+)` `` -}}
@@ -86,6 +87,7 @@
 		<meta name='twitter:title' property='og:title' itemprop='name' content='{{- .Title | default .Site.Params.title -}}'>
 		{{- if gt (len $desc) 0 -}}<meta name='twitter:description' property='og:description' itemprop='description' content='{{- $desc -}}'/>{{- end -}}
 		{{- if .Params.date -}}<meta property='article:published_time' itemprop='datePublished' content='{{- .Date.Format $iso8601 | safeHTMLAttr -}}'/>{{- end -}}
+		{{- if ne .Lastmod .Date -}}<meta property='article:published_time' itemprop='dateModified' content='{{- .Lastmod.Format $iso8601 | safeHTMLAttr -}}'/>{{- end -}}
 		{{- if ne .Lastmod .Date -}}<meta property='article:published_time' itemprop='dateModified' content='{{- .Lastmod.Format $iso8601 | safeHTMLAttr -}}'/>{{- end -}}
 		{{- with .Permalink -}}<meta property='og:url' content='{{- . -}}' />{{- end -}}
 		{{- with .Site.Params.title -}}<meta property='og:site_name' content='{{- . -}}'/>{{- end -}}
@@ -143,8 +145,15 @@
 				{{- ` ` -}}
 				{{- .Site.Params.author -}}{{- ` – ` -}}{{- .Site.Params.copyright -}}
 				</p>
-			{{- $topLink := cond (in (slice "/settings/" "/search/" "/share/") .RelPermalink) `javascript:toTop();` `#` -}}
-			<p class='to-top'><a id="top-link" href='{{- $topLink | safeURL -}}'><span>{{- `Back to Top` -}}</span></a></p>
+			<p class='to-top'>
+				{{/* Top link is done the long way to prevent character escaping */}}
+				{{- $topLinkText := `<span>Back to Top</span>` -}}
+				{{- if in (slice "/settings/" "/search/" "/share/") .RelPermalink -}}
+					<a id="top-link" href="javascript:toTop();">{{- $topLinkText | safeHTML -}}</a>
+				{{- else -}}
+					<a id="top-link" href="#">{{- $topLinkText | safeHTML -}}</a>
+				{{- end -}}
+			</p>
 		</div>
 		{{/* JavaScript */}}
 		{{/* We place it here to let scripts run after the rest of the DOM loads. */}}

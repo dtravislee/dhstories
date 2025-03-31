@@ -1,0 +1,17 @@
+{{/* HTML content for 404 page */}}
+
+{{- define `content` -}}
+
+<div id="content">
+
+	<p>Sorry, this page could not be found.</p>
+
+	<p><a href='{{- .Site.BaseURL -}}'><span>Return to Home</span></a>.</p>
+
+	<p><a href='javascript:window.history.back();'><span>Go back</span></a>.</p>
+
+	<p>Or <a href='https://forms.gle/dnFrmqeiwqLEzqXe9'><span>contact the author</span></a> if something should be here.</p>
+
+</div>
+		
+{{- end -}}

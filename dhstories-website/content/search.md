@@ -23,7 +23,7 @@ layout = "search"
 {{/* --- */}}
 {{/* Base search */}}
 {{/* --- */}}
-<form class='js-only' action='javascript:search();'>
+<form class='js-only' action='javascript:startSearch();'>
 	<label for='search-input' >Enter keywords to search and click "{{- $buttonName -}}":</label>
 	<input type='text' id='search-input' class='text-input long'/>
 	<p class='search-tip'>
@@ -32,6 +32,7 @@ layout = "search"
 	<p class='large-form-buttons'>
 		<a role='button' href='javascript:startSearch();' class='form-button' title='Start the search'><span>{{- $buttonName -}}</span></a>
 		<a role='button' id='top-advanced-button' href='javascript:showAdvanced();' class='form-button' id='search-adv' title='Open advanced search options'><span>Advanced Options</span></a>
+		<a id='reset-search-top' role='button' href='javascript:resetSearch();' class='form-button hidden'><span>Reset Search</span></a>
 	</p>
 	
 {{/* --- */}}
@@ -43,14 +44,14 @@ layout = "search"
 		<fieldset>
 			<legend>Search in</legend>
 			<p>Look for the search query in:</p>
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Title" `id` "loc-title" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Subtitle" `id` "loc-description" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Date" `id` "loc-date" `checked` true) -}} {{/* Also searches for edited dates */}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Text" `id` "loc-content" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Tags" `id` "loc-tags" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "URL" `id` "loc-url" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Read time" `id` "loc-readtime" `checked` true) -}}
-			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Word count" `id` "loc-words" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Title" `id` "loc-title" `value` "title" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Subtitle" `id` "loc-description" `value` "description" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Date" `id` "loc-date" `value` "date" `checked` true) -}} {{/* Also searches for edited dates */}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Text" `id` "loc-content" `value` "content" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Tags" `id` "loc-tags" `value` "tags" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "URL" `id` "loc-url" `value` "url" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Read time" `id` "loc-readtime" `value` "readtime" `checked` true) -}}
+			{{- partial `inputbox` (dict `type` "checkbox" `group` "fields" `label` "Word count" `id` "loc-words" `value` "words" `checked` true) -}}
 			<p>
 				<a aria-role='button' class='form-button' href='javascript:checkboxAll("fields", true);'><span>Select all fields</span></a>
 				<a aria-role='button' class='form-button' href='javascript:checkboxAll("fields", false);'><span>Deselect all fields</span></a>
@@ -82,10 +83,15 @@ layout = "search"
 			{{- $monthMax := 12 -}}
 			{{- $days := seq 31 1 -}}
 			{{- $months := seq 12 1 -}}
-			{{- $earliestYear := sub (int .context.Site.Params.startYear) 1 -}}
-			{{- $latestYear := add (time.Now.Year) 1 -}}
+			{{- $dateYears := slice -}}
+			{{- range .context.Site.RegularPages -}}
+				{{- if .Date -}}
+					{{- $dateYears = $dateYears | append (.Date | dateFormat "2006") -}}
+				{{- end -}}
+			{{- end -}}
+			{{- $earliestYear := math.Min $dateYears -}}
+			{{- $latestYear := math.Max $dateYears -}}
 			{{- $years := seq $latestYear $earliestYear -}}
-				{{/* Add a little breadth in the year counter to account for user misinterpretations */}}
 			<select aria-label='Select day' id='{{- .id -}}-day' name='{{- .id -}}' class='date'>
 				{{- range $days -}}
 					<option value='{{- printf "%02d" . -}}'
@@ -118,8 +124,8 @@ layout = "search"
 					{{/* Pre-select the earliest year if this is "after" a date,
 							or the latest year if this is "before" a date */}}
 						{{- if or 
-							(and (eq $.id "before") (eq . $latestYear))
-							(and (eq $.id "after") (eq . $earliestYear)) -}}
+							(and (eq $.id "before") (eq . (int $latestYear)))
+							(and (eq $.id "after") (eq . (int $earliestYear))) -}}
 							{{- ` selected` -}}
 						{{- end -}}
 					>{{- . -}}</option>
@@ -176,12 +182,17 @@ layout = "search"
 			{{- partial `inputbox` (dict `type` "radio" `group` "sort-rule" `label` "Newest first" `id` "new-first" `checked` true) -}}
 			{{- partial `inputbox` (dict `type` "radio" `group` "sort-rule" `label` "Oldest first" `id` "old-first" `checked` false) -}}
 		</fieldset>
+		<p id='reset-advanced'><a role='button' href='javascript:resetAllAdvanced();' class='form-button'><span>Reset all options</span></a></p>
 		<p class='large-form-buttons'>
 			<a role='button' href='javascript:startSearch();' class='form-button'><span>{{- $buttonName -}}</span></a>
-			<a role='button' id='bottom-advanced-button' href='javascript:hideAdvanced();' class='form-button'><span>Close Advanced Options</span></a>
-			<a role='button' href='javascript:resetAllAdvanced();' class='form-button'><span>Reset All</span></a>
+			<a role='button' id='bottom-advanced-button' href='javascript:hideAdvanced();' class='form-button'><span>Hide Advanced Options</span></a>
+			<a role='button' href='javascript:resetSearch();' class='form-button'><span>Reset Search</span></a>
 		</p>
 	</div>
 </form>
 {{</ search.inline >}}
 <div id='results-container'></div>
+<div id='load-more-container' class='large-form-buttons hidden'>
+<p id='load-more' class='hidden'><a role='button' href='javascript:continueSearch();'><span>Load more</span></a></p>
+<p id='end-results' class='hidden'>End of results</p>
+</div>

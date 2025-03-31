@@ -25,7 +25,7 @@
 	{{- if and (.Content) (lt $pageNum 2) -}}
 		{{- partial `content` . -}}
 	{{- else -}}
-		<div id='#content'></div>
+		<div id='content'></div>
 	{{- end -}}
 
 	{{/* Show featured post only on first homepage, if enabled and set up correctly */}}

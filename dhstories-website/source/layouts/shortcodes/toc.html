@@ -26,7 +26,7 @@
 			{{- end -}}
 			{{/* Add the heading item as a listed link */}}
 				<li>
-					<a href='#{{- $headings.ID -}}'><span>{{- $headings.Title -}}</span></a>
+					<a href='#{{- $headings.ID -}}'><span>{{- $headings.Title | safeHTML -}}</span></a>
 					{{/* If it has sub-headings, repeat the process for those */}}
 					{{- with $headings.Headings -}}
 						{{- template `contentslist` (merge $tocParams (dict `context` .)) -}}

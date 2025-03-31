@@ -10,26 +10,26 @@
 
 /* User input variables */
 
-var query, 			// The main search query
-	lookIn, 		// The "Search In" section results
-	tags, 			// Tags that posts ought to have
-	beforeDate,		// Date posts should be newer than
-	afterDate,		// Date posts should be older than
-	longerThan,		// The read time posts should be longer than
-	shorterThan,	// The read time posts should be shorter than
-	newestFirst;	// Whether the results order by newest first (as a number, 1 or 0)
+var searchQuery, 		// The main search query
+	lookIn, 			// The "Search In" section results
+	tags, 				// Tags that posts ought to have
+	beforeDate,			// Date posts should be newer than
+	afterDate,			// Date posts should be older than
+	longerThan,			// The read time posts should be longer than
+	shorterThan;		// The read time posts should be shorter than
+var newestFirst = true;	// Whether the results order by newest first (as a number, 1 or 0)
 	
 /* Index variables */
 
 var posts,			// Current set of posts pulled from JSON files, as object array
 	jsonIndex,		// Current json file, split into an array of posts
 	indexURL,		// URL to current json file
-	startIndex;		// Current page number of the paginated index files - starts at page 1
+	startIndex;		// Current page number of the paginated index files
 // Global counter for posts
-var postCount = 1;
+var postCount = 0;
 // Base URL as provided by Hugo
 var baseURL = "{{- $.Site.BaseURL -}}";
-// Total number of posts in the search index
+// Total number of posts in the search indices
 var totalPostCount = {{- len (where (where .Site.RegularPages.Reverse `Params.hide` `=` nil) `Params.date` `!=` nil) -}};
 // Number of posts per individual json index
 var paginationSize = {{- .Site.Params.paginate -}};
@@ -38,12 +38,14 @@ var maxIndex = Math.ceil(totalPostCount / paginationSize);
 
 /* Results variables */
 
-var maxResults = paginationSize; // Maximum number of results per search call
-var resultCount, // Number of results acquired so far, in total
-	currentResultCount, // Number of results acquired in this call of continueSearch()
-	resultInIndex, // Reference of result in current index (in case we hit the max amid an index)
-	resultObjects; // Array of result objects
+var maxResults = paginationSize; // Maximum number of results to show per call of doSearch()
+var resultObjects = []; // Array of result objects
+var resultCount = 0; // Number of results acquired in this call of doSearch()
 var resultsContainer = document.getElementById("results-container"); // HTML container hosting results
+var cachedResults = []; // Any results grabbed that go over the maxResults value
+var searchCount = 0; // How many times doSearch() has been called
+var targetSearchCount = 1; // How many times we want doSearch() to call when pressing "begin search"
+var snippetLength = 120; // About how long the post snippet should be, in characters (imprecise)
 
 /* Advanced Options variables */
 
@@ -65,6 +67,7 @@ var fieldsEncodingRadix = document.getElementsByName("fields").length;
 // The base used for encoding tags, from 2 to 36 inclusive
 // Higher numbers means greater compression
 var tagsEncodingRadix = 36;	
+
 
 //********>
 // POST OBJECT
@@ -89,9 +92,7 @@ function Post(rawJson) {
 	/* (private function) */
 	/* Undoes JSON escape characters, e.g. \n, &rdquo; etc. */
 	this._sanitizeText = function(input) {
-		return input
-			/* Newlines */
-			.replace(/(\\s|\\n|\\r|\s|\n|\r)/, " ") 
+		return input.replace(/(\\s|\\n|\\r|\s|\n|\r)/, " ") 
 			/* Double quote marks */
 			.replace(/(&ldquo;|&rdquo;|&#34;)/g, '"')
 			/* Single quote marks */
@@ -126,7 +127,7 @@ function Post(rawJson) {
 		var resultArray = kvRegex.exec(rawJson);
 		
 		/* If a result is not found, return null */
-		if (! resultArray) { return null; }
+		if (!resultArray) { return null; }
 		
 		/* Otherwise... */
 		
@@ -158,9 +159,11 @@ function Post(rawJson) {
 	this.edited = this._getKeyValue("edited");
 	this.readtime = this._getKeyValue("readtime");
 	this.tags = this._sanitizeText(this._getKeyValue("tags"));
+	this.taglinks = this._sanitizeText(this._getKeyValue("taglinks"));
 	this.title = this._sanitizeText(this._getKeyValue("title"));
 	this.url = this._getKeyValue("url");
 	this.words = this._getKeyValue("words");
+	this.snippet = "";
 	
 	// Datepart attributes
 	this.year = this._getKeyValue("year");
@@ -187,13 +190,46 @@ function Post(rawJson) {
 	/* GET READ TIME MORE (integer - read time in minutes)*/
 	/* Returns bool: whether the post read time is longer than, or equal to, the input time */
 	this.getReadtimeMore = function(inputTime) {
-		return (this.readtime >= inputTime);
+		return (parseInt(this.readtime) >= parseInt(inputTime));
 	}
 	
 	/* GET READ TIME LESS (integer - read time in minutes)*/
 	/* Returns bool: whether the post is read time shorter than, or equal to, the input time */
 	this.getReadtimeLess = function(inputTime) {
-		return (this.readtime <= inputTime);
+		return (parseInt(this.readtime) <= parseInt(inputTime));
+	}
+	
+	/* FIND IN CONTENT (query-string) */
+	/* Finds the given query in the post's content and populates the post snippet if needed */
+	/* Behaves like string.search(), just with extra logic to populate the post snippet */
+	this.findInContent = function(query) { 
+		/* Find the index where the query first appears */
+		var queryIndex = this.content.search(query);
+		/* If no snippet exists, populate it */
+		if (!this.snippet && queryIndex != -1) {
+			
+			/* Start by getting the snippet's start / end indices */
+			var charactersMargin = snippetLength / 2; // Get # of characters to left or right to grab
+			var startIndex = queryIndex - charactersMargin; // Where to start the substring
+			var endIndex = queryIndex + charactersMargin; // Where to end the substring
+			if (startIndex < 0) { startIndex = 0; } // Normalize startIndex into bounds if needed
+			if (endIndex > this.content.length) { endIndex = this.content.length; } // Normalize endIndex into bounds
+			
+			/* Then grab the snippet and cut it off at a space character for good presentation */
+			var snippetString = this.content.substring(startIndex, endIndex); // Get the snippet
+			startIndex = snippetString.indexOf(" "); // Move the startIndex to the first space in the snippet
+			endIndex = snippetString.lastIndexOf(" "); // Move the endIndex to the last space in the snippet
+			snippetString = snippetString.substring(startIndex, endIndex); // Trim the snippet at the space characters
+			
+			/* Clean up some character escapes */
+			snippetString = snippetString.replace(/\\n/g, " "); // New line escapes
+			snippetString = snippetString.replace(/\\u0026/g, "&"); // Ampersand escapes
+			
+			/* Finally, save the snippet */
+			this.snippet = "…" + snippetString + "…";
+		}
+		/* Return the index where the query appears as a boolean*/
+		return queryIndex;
 	}
 	
 	/* FIND IN POST (key-string, query-string) */
@@ -201,16 +237,36 @@ function Post(rawJson) {
 	/*	Or false if improperly formatted */
 	/* Valid keys include any of the searchable attribute names */
 	this.findInPost = function(key, query) {
+		var cleanQuery = query.toString();
+		/* Negation handling (removing leading - character) */
+		if (cleanQuery.charAt(0) == "-") { cleanQuery = cleanQuery.substring(1); }
+		/* Regexp handling */
+		var regexQuery = cleanQuery.match(/\/.*?\//);
+		if (regexQuery) {
+			// Clean out the regex indicators (slashes) when making it into a regular expression
+			try { cleanQuery = new RegExp(regexQuery[0].substring(1, regexQuery[0].length-1), "i"); }
+			catch (e) {	var dump = e; /* IE7 */ }
+		}
+		else {
+			/* Final conversion to regexp for case insensitivity */
+			/* Seems to help search accuracy in other ways, too! */
+			try { cleanQuery = new RegExp(cleanQuery, "i"); }
+			catch (e) { var dump = e; /* IE7 */ }
+		}
+		/* 		Note that we put content first because it is the only field that is not written to the page
+			by default. Putting it first ensures a snippet, if any, is guaranteed to be included.
+				If you decide to remove snippets, you can move "content" to the bottom and give a small boost
+			to search speeds by leaving the largest field as a last resort. */
 		switch(key) {
-			case "content": return (this.content.search(query) != -1) ? true:false;
-			case "date": return (this.date.search(query) != -1) ? true:false;
-			case "description": return (this.description.search(query) != -1) ? true:false;
-			case "edited": return (this.edited.search(query) != -1) ? true:false;
-			case "readtime": return (this.readtime.search(query) != -1) ? true:false;
-			case "tags": return (this.tags.search(query) != -1) ? true:false;
-			case "title": return (this.title.search(query) != -1) ? true:false;
-			case "url": return (this.url.search(query) != -1) ? true:false;
-			case "words": return (this.words.search(query) != -1) ? true:false;
+			case "content": return (this.findInContent(cleanQuery) != -1) ? true:false;
+			case "date": return (this.date.search(cleanQuery) != -1) ? true:false;
+			case "description": return (this.description.search(cleanQuery) != -1) ? true:false;
+			case "edited": return (this.edited.search(cleanQuery) != -1) ? true:false;
+			case "readtime": return (this.readtime.search(cleanQuery) != -1) ? true:false;
+			case "tags": return (this.tags.search(cleanQuery) != -1) ? true:false;
+			case "title": return (this.title.search(cleanQuery) != -1) ? true:false;
+			case "url": return (this.url.search(cleanQuery) != -1) ? true:false;
+			case "words": return (this.words.search(cleanQuery) != -1) ? true:false;
 			default: return false;
 		}
 	}
@@ -219,7 +275,7 @@ function Post(rawJson) {
 	/* Writes this post object as HTML, formatted the same as _default/list.html */
 	/* Returns the outputted HTML */
 	this.writeToHtml = function () {
-		var output = "<div role='article'>"
+		var output = "<div role='article' class='listed-article'>"
 			+ "<h2><a href='"
 			+ this.url
 			+ "'><span>"
@@ -240,16 +296,24 @@ function Post(rawJson) {
 				+ this.edited
 				+ "</p>";
 		}
+		if (this.readtime != "" && this.words != "") {
+			output += "<p class='meta'>"
+				+ this.readtime
+				+ " minute read ("
+				+ this.words
+				+ " words)";
+		}
 		if (this.tags != "") {
 			/* Split the tags string into an array, then loop it */
 			var tagsArray = this.tags.split("; ");
-			var tagsCount = tagsArray.length;
+			var taglinksArray = this.taglinks.split("; ");
+			var tagsCount = tagsArray.length; // Same as taglinks
 			output += "<p class='meta'>Tags: ";
 			for (var i = 0; i < tagsCount; i++) {
 				output += "<a href='/tags/"
-					+ this.tags
+					+ taglinksArray[i]
 					+ "'><span>"
-					+ this.tags
+					+ tagsArray[i]
 					+ "</span></a>";
 				/* Add a comma-space after every entry except the last one */
 				if (i < tagsCount-1){
@@ -257,6 +321,11 @@ function Post(rawJson) {
 				}
 			}
 			output += "</p>";
+		}
+		if (this.snippet != "") {
+			output += "<p class='snippet'>" 
+				+ this.snippet 
+				+ "</p>";
 		}
 		output += "</div>";
 		return output;
@@ -284,26 +353,40 @@ function getQuery() {
 	/* Get the query as written */
 	/* We add leading and trailing spaces to ease targeting indicators */
 	/*	(Because we don't need special start-of-string / end-of-string cases) */
-	var rawQuery = " " + document.getElementById("search-input").value + " ";
+	var rawQuery = " " + queryValue.toLowerCase() + " ";
 	
 	/* Remove orphan indicators (any -, /, or " surrounded by spaces) */
 	var rawQueryClean = rawQuery.replace(/\s+[-\/"]\s+/g, " ");
 		
 	/* Extract Regex from query and remove them from the raw query string */
 	var regexQueryExp = /\s-?\/.*?\/\s/g;
-	result = result.concat(rawQueryClean.match(regexQueryExp));
-	rawQueryClean = rawQueryClean.replace(regexQueryExp, " ");
+	var regexExpMatch = rawQueryClean.match(regexQueryExp);
+	/* If any regex is found, add it to result and remove it from the raw query string */
+	if (regexExpMatch) {
+		result = result.concat(regexExpMatch);
+		rawQueryClean = rawQueryClean.replace(regexQueryExp, " ");
+	}
 	
 	/* Same as above, but for literals (quotation marks) */
-	var regexQueryExp = /\s-?".*?"\s/g;
-	result = result.concat(rawQueryClean.match(regexQueryExp));
-	rawQueryClean = rawQueryClean.replace(regexQueryExp, " ");
+	var regexQueryLit = /\s-?".+?"\s/g;
+	var regexLitMatch = rawQueryClean.match(regexQueryLit);
+	/* If any regex for literals is found, add it to result and remove it from the raw query string */
+	if (regexLitMatch) { 
+		/* Ensure quotation marks are removed from the actual query item */
+		for (var i = 0; i < regexLitMatch.length; i++) {
+			regexLitMatch[i] = regexLitMatch[i].replace(' "', "").replace('" ', "");
+		} 
+		result = result.concat(regexLitMatch); 
+		rawQueryClean = rawQueryClean.replace(regexQueryLit, " ");
+	}
 	
 	/* Finally, split what is left based on spaces and add it to the result */
 	rawQueryClean = rawQueryClean.replace(/\s+/g, " "); // Discards extra consecutive spaces
 	rawQueryClean = rawQueryClean.replace(/^\s+/g, ""); // Discards any leading space
 	rawQueryClean = rawQueryClean.replace(/\s+$/g, ""); // Discards any trailing space
-	result = result.concat(rawQueryClean.split(" ")); // Splits the remainder on spaces and combines with result
+	if (rawQueryClean) { /* Will be true if any other query items remain */
+		result = result.concat(rawQueryClean.split(" "));
+	}
 	
 	/* Return the array */
 	return result;
@@ -393,29 +476,11 @@ function getRadioSet(name) {
 	}
 }
 
-/* GET JSON (url - string) */
-/* Retrieves the raw content of a JSON file
-	when given a URL to the target file */
-/* Params: 
-	url = a url pointed to a well-formatted JSON file */
-function getJson(url) {
-	var req = new XMLHttpRequest(); // Initialize the HTTP request
-	req.open("GET", url); // Try to get the index file based on the URL
-	req.onreadystatechange = function() { // For each statechange...
-		if (req.readyState == 4) { // See if the data stream is complete and if so...
-			if (req.status != "200") { return null; } // Return null if there is a connection error
-			return req.responseText;
-		}
-	}
-	req.send(null);
-}
-
 /* GET POSTS (rawJson - string) */
 /* Creates array of post objects out of a raw JSON output */
 /* Returns array of post objects, or null if the JSON input is blank */
 /* Params: 
-	rawJson = raw output from a getJson() call containing post information 
-		(see index.json for more) */
+	rawJson = raw json output containing post information */
 function getPosts(rawJson) {
 
 	/* Initialize a variable for holding the resulting array */
@@ -429,7 +494,7 @@ function getPosts(rawJson) {
 	/* Send each fragment to the posts object constructor */
 		/* And add the new object to the result array */
 	for (var i = 0; i < rawPosts.length; i++) {
-		result.push(new Post(rawJson[i]));
+		result.push(new Post(rawPosts[i]));
 	}
 	
 	/* Return the array */
@@ -493,15 +558,37 @@ function resetWords() {
 	readtimeLess.selectedIndex = 0;
 }
 
-/* RESET ALL */
+/* RESET ADVANCED ALL */
 /* Resets all advanced search fields */
-/* Does NOT reset the query box! Refresh the page for that. */
+/* Does NOT reset the query box! See resetSearch() for that. */
 function resetAllAdvanced() {
 	checkboxAll("fields", true); // Search in fields
 	checkboxAll("tags", true); // Tags filter
 	resetDates(); // Dates selector
 	resetWords(); // Words selector
 	document.getElementById("new-first").checked = true; // Results sorting
+}
+
+
+/* RESET SEARCH */
+/* Resets hash and refreshes page for a complete reset. */
+function resetSearch() {
+	window.location.hash = "";
+	window.location.reload();
+}
+
+/* SHOW HIDDEN ELEMENT */
+/* Takes ID of an element and removes any "hidden" class */
+/* Preserves other classes */
+function showHidden(Id) {
+	document.getElementById(Id).className = document.getElementById(Id).className.toString().replace(/hidden/g, "");
+}
+
+/* HIDE SHOWN ELEMENT */
+/* Same as showHidden, but adds "hidden" class to hide the element instead */
+function hideShown(Id) {
+	showHidden(Id); // Remove any existing "hidden" classes
+	document.getElementById(Id).className += " hidden";
 }
 
 /* SHOW ADVANCED OPTIONS */
@@ -513,7 +600,7 @@ function showAdvanced() {
 	document.getElementById(bottomAdvancedID).outerHTML = closeAdvanced.replace(topAdvancedID, bottomAdvancedID);
 	
 	/* Set the advanced options container class to null */
-	document.getElementById(advID).className = "";
+	showHidden(advID);
 	
 	/* Trigger the advanced options toggle */
 	doAdvanced = 1;
@@ -522,13 +609,40 @@ function showAdvanced() {
 /* HIDE ADVANCED OPTIONS */
 /* Hides the advanced options */
 function hideAdvanced() {
+	
 	/* Set both top and bottom buttons to "open advanced" state */
 	/* Be sure to replace IDs appropriately! */
 	document.getElementById(topAdvancedID).outerHTML = openAdvanced.replace(bottomAdvancedID, topAdvancedID);
 	document.getElementById(bottomAdvancedID).outerHTML = openAdvanced.replace(topAdvancedID, bottomAdvancedID);
 	
-	/* Set the advanced options container class to null */
-	document.getElementById(advID).className = "hidden";
+	/* Set the advanced options container class to hidden */
+	hideShown(advID);
+}
+
+/* SHOW / HIDE LOAD MORE BUTTON */
+/* Shows (or hides) the "load more results" button, as needed */
+function loadMoreButton() {
+	
+	/* IDs for containers and buttons */
+	/* Check the markdown file for what these should be set to */
+	var lmContainerId = "load-more-container";
+	var lmButtonId = "load-more";
+	var lmEndId = "end-results";
+	
+	/* Load the container box / border first */
+	showHidden(lmContainerId);
+	
+	/* Then, show the button, and only the button, only if we have posts left to look at */
+	if ( postCount < totalPostCount || cachedResults.length ) {
+		hideShown(lmEndId);
+		showHidden(lmButtonId);	
+	}
+	
+	/* Otherwise, hide the button and show an "End of Results" text instead */
+	else { 
+		hideShown(lmButtonId);
+		showHidden(lmEndId); 
+	}
 }
 
 //********>
@@ -552,7 +666,7 @@ function encodeBinary(binary, base) {
 /* Takes an encoded number string and the base used to encode it, from 2 to 36,
 	and returns the binary string */
 /* Note: For precision, input strings should be limited to 64 characters */
-function encodeBinary(number, base) {
+function decodeBinary(number, base) {
 	return (parseInt(number, base)).toString(2);
 }
 
@@ -590,7 +704,7 @@ function getCheckboxBinary(name) {
 /* POPULATE VARIABLES */
 /* Populates variables per user input query and advanced options */
 function popVars() { 
-	query = getQuery();
+	searchQuery = getQuery();
 	if (doAdvanced) {
 		lookIn = getCheckboxSet("fields");
 		tags = getCheckboxSet("tags");
@@ -598,12 +712,12 @@ function popVars() {
 		afterDate = getDateSelector("after");
 		longerThan = getReadTime("more");
 		shorterThan = getReadTime("less");
-		newestFirst = getRadioSet("sort-rule") == "new-first" ? 1:0;
+		newestFirst = (getRadioSet("sort-rule") == "new-first") ? 1:0;
 	}
-	// Posts sort old-to-new, so if the search looks for newest posts first,
+	/* Posts sort old-to-new, so if the search looks for newest posts first,
 	//	it has to start at the largest index rather than the smallest
-	// (This helps with caching indices, since new posts won't alter index json files)
-	startIndex = newestFirst ? maxIndex:1;
+	// (This helps with caching indices, since new posts won't alter index json files) */
+	startIndex = (newestFirst) ? (maxIndex):1;
 }
 
 /* ENCODE QUERY HASH */
@@ -617,10 +731,10 @@ function encodeQueryHash() {
 	
 	/* Range through query variable, adding each query item to result as a string */
 	/* Queries use encodeURIComponent to prevent read issues (e.g. if a & exists in the query) */
-	if (query) {
-		for (var i = 0; i < query.length; i++) {
-			result += encodeURIComponent(query[i]);
-			if (i != query.length-1) { result += "+"; } // Use + to demarcate individual queries
+	if (searchQuery) {
+		for (var i = 0; i < searchQuery.length; i++) {
+			result += encodeURIComponent(searchQuery[i]);
+			if (i != searchQuery.length-1) { result += "+"; } // Use + to demarcate individual queries
 		}
 	}
 	
@@ -649,10 +763,10 @@ function encodeQueryHash() {
 		result += "&n=" + newestFirst;
 	}
 	
-	/* Number of results retrieved so far */
+	/* Number of times continuedSearch() has been called */
 	/* Used when there is a saved query and we are reloading the page */
 	/*	such as when navigating back from clicking a result */
-	result += "&c=" + resultCount;
+	result += "&c=" + searchCount;
 	
 	/* Return resulting URI fragment string */
 	return result;
@@ -666,119 +780,164 @@ function encodeQueryHash() {
 	post = a target post object */
 function getSearchResults(post) {
 	
-	/* Basic search */
-	if (!doAdvanced) {
-		if (!query) { return true; } // Default to true if no query is entered
-		for (var i = 0; i < query.length; i++) {
-			if (post.findInPost("content", query[i])) { continue; }
-			if (post.findInPost("date", query[i])) { continue; }
-			if (post.findInPost("description", query[i])) { continue; }
-			if (post.findInPost("edited", query[i])) { continue; }
-			if (post.findInPost("readtime", query[i])) { continue; }
-			if (post.findInPost("tags", query[i])) { continue; }
-			if (post.findInPost("title", query[i])) { continue; }
-			if (post.findInPost("url", query[i])) { continue; }
-			if (post.findInPost("words", query[i])) { continue; }
-			return false; // Return false if a query item isn't found anywhere
+	/* We tackle this bottom-to-top in the advanced search form,
+		skipping if the form was not used */
+	if (doAdvanced) {
+		if (!post.getReadtimeMore(longerThan)) { return false; }
+		if (!post.getReadtimeLess(shorterThan)) { return false; }
+		if (!post.getDateBefore(beforeDate)) { return false; }
+		if (!post.getDateAfter(afterDate)) { return false; }
+		/* For every checked tag, see if it exists in the post; if at least one does, move on */
+		var postContainsTag = false;
+		for (var i = 0; i < tags.length; i++) {
+			if (post.findInPost("tags", tags[i])) { postContainsTag = true; break; }
 		}
-		return true; // If all queries are found in the post, return true
+		if (!postContainsTag) { return false; }
 	}
 	
-	/* Advanced search */
-	/* We tackle this bottom-to-top in the advanced search form */
-	if (!getReadtimeMore(longerThan)) { return false; }
-	if (!getReadtimeLess(shorterThan)) { return false; }
-	if (!getDateBefore(beforeDate)) { return false; }
-	if (!getDateAfter(afterDate)) { return false; }
-	for (var i = 0; i < tags.length; i++) {
-		if (!post.findInPost("tags", tags[i])) { return false; }
-	}
+	/* Query search */
+	if (!searchQuery) { return true; } // Default to true if no query is entered
+	var keyArray = ["content", "date", "description", "edited", "readtime", "tags", "title", "url", "words"];
+	if (doAdvanced) { keyArray = lookIn; } // Update key array to advanced "look in" checkboxes, if needed
+	
 	/* For every query item, look in every checked field for it, return false if it is never found */
-	for (var i = 0; i < query.length; i++) {
-		for (var j = 0; j < lookIn.length; j++) {
-			if (post.findInPost(lookIn[j], query[i])) { break; }
-			if (j = lookIn.length-1) { return false; } 
+	for (var i = 0; i < searchQuery.length; i++) {
+		var isNegated = searchQuery[i].toString().charAt(0) == "-"; // Whether this query is negated
+		var isMatched = false; // Whether the query was matched
+		for (var j = 0; j < keyArray.length; j++) {
+			/* Try to find the item in the given property (indicated by the given key) */
+			var isInPost = post.findInPost(keyArray[j], searchQuery[i]);
+			/* If the item is found, but the query is negated, then we skip this post */
+			if (isInPost && isNegated) { return false; }
+			/* Otherwise, we say the query matches if:
+				1. The query is in the post and is not negated
+				2. The query is not in the post but the query is negated */
+			if (isInPost && !isNegated
+				|| !isInPost && isNegated ) { isMatched = true; break; } // Exit this loop if we have a match
 		}
+		if (isMatched) { continue; } // If the query was matched, move to the next query
+		return false; // Skip this post if a query never matches
 	}
-	return true; // Returns if it passes every other test
+	return true; // Use this post if all queries matched
 }
 
-/* SEARCH IN INDEX */
-/* Applies a search query to posts in an index in a given order */
+/* WRITE SEARCH RESULTS */
+/* Takes an array of results and writes the HTML to the page, up to maxResults */
+/* Any excess results are cached. */
 /* Params:
-	startPos = the position from which to start searching through the index
-	endPos = the position at which to halt the search */
-/* Note that startPost can be greater than endPos, leading to a reverse direction search */
-function searchInIndex(startPos, endPos){
-	var i = startPos;
-	while (currentResultCount < maxResults) {
-		if (getSearchResults(posts[i])) { // Push matching results and increment counters
-			resultObjects.push(posts[i]); 
-			resultCount++;
-			currentResultCount++;
-		} 
-		if (i != endPos) { break; } // Break if this is the last item of the index
-		i = startPos > endPos ? i--:i++; // Increment or decrement whether we're going forwards or backwards
+	results = an array of post objects */
+/* Note that maxResults is 1-index, while i is 0-index. */
+function writeSearchResults(results) {
+	for (var i = 0; i < results.length; i++) {
+		if (resultCount < maxResults || searchCount <= targetSearchCount) { 
+			resultsContainer.innerHTML += results[i].writeToHtml(); // Write the result
+			resultCount++; // Increment the counter of written results
+		}
+		else { cachedResults.push(results[i]); }
 	}
 }
 
 /* START SEARCH */
 /* Begins a user search query */
-function startSearch() {
+/* Params:
+	searchCallsAmount: How many times to call doSearch() when starting */
+function startSearch(searchCallsAmount) {
+	if (searchCallsAmount) { targetSearchCount = searchCallsAmount; }
+	cachedResults = []; // Remove any cached results
+	postCount = 0; // Reset post counter
 	popVars(); 	// Populate main variables
 	window.location.hash = encodeQueryHash(); // Encode the query as a URI fragment in the browser URI
-	continueSearch(); // Perform an initial search
+	resultsContainer.innerHTML = ""; // Erase any existing search result data
+	hideAdvanced(); // Hide the advanced form first to get to results faster
+	showHidden("reset-search-top"); // Show the reset button
+	doSearch(); // Perform initial search
 }
 
-/* CONTINUES SEARCH */
-/* Iterates a search query, e.g. when the user clicks "load more results" */
+/* CONTINUE SEARCH */
+/* Reiterates the next part of a search, if able */
+/* Also handles any call of doSearch() that procures matches */
 function continueSearch() {
-	/* Reset the resultsObject array */
-	resultObjects = [];
-	/* If we left off in the middle of an index, finish that first */
-	if (0 < resultInIndex < paginationSize) {
-		// Set end point based on whether new or old first
-		// (Note that new posts are at the end!)
-		var endPos = newestFirst ? (paginationSize-1):0;
-		// Finish the search on the current index
-		searchInIndex(resultInIndex, endPos); 
+	// Continue the search if we haven't hit the max results cap
+	// OR if we need to call it a certain number of times
+	if ( resultCount < maxResults || searchCount <= targetSearchCount ) { doSearch(); }
+	// Otherwise, handle post-continueSearch() logic by....
+	else { 
+		resultCount = 0; // reset the result count for this call
+		loadMoreButton(); // toggle the "load more" button
 	}
-	/* Only pull more results if still needed (and said results exist) */
-	while (currentResultCount < maxResults && 1 <= startIndex <= maxIndex) {
+}
+
+/* DO SEARCH */
+/* Iterates a search query, e.g. when the user clicks "load more results" */
+function doSearch() {
+	/* Reset the resultObjects array */
+	resultObjects = [];
+	
+	/* Increment the counter for calls to this function */
+	searchCount++;
+	
+	// Update the searches count record in the URI hash
+	window.location.hash = window.location.hash.replace(/&c=[0-9]+/g, "&c=" + searchCount);
+	
+	/* If we have cached results, show them first */
+	if ( cachedResults.length ) { 
+		resultObjects = cachedResults; // Move the cache to the main array
+		cachedResults = []; // Empty the cached results
+		writeSearchResults(resultObjects); // Write the results to the page
+		continueSearch(); // Repeat, if necessary
+	}
+	/* Otherwise, pull the next index if it exists */
+	else if (1 <= startIndex && startIndex <= maxIndex) {
 		
 		/* Get the next index URL */
 		/* Index page 1 has a different URL structure - keep note! */
 		indexURL = baseURL + "/index.json"
 		if (startIndex > 1) { indexURL = baseURL + "/page/" + startIndex + "/index.json"; }
 		
-		/* Populate the posts array */
-		posts = getPosts(getJson(indexURL));
-		
-		/* Set start and end positions for index searching, based on whether we look for newest posts first */
-		var startPos = newestFirst ? 0:(paginationSize-1);
-		var endPos = newestFirst ? (paginationSize-1):0;
-		searchInIndex(startPos, endPos);
-		
-		/* Increment or decrement the index number whether we're going forwards or backwards */
-		startIndex = newestFirst ? startIndex--:startIndex++;
+		/* Get and parse the index JSON */
+		var req = new XMLHttpRequest(); // Initialize the HTTP request
+		req.onreadystatechange = function() { // For each statechange...
+			if (req.readyState == 4 && req.status == "200") { // Once the data stream is complete...
+			
+				/* Populate the posts array */
+				posts = getPosts(req.responseText);
+				
+				/* Perform the search on this index */
+				/* Since new posts are at the end of indices, we look in reverse direction */
+				for (var i = paginationSize-1; i >= 0; i--) {
+					if (getSearchResults(posts[i])) { resultObjects.push(posts[i]); }
+				} 
+				
+				// Reverse the results array, if needed
+				if (!newestFirst) { resultObjects = resultObjects.reverse(); }
+				
+				// Write the collected results to the results container, up to maxResults
+				writeSearchResults(resultObjects);
+				
+				/* Increment or decrement the index number whether we're going forwards or backwards */
+				if (newestFirst) { startIndex = startIndex - 1; }
+				else { startIndex = startIndex + 1; }
+				
+				// Repeat the search if we still need posts
+				continueSearch();
+			}
+		}
+		/* Functions that start the HTTP request */
+		req.open("GET", indexURL);
+		req.send(null);
 	}
-	// Update the count record in the URI hash
-	window.location.hash = window.location.hash.replace(/&c=[0-9]+/g, "&c=" + resultCount);
-	
-	// Finally, write the collected results to the results container
-	for (var i = 0; i < resultObjects.length; i++) {
-		resultsContainer.innherHTML += resultObjects[i].writeToHtml();
+
+	/* If we are at the last index and have no results, write that as a message */
+	/* If we have results, though, update the "load more" button */
+	else {
+		if (resultsContainer.innerHTML == "") { resultsContainer.innerHTML = "<em>No results found</em>" }
+		else { loadMoreButton(); }
 	}
 }
 
-/* If we decide to paginate:
-	-go through all the posts to get results
-	-Instead of writing all the results as HTML, write only the index number and post number in that index
-	-Then, based on what posts need to show, use those numbers to pull the data from the index files again
-	(Does require a few added HTTP request calls but, with caching, that should be okay...)
-BUT Finish this version first, then duplicate and change it, just in case we want to revert it!
+/* --- */
+/* PAGE LOAD SCRIPTS */
+/* --- */
 
-Maybe pre-load search indices too. We could still pre-load...
--But that could mean more server calls...
--Unless cached...?
-*/
+/* LOAD PREVIOUS QUERY */
+/* Takes a query encoded in the URI hash and populates related fields, then re-runs the search */

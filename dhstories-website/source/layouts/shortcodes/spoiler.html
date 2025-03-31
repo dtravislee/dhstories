@@ -1,0 +1,13 @@
+{{/* SPOILER SHORTCODE */}}
+{{/* Adds spoiler / spoiler end markings to text that could serve as spoilers */}}
+{{/* Note that this does not hide any text, so be smart when writing potential spoilers! (Don't lead with big spoilers, for example.) */}}
+
+<p class='spoiler spoiler-start'>
+	<strong>Warning:</strong> plot and/or story spoilers below!
+</p>
+
+{{- .Inner | markdownify -}}
+
+<p class='spoiler spoiler-end'>
+	Spoilers end here
+</p>

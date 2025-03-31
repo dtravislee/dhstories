@@ -7,17 +7,22 @@
 {{- $paginator := (.Paginate (where (where .Site.RegularPages.Reverse `Params.hide` `=` nil) `Params.date` `!=` nil) .Site.Params.paginate) -}}
 {{/* Array of posts */}}
 {{- $posts := slice -}}
-{{/* Tags for a given post */}}
-{{- $tags := `` -}}
+
 
 {{/* JSON populator */}}
 {{/* Uses pagination to split JSON files per page */}}
 {{/*	so that search functions needn't pull the entire site index just to get 10 results */}}
 
 {{- range $paginator.Pages -}}
+	{{/* Tags initialization / reset */}}
+	{{- $tags := `` -}}
+	{{- $taglinks := slice -}}
 	{{/* Get tags for the post, if any exist, as a string */}}
 	{{- with .Params.tags -}}
 		{{- $tags = delimit . "; " | replaceRE `{` "&lbrace;" | replaceRE `}` "&rbrace;" -}}
+		{{- range . -}}
+			{{- $taglinks = $taglinks | append (. | urlize) -}}
+		{{- end -}}
 	{{- else -}}
 		{{- $tags = `` -}}
 	{{- end -}}
@@ -31,6 +36,7 @@
 		"url" .RelPermalink
 		"content" (.Plain | replaceRE `{` "&lbrace;" | replaceRE `}` "&rbrace;")
 		"tags" $tags
+		"taglinks" (delimit $taglinks "; ")
 		"description" (.Description | replaceRE `{` "&lbrace;" | replaceRE `}` "&rbrace;")
 		"readtime" (string .ReadingTime)
 		"words" (string .FuzzyWordCount ) -}}
