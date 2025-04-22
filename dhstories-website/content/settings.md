@@ -95,15 +95,15 @@ layout = "settings"
 			</ol>
 			<p>These cookies are maintained on your current device, and only your current device, until you choose to remove them.</p>
 			{{- partial `inputbox` (dict `type` "checkbox" `group` "cookie-consent" `label` "<b>I consent to the above cookie policy for <i>Dragonhouse Stories</i></b>" `id` "cookie-consent" `checked` false) -}}
-			<p id='cookie-error' class='hidden'>Cookies must be accepted before applying settings.</p>
+			<p id='cookie-error' class='hidden' role='alert'>Cookies must be accepted before applying settings.</p>
 		</div>
 		{{/* Consent accepted HTML */}}
 		<div id='accepted-consent' style='display:none;' aria-hidden=true>
 			<p>Cookies for <i>Dragonhouse Stories</i> have been accepted on this device.</p><p>If you would like to withdraw any given consent, erase these cookies from your device, and reset your reading settings, click: <a role='button' href='javascript:resetSettings()'><span>reset all settings</span></a>.</p>
 		</div>
 	</fieldset>
-	<p id='storage-error' class='hidden'>ERROR: Unable to save settings. You may have cookies and/or local storage disabled in your browser!</p>
-	<p id='settings-ok' class='hidden'> Settings OK! Returning to previous page... <a href='javascript:undoSettings();'><span>Undo</span></a></p>
+	<p id='storage-error' class='hidden' role='alert'>ERROR: Unable to save settings. You may have cookies and/or local storage disabled in your browser!</p>
+	<p id='settings-ok' class='hidden' role='alert'> Settings OK! Returning to previous page... <a href='javascript:undoSettings();'><span>Undo</span></a></p>
 	<p class='large-form-buttons'>
 		<a role='button' href='javascript:updateSettings();' class='form-button large' title='Apply the current settings and return to the previous page' aria-label='Apply and return to last page'><span>Apply</span></a>
 		<a role='button' href='javascript:previewSettings();' class='form-button large' title='Demonstrate the current settings in a preview box below'><span>Preview</span></a>
@@ -113,8 +113,8 @@ layout = "settings"
 </form>
 {{</ settings.inline >}}
 
-<div id='preview-box' class='preview-box hidden'>
-
+<div id='preview-box' class='hidden' aria-live='polite'>
+<div id='preview-content'>
 {{< markdownify >}}
 
 ## Preview
@@ -161,4 +161,10 @@ We may have a definition list
 > A block quote  
 
 {{</ markdownify >}}
+</div>
+<p class='large-form-buttons'>
+	<a role='button' href='javascript:updateSettings();' class='form-button large' title='Apply the current settings and return to the previous page' aria-label='Apply and return to last page'><span>Apply</span></a>
+	<a role='button' href='javascript:cancelSettings();' class='form-button large' title='Discard the current settings and return to the previous page' aria-label='Cancel and return to last page'><span>Cancel</span></a>
+	<a role='button' href='javascript:undoSettings();' class='form-button large' title='Revert to your earlier settings'><span>Undo</span></a>
+</p>
 </div>

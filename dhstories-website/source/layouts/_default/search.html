@@ -5,8 +5,8 @@
 {{/* --- */}}
 
 {{- define `js` -}}
+	{{- partial `jsgoloader` (dict `file` `js/fragnav.js` `scope` . ) -}}
 	{{- partial `jsgoloader` (dict `file` `js/search.js` `scope` . ) -}}
-	{{- partial `jsgoloader` (dict `file` `js/to-top.js` `scope` . ) -}}
 {{- end -}}
 
 {{/* --- */}}

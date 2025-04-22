@@ -11,22 +11,20 @@
 /* User input variables */
 
 var searchQuery, 		// The main search query
-	lookIn, 			// The "Search In" section results
-	tags, 				// Tags that posts ought to have
+	lookIn, 			// Post fields the engine should look into (e.g. title)
+	badTags, 			// Blacklisted tags
 	beforeDate,			// Date posts should be newer than
 	afterDate,			// Date posts should be older than
 	longerThan,			// The read time posts should be longer than
-	shorterThan;		// The read time posts should be shorter than
-var newestFirst = true;	// Whether the results order by newest first (as a number, 1 or 0)
+	shorterThan,		// The read time posts should be shorter than
+	oldestFirst;		// Whether the results order by oldest posts first (default: new first)
 	
 /* Index variables */
 
-var posts,			// Current set of posts pulled from JSON files, as object array
-	jsonIndex,		// Current json file, split into an array of posts
+var posts = [];		// Current set of posts pulled from JSON files, as object array
+var jsonIndex,		// Current json file, split into an array of posts
 	indexURL,		// URL to current json file
-	startIndex;		// Current page number of the paginated index files
-// Global counter for posts
-var postCount = 0;
+	startSearchIndex;		// Current page number of the paginated index files
 // Base URL as provided by Hugo
 var baseURL = "{{- $.Site.BaseURL -}}";
 // Total number of posts in the search indices
@@ -38,14 +36,22 @@ var maxIndex = Math.ceil(totalPostCount / paginationSize);
 
 /* Results variables */
 
-var maxResults = paginationSize; // Maximum number of results to show per call of doSearch()
-var resultObjects = []; // Array of result objects
-var resultCount = 0; // Number of results acquired in this call of doSearch()
+var maxVisibleResults = paginationSize; // Maximum number of results to show per search
+var maxResults = maxVisibleResults * 2; // Maximum number of results to grab per search, including cached results
+var visibleResults = []; // Result objects to show the user
+var cachedResults = []; // Result objects from an index that go over the maxVisibleResults limit
 var resultsContainer = document.getElementById("results-container"); // HTML container hosting results
-var cachedResults = []; // Any results grabbed that go over the maxResults value
-var searchCount = 0; // How many times doSearch() has been called
-var targetSearchCount = 1; // How many times we want doSearch() to call when pressing "begin search"
 var snippetLength = 120; // About how long the post snippet should be, in characters (imprecise)
+var searchCount = 0; // Number of times search has run
+var targetSearchCount = 1; // Number of times to run the search count
+var resultsGroupName = "results-group"; // ID prefix for results group elements
+
+/* Load More button variables */
+
+var lmContainerId = "load-more-container"; // Container
+var lmButtonId = "load-more"; // Load more link / button
+var lmEndId = "end-results"; // End of results text box
+var lmNoneId = "no-results"; // No results found text box
 
 /* Advanced Options variables */
 
@@ -59,14 +65,9 @@ var closeAdvanced = document.getElementById(bottomAdvancedID).outerHTML;
 var advID = "advanced-opt";
 // Whether advanced options have been opened and need processing
 var doAdvanced = 0;
-
-// The base used for encoding fields-to-search
-// Since the number of fields should be far less than 64, where toString and parseInt can lack precision,
-//	we just use how many fields there are
-var fieldsEncodingRadix = document.getElementsByName("fields").length;
-// The base used for encoding tags, from 2 to 36 inclusive
+// The base used for encoding binary to a text string, from 2 to 36 inclusive
 // Higher numbers means greater compression
-var tagsEncodingRadix = 36;	
+var binaryEncodingRadix = 36;	
 
 
 //********>
@@ -75,14 +76,9 @@ var tagsEncodingRadix = 36;
 
 /* The framework for post objects that do the heavy lifting on search */
 /* Params: rawJson = a fragment of raw JSON text
-	as specified by layouts/_default/index.json
-	and gathered by getPosts(); */
+	as specified by layouts/_default/index.json */
 
 function Post(rawJson) {
-	
-	// Post number / ID
-	this.num = postCount;
-	postCount++; // Increment counter for each retrieved post
 	
 	/*---*/
 	/* PRIVATE FUNCTIONS */
@@ -205,6 +201,7 @@ function Post(rawJson) {
 	this.findInContent = function(query) { 
 		/* Find the index where the query first appears */
 		var queryIndex = this.content.search(query);
+		
 		/* If no snippet exists, populate it */
 		if (!this.snippet && queryIndex != -1) {
 			
@@ -253,20 +250,15 @@ function Post(rawJson) {
 			try { cleanQuery = new RegExp(cleanQuery, "i"); }
 			catch (e) { var dump = e; /* IE7 */ }
 		}
-		/* 		Note that we put content first because it is the only field that is not written to the page
-			by default. Putting it first ensures a snippet, if any, is guaranteed to be included.
-				If you decide to remove snippets, you can move "content" to the bottom and give a small boost
-			to search speeds by leaving the largest field as a last resort. */
 		switch(key) {
-			case "content": return (this.findInContent(cleanQuery) != -1) ? true:false;
-			case "date": return (this.date.search(cleanQuery) != -1) ? true:false;
-			case "description": return (this.description.search(cleanQuery) != -1) ? true:false;
-			case "edited": return (this.edited.search(cleanQuery) != -1) ? true:false;
-			case "readtime": return (this.readtime.search(cleanQuery) != -1) ? true:false;
-			case "tags": return (this.tags.search(cleanQuery) != -1) ? true:false;
-			case "title": return (this.title.search(cleanQuery) != -1) ? true:false;
-			case "url": return (this.url.search(cleanQuery) != -1) ? true:false;
-			case "words": return (this.words.search(cleanQuery) != -1) ? true:false;
+			case "content": return (this.findInContent(cleanQuery) != -1) ? true:false; // All body content
+			case "date": return (this.date.search(cleanQuery) != -1 || this.edited.search(cleanQuery) != -1) ? true:false; // Both edited and regular dates
+			case "description": return (this.description.search(cleanQuery) != -1) ? true:false; // Description / subtitle
+			case "readtime": return (this.readtime.search(cleanQuery) != -1) ? true:false; // Post read time
+			case "tags": return (this.tags.search(cleanQuery) != -1 || this.taglinks.search(cleanQuery) != -1) ? true:false; // Tags and tag URLs
+			case "title": return (this.title.search(cleanQuery) != -1) ? true:false; // Titles
+			case "url": return (this.url.search(cleanQuery) != -1) ? true:false; // Post URLs
+			case "words": return (this.words.search(cleanQuery) != -1) ? true:false; // Post word counts
 			default: return false;
 		}
 	}
@@ -405,12 +397,20 @@ function getCheckboxSet(name) {
 	/* Pull all the field checkboxes */
 	var boxes = document.getElementsByName(name);
 	
-	/* Range through the field checkboxes and, if it is checked, add to the result */
-	for (var i = 0; i < boxes.length; i++) {
-		if (boxes[i].checked) {
-			result.push(boxes[i].value);
+	/* If we are handling tags, we want to get unchecked boxes instead, so...*/
+	if (name == "tags") {
+		/* Range through the field checkboxes and, if it is unchecked, add to the result */
+		for (var i = 0; i < boxes.length; i++) {
+			if (!boxes[i].checked) { result.push(boxes[i].value); }
 		}
 	}
+	/* Otherwise, retrieve checked values as normal */
+	else {
+		for (var i = 0; i < boxes.length; i++) {
+			if (boxes[i].checked) { result.push(boxes[i].value); }
+		}
+	}
+	
 	
 	/* Return the resulting array */
 	return result;
@@ -432,9 +432,6 @@ function getDateSelector(name) {
 	for (var i = 0; i < dateElems.length; i++) {
 		dateParts.push(parseInt(dateElems[i].value));
 	}
-	
-	/* Subtract 1 from the month, as months are 0-index in date objects */
-	dateParts[1] -= 1;
 	
 	/* Create a date object out of the input data for verification */
 	var dateObject = new Date(dateParts[2], dateParts[1], dateParts[0]);
@@ -476,36 +473,34 @@ function getRadioSet(name) {
 	}
 }
 
-/* GET POSTS (rawJson - string) */
-/* Creates array of post objects out of a raw JSON output */
-/* Returns array of post objects, or null if the JSON input is blank */
-/* Params: 
-	rawJson = raw json output containing post information */
-function getPosts(rawJson) {
+/* GET CHECKBOX AS BINARY (name - string) */
+/* Gets binary representation of an array of checkboxes */
+/*	1 = checked, 0 = unchecked */
+/* Params:
+	name = value of name attribute of checkbox group */
+function getCheckboxBinary(name) {
 
-	/* Initialize a variable for holding the resulting array */
-	var result = [];
+	/* Initialize result variable */
+	var result = "";
 	
-	/* Split the json on the character set "},{" */
-	/* Other curly braces should be escaped in making the json file,
-		so this substring ought to appear only between json items */
-	var rawPosts = rawJson.split("},{");
+	/* Pull all the checkboxes with the given name */
+	var boxes = document.getElementsByName(name);
 	
-	/* Send each fragment to the posts object constructor */
-		/* And add the new object to the result array */
-	for (var i = 0; i < rawPosts.length; i++) {
-		result.push(new Post(rawPosts[i]));
+	/* Range through the checkboxes
+		if it is checked, append 1 to the result
+		if it is unchecked, append 0 to the result */
+	for (var i = 0; i < boxes.length; i++) {
+		if (boxes[i].checked) { result += "1"; }
+		else { result += "0"; }
 	}
 	
-	/* Return the array */
+	/* Return the resultant binary string */
 	return result;
 }
 
 //********>
-// FORM FUNCTIONS
+// SETTER FUNCTIONS
 //********>
-
-/* Resets and (de)select all functions */
 
 /* SET ALL CHECKBOXES (name - string, checked - bool) */
 /* Sets all checkboxes with a given name to be checked (true) or unchecked (false) */
@@ -519,56 +514,97 @@ function checkboxAll(name, checked){
 	}
 }
 
-/* RESET DATES */
-/* Resets date selectors to defaults */
-/* Note that "defaults" means what the page loads from a blank slate,
-	not what the selectors are set to when navigating back from a result. */
-function resetDates(){
-	/* Get the select boxes */
-	var beforeDates = document.getElementsByName("before");
-	var afterDates = document.getElementsByName("after");
-	
-	/* Roll through the before dates and set them all to the largest value */
-	/* Values start largest at index 0 */
-	for (var i = 0; i < beforeDates.length; i++){
-		beforeDates[i].selectedIndex = 0;
-	}
-	
-	/* Roll through the after dates and set them all to the smallest value */
-	/* Values start largest at index 0, so the smallest value is at the largest index */
-	for (var i = 0; i < afterDates.length; i++){
-		afterDates[i].selectedIndex = afterDates[i].options.length-1;
+/* SET CHECKBOX FROM HASH (name - string) */
+/* Sets checkbox group, ID'd by name, based on code in URI fragment */
+/* Params:
+	name = name attribute of target checkbox group */
+function setCheckboxFromHash(name) {
+	/* Try to pull the hash fragment from the URI before continuing */
+	var boxesHash = pullFromHash(name);
+	if (boxesHash) { 
+		/* Decode the hash to binary */
+		var boxesBinary = encodeToBinary(boxesHash);
+		/* Target all field checkboxes */
+		var boxes = document.getElementsByName(name);
+		/* Append leading "0" characters until it matches the number of boxes */
+		while (boxesBinary.length < boxes.length) {
+			boxesBinary = "0" + boxesBinary;
+		}
+		/* Cap loop at the smaller of the binary string and checkboxes count to prevent exceptions */
+		var checkboxLoopMax = Math.min(boxesBinary.length, boxes.length);
+		/* For every bit / checkbox, check box if bit = 1, otherwise uncheck */
+		for (var i = 0; i < checkboxLoopMax; i++) {
+			if (boxesBinary.charAt(i) == "1") { boxes[i].checked = true; }
+			else { boxes[i].checked = false; }
+		}
 	}
 }
 
-/* RESET READ TIMES */
-/* Resets read time selectors to defaults */
-/* Note that "defaults" means what the page loads from a blank slate,
-	not what the selectors are set to when navigating back from a result. */
-function resetWords() {
-	
-	/* Get the read time select lists */
-	var readtimeMore = document.getElementById("readtime-more");
-	var readtimeLess = document.getElementById("readtime-less");
-	
-	/* Set the "more than" read time to the smallest value */
-	/* and the "less than" read time to the largest value */
-	/* Values start largest at index 0, so the smallest value is at the largest index */
-	readtimeMore.selectedIndex = readtimeMore.options.length-1;
-	readtimeLess.selectedIndex = 0;
+/* SET CHECKBOX FROM HASH (name - string) */
+/* Sets group of selectors for a date, ID'd by name, based on code in URI fragment */
+/* Params:
+	name = name attribute of target date group */
+function setDateFromHash(name) {
+	var hashDate = pullFromHash(name);
+	if (hashDate) {
+		var hashDateParts = hashDate.split("-");
+		var dateElement = document.getElementsByName(name);
+		var dateLoopMax = Math.min(hashDateParts.length, dateElement.length);
+		for (var i = 0; i < dateLoopMax; i++) {
+			dateElement[i].value = hashDateParts[i];
+		}
+	}
+}
+
+/* SET READ-TIME FROM HASH (name - string) */
+/* Sets a read-time selector based on code in URI fragment */
+/* Params:
+	id = id attribute of target readtime selector */
+function setReadTimeFromHash(id) {
+	var hashReadTime = pullFromHash(id);
+	if (hashReadTime) { document.getElementById(id).value = hashReadTime; }
+}
+
+/* RESET CHECK / RADIO SELECTOR */
+/* Resets set of checkboxes / radio buttons to HTML-supplied default */
+/* Params:
+	name = name attribute of checkbox or radio group */
+function resetCheckboxRadio(name) {
+	var elementSet = document.getElementsByName(name);
+	for (var i = 0; i < elementSet.length; i++) {
+		elementSet[i].checked = elementSet[i].defaultChecked;
+	}
+}
+
+/* RESET OPTION SELECTOR */
+/* Resets series of drop-down selectors to HTML-supplied default */
+/* Params:
+	name = name attribute of selector list group */
+function resetSelectors(name) {
+	var elementSet = document.getElementsByName(name);
+	/* Look at each selector, find its defaultSelected index,
+		and change the current selected index to that default */
+	for (var i = 0; i < elementSet.length; i++) {
+		for (var j = 0; j < elementSet[i].options.length; j++) {
+			if (elementSet[i].options[j].defaultSelected) {
+				elementSet[i].selectedIndex = j;
+				break;
+			}
+		}
+	}
 }
 
 /* RESET ADVANCED ALL */
 /* Resets all advanced search fields */
 /* Does NOT reset the query box! See resetSearch() for that. */
 function resetAllAdvanced() {
-	checkboxAll("fields", true); // Search in fields
-	checkboxAll("tags", true); // Tags filter
-	resetDates(); // Dates selector
-	resetWords(); // Words selector
-	document.getElementById("new-first").checked = true; // Results sorting
+	resetCheckboxRadio("fields"); // Search in fields
+	resetCheckboxRadio("tags"); // Tags filter
+	resetSelectors("before"); // Before date selector
+	resetSelectors("after"); // After date selector
+	resetSelectors("readtime"); // Word count selector
+	resetCheckboxRadio("sort-rule"); // Results sorting
 }
-
 
 /* RESET SEARCH */
 /* Resets hash and refreshes page for a complete reset. */
@@ -577,19 +613,9 @@ function resetSearch() {
 	window.location.reload();
 }
 
-/* SHOW HIDDEN ELEMENT */
-/* Takes ID of an element and removes any "hidden" class */
-/* Preserves other classes */
-function showHidden(Id) {
-	document.getElementById(Id).className = document.getElementById(Id).className.toString().replace(/hidden/g, "");
-}
-
-/* HIDE SHOWN ELEMENT */
-/* Same as showHidden, but adds "hidden" class to hide the element instead */
-function hideShown(Id) {
-	showHidden(Id); // Remove any existing "hidden" classes
-	document.getElementById(Id).className += " hidden";
-}
+//********>
+// FORM FUNCTIONS
+//********>
 
 /* SHOW ADVANCED OPTIONS */
 /* Shows the advanced options */
@@ -619,32 +645,6 @@ function hideAdvanced() {
 	hideShown(advID);
 }
 
-/* SHOW / HIDE LOAD MORE BUTTON */
-/* Shows (or hides) the "load more results" button, as needed */
-function loadMoreButton() {
-	
-	/* IDs for containers and buttons */
-	/* Check the markdown file for what these should be set to */
-	var lmContainerId = "load-more-container";
-	var lmButtonId = "load-more";
-	var lmEndId = "end-results";
-	
-	/* Load the container box / border first */
-	showHidden(lmContainerId);
-	
-	/* Then, show the button, and only the button, only if we have posts left to look at */
-	if ( postCount < totalPostCount || cachedResults.length ) {
-		hideShown(lmEndId);
-		showHidden(lmButtonId);	
-	}
-	
-	/* Otherwise, hide the button and show an "End of Results" text instead */
-	else { 
-		hideShown(lmButtonId);
-		showHidden(lmEndId); 
-	}
-}
-
 //********>
 // OTHER FUNCTIONS
 //********>
@@ -656,45 +656,21 @@ Use groups of 32 in base 32, groups of 16 in hexadecimal
 
 /* Random bits and bobs used in the search process */
 
-/* ENCODE BINARY (binary - string, base - number)*/
-/* Takes a binary string and a number base, from 2 to 36, and encodes the binary in the base chosen */
-/* Note: For precision, input strings should be limited to 64 characters */
-function encodeBinary(binary, base) {
-	return (parseInt(binary, 2)).toString(base);
-}
-/* DECODE BINARY (number - string, base - number) */
-/* Takes an encoded number string and the base used to encode it, from 2 to 36,
-	and returns the binary string */
-/* Note: For precision, input strings should be limited to 64 characters */
-function decodeBinary(number, base) {
-	return (parseInt(number, base)).toString(2);
-}
-
-/* GET CHECKBOX AS BINARY (name - string) */
-/* Gets binary representation of an array of checkboxes */
-/*	1 = checked, 0 = unchecked */
-/* Returns binary string with a 1 appended to the front (to avoid truncation) */
+/* DECODE FROM BINARY (binary - string, base - number)*/
+/* Encodes a binary string into the base set in global variables */
 /* Params:
-	name = value of name attribute of checkbox group */
-function getCheckboxBinary(name) {
-
-	/* Initialize result variable */
-	/* We initialize with 1 so that leading 0s do not get truncated */
-	var result = "1";
-	
-	/* Pull all the field checkboxes */
-	var boxes = document.getElementsByName(name);
-	
-	/* Range through the field checkboxes
-		if it is checked, append 1 to the result
-		if it is unchecked, append 0 to the result */
-	for (var i = 0; i < boxes.length; i++) {
-		if (boxes[i].checked) { result += "1"; }
-		else { result += "0"; }
-	}
-	
-	/* Return the resultant binary string */
-	return result;
+	binary = string of binary to encode
+/* Note: For precision, input strings should be limited to 64 characters */
+function decodeFromBinary(binary) {
+	return (parseInt(binary, 2)).toString(binaryEncodingRadix);
+}
+/* ENCODE TO BINARY (number - string, base - number, targetSize = number) */
+/* Takes a number string and returns the binary string */
+/* Params:
+	number = string representation of a number to decode into binary
+/* Note: For precision, input strings should be limited to 64 characters */
+function encodeToBinary(number) {
+	return (parseInt(number, binaryEncodingRadix)).toString(2);
 }
 
 //********>
@@ -707,27 +683,50 @@ function popVars() {
 	searchQuery = getQuery();
 	if (doAdvanced) {
 		lookIn = getCheckboxSet("fields");
-		tags = getCheckboxSet("tags");
+		badTags = getCheckboxSet("tags");
 		beforeDate = getDateSelector("before");
 		afterDate = getDateSelector("after");
 		longerThan = getReadTime("more");
 		shorterThan = getReadTime("less");
-		newestFirst = (getRadioSet("sort-rule") == "new-first") ? 1:0;
+		oldestFirst = parseInt(getRadioSet("sort-rule"));
 	}
 	/* Posts sort old-to-new, so if the search looks for newest posts first,
 	//	it has to start at the largest index rather than the smallest
 	// (This helps with caching indices, since new posts won't alter index json files) */
-	startIndex = (newestFirst) ? (maxIndex):1;
+	startSearchIndex = (oldestFirst) ? 1:(maxIndex);
+	
+	/* Note that we sort lookIn so that "content", if enabled, is done first.
+	/* 	We put content first because it is the only post field that is not written to the page
+			by default. Putting it first ensures a snippet, if any, is guaranteed to be included.
+		If you decide to remove snippets, you can change this sorting step give a small boost
+			to search speeds by leaving the largest field as a last resort. */
+			
+	/* Temporary array for lookIn ordering */
+	var lookInArray = [];
+	/* Order for lookIn */
+	var lookInOrder = ["content", "title", "description", "tags", "url", "date", "readtime", "words"];
+	/* Default active lookIn fields */
+	if(!lookIn) { lookIn = ["title", "description", "tags", "url", "date", "readtime", "words"]; }
+
+	/* Look at each lookIn element, in order.
+		If it is also present in the lookIn variable, add it to the temp array. */ 
+	for (var i = 0; i < lookInOrder.length; i++) {
+		for (var j = 0; j < lookIn.length; j++) {
+			if (lookInOrder[i] == lookIn[j]) { lookInArray.push(lookIn[j]); break; }
+		}
+	}
+	/* Finally, set lookIn to its ordered version */
+	lookIn = lookInArray;
 }
 
 /* ENCODE QUERY HASH */
 /* Encodes search form variables / state as a URI fragment string */
-/*	so that returning to the search page loads the results as it was */
+/*	so that returning to the search page can load the results as it was */
 /* Returns URI fragment string */
 function encodeQueryHash() {
 	
-	/* Initialize result variable */
-	var result = "q=";
+	/* Initialize result variable ("q" for "query") */
+	var result = "&q=";
 	
 	/* Range through query variable, adding each query item to result as a string */
 	/* Queries use encodeURIComponent to prevent read issues (e.g. if a & exists in the query) */
@@ -749,10 +748,12 @@ function encodeQueryHash() {
 		c = count (of results gathered)
 	*/
 	if (doAdvanced) {
+		/* Indicator for advanced options */
+		result += "&adv";
 		/* Search In state */
-		result += "&f=" + encodeBinary(getCheckboxBinary("fields"), fieldsEncodingRadix);
+		result += "&f=" + decodeFromBinary(getCheckboxBinary("fields"));
 		/* Tags state */
-		result += "&t=" + encodeBinary(getCheckboxBinary("tags"), tagsEncodingRadix);
+		result += "&t=" + decodeFromBinary(getCheckboxBinary("tags"));
 		/* Date states */
 		result += "&b=" + beforeDate.getDate() + "-" + beforeDate.getMonth() + "-" + beforeDate.getFullYear();
 		result += "&a=" + afterDate.getDate() + "-" + afterDate.getMonth() + "-" + afterDate.getFullYear();
@@ -760,7 +761,7 @@ function encodeQueryHash() {
 		if (longerThan) { result += "&m=" + longerThan; }
 		if (shorterThan) { result += "&l=" + shorterThan; }
 		/* Results order states */
-		result += "&n=" + newestFirst;
+		result += "&n=" + oldestFirst;
 	}
 	
 	/* Number of times continuedSearch() has been called */
@@ -771,6 +772,43 @@ function encodeQueryHash() {
 	/* Return resulting URI fragment string */
 	return result;
 	
+}
+
+/* PULL FROM HASH */
+/* Gets data from URI fragment string to set search form variables / state */
+/* Params:
+	type = string, one of "query", "fields", "tags", "before", "after", "readtime-more", "readtime-less", "sort-rule", "search-count" */
+/* Note that this does not do any type-specific processing - this only grabs the raw text string from the URI fragment. */
+function pullFromHash(type) {
+	/* Store the URI fragment string */
+	var hashCode = window.location.hash;
+	/* Get the type as a single letter key; return null-string if type is malformatted */
+	var hashKey = "";
+	switch(type) {
+		case "query": hashKey = "q"; break;
+		case "fields": hashKey = "f"; break;
+		case "tags": hashKey = "t"; break;;
+		case "before": hashKey = "b"; break;
+		case "after": hashKey = "a"; break;
+		case "readtime-more": hashKey = "m"; break;
+		case "readtime-less": hashKey = "l"; break;
+		case "sort-rule": hashKey = "n"; break;
+		case "search-count": hashKey = "c"; break;
+		default: return "";
+	}
+	/* Try to pull the data from the URI fragment */
+	try {
+		/* Create a Regex value based on the hash key input */
+		var hashRegex = new RegExp('(?:' + hashKey + '=)(.*?)(?:&|$)', 'i');
+		
+		/* Execute the Regex as a search on the stored hash code 
+			We return the [1]th result as that includes only the captured group */
+		return hashRegex.exec(hashCode)[1];
+	}
+	catch(e) {
+		var dump = e; /* IE7 */
+		return ""; // Return null-string if data is not found
+	}
 }
 
 /* GET SEARCH RESULTS */
@@ -787,26 +825,21 @@ function getSearchResults(post) {
 		if (!post.getReadtimeLess(shorterThan)) { return false; }
 		if (!post.getDateBefore(beforeDate)) { return false; }
 		if (!post.getDateAfter(afterDate)) { return false; }
-		/* For every checked tag, see if it exists in the post; if at least one does, move on */
-		var postContainsTag = false;
-		for (var i = 0; i < tags.length; i++) {
-			if (post.findInPost("tags", tags[i])) { postContainsTag = true; break; }
+		for (var i = 0; i < badTags.length; i++) {
+			if (post.findInPost("tags", badTags[i])) { return false; }
 		}
-		if (!postContainsTag) { return false; }
 	}
 	
 	/* Query search */
-	if (!searchQuery) { return true; } // Default to true if no query is entered
-	var keyArray = ["content", "date", "description", "edited", "readtime", "tags", "title", "url", "words"];
-	if (doAdvanced) { keyArray = lookIn; } // Update key array to advanced "look in" checkboxes, if needed
+	if (!searchQuery) { return true; } // Default to true / pull all if no query is entered
 	
 	/* For every query item, look in every checked field for it, return false if it is never found */
 	for (var i = 0; i < searchQuery.length; i++) {
 		var isNegated = searchQuery[i].toString().charAt(0) == "-"; // Whether this query is negated
 		var isMatched = false; // Whether the query was matched
-		for (var j = 0; j < keyArray.length; j++) {
+		for (var j = 0; j < lookIn.length; j++) {
 			/* Try to find the item in the given property (indicated by the given key) */
-			var isInPost = post.findInPost(keyArray[j], searchQuery[i]);
+			var isInPost = post.findInPost(lookIn[j], searchQuery[i]);
 			/* If the item is found, but the query is negated, then we skip this post */
 			if (isInPost && isNegated) { return false; }
 			/* Otherwise, we say the query matches if:
@@ -821,30 +854,15 @@ function getSearchResults(post) {
 	return true; // Use this post if all queries matched
 }
 
-/* WRITE SEARCH RESULTS */
-/* Takes an array of results and writes the HTML to the page, up to maxResults */
-/* Any excess results are cached. */
-/* Params:
-	results = an array of post objects */
-/* Note that maxResults is 1-index, while i is 0-index. */
-function writeSearchResults(results) {
-	for (var i = 0; i < results.length; i++) {
-		if (resultCount < maxResults || searchCount <= targetSearchCount) { 
-			resultsContainer.innerHTML += results[i].writeToHtml(); // Write the result
-			resultCount++; // Increment the counter of written results
-		}
-		else { cachedResults.push(results[i]); }
-	}
-}
-
 /* START SEARCH */
 /* Begins a user search query */
 /* Params:
-	searchCallsAmount: How many times to call doSearch() when starting */
-function startSearch(searchCallsAmount) {
-	if (searchCallsAmount) { targetSearchCount = searchCallsAmount; }
+	resultsAmount = how many results to pull off the initial call of startSearch */
+function startSearch(targetSearches) {
+	targetSearchCount = 1; // Reset targetSearchCount, e.g. if doing a different search
+	if (targetSearches) { targetSearchCount = targetSearches; } // Apply targetSearches if needed
 	cachedResults = []; // Remove any cached results
-	postCount = 0; // Reset post counter
+	searchCount = 0; // Reset search counter
 	popVars(); 	// Populate main variables
 	window.location.hash = encodeQueryHash(); // Encode the query as a URI fragment in the browser URI
 	resultsContainer.innerHTML = ""; // Erase any existing search result data
@@ -853,86 +871,142 @@ function startSearch(searchCallsAmount) {
 	doSearch(); // Perform initial search
 }
 
-/* CONTINUE SEARCH */
-/* Reiterates the next part of a search, if able */
-/* Also handles any call of doSearch() that procures matches */
-function continueSearch() {
-	// Continue the search if we haven't hit the max results cap
-	// OR if we need to call it a certain number of times
-	if ( resultCount < maxResults || searchCount <= targetSearchCount ) { doSearch(); }
-	// Otherwise, handle post-continueSearch() logic by....
-	else { 
-		resultCount = 0; // reset the result count for this call
-		loadMoreButton(); // toggle the "load more" button
-	}
-}
-
 /* DO SEARCH */
-/* Iterates a search query, e.g. when the user clicks "load more results" */
+/* Pulls the next index and performs a search, populating visibleResults */
 function doSearch() {
-	/* Reset the resultObjects array */
-	resultObjects = [];
 	
-	/* Increment the counter for calls to this function */
-	searchCount++;
-	
-	// Update the searches count record in the URI hash
-	window.location.hash = window.location.hash.replace(/&c=[0-9]+/g, "&c=" + searchCount);
-	
-	/* If we have cached results, show them first */
+	/* If we have cached results, add those to the visibleResults array first */
 	if ( cachedResults.length ) { 
-		resultObjects = cachedResults; // Move the cache to the main array
+		visibleResults = cachedResults; // Move the cache to the main array
 		cachedResults = []; // Empty the cached results
-		writeSearchResults(resultObjects); // Write the results to the page
-		continueSearch(); // Repeat, if necessary
+		doSearch(); // Recall this function
 	}
-	/* Otherwise, pull the next index if it exists */
-	else if (1 <= startIndex && startIndex <= maxIndex) {
+	
+	/* With no cached results, ensure the next index exists */
+	else if (1 <= startSearchIndex && startSearchIndex <= maxIndex) {
 		
 		/* Get the next index URL */
 		/* Index page 1 has a different URL structure - keep note! */
 		indexURL = baseURL + "/index.json"
-		if (startIndex > 1) { indexURL = baseURL + "/page/" + startIndex + "/index.json"; }
+		if (startSearchIndex > 1) { indexURL = baseURL + "/page/" + startSearchIndex + "/index.json"; }
+		
+		
+		/* USE THIS REQUEST TO FILL THE CACHE INSTEAD */
+		/* Basically, the 0th call should populate visibleResults, the 1st should populate the cache */
+		/* startSearch() thus should call at least twice.
+		/* There should always be posts in the cache at the end of each call 
+		If there aren't, then we're at the end, and we can detect that without calling again 
+		This will make the load more button accurate */
+		
 		
 		/* Get and parse the index JSON */
 		var req = new XMLHttpRequest(); // Initialize the HTTP request
 		req.onreadystatechange = function() { // For each statechange...
 			if (req.readyState == 4 && req.status == "200") { // Once the data stream is complete...
 			
-				/* Populate the posts array */
-				posts = getPosts(req.responseText);
+				/* Split the json on the character set "},{" */
+				/* Other curly braces should be escaped in making the json file,
+					so this substring ought to appear only between json items */
+				var rawPosts = req.responseText.split("},{");
+				
+				/* Send each fragment to the posts object constructor */
+					/* And add the new object to the posts array */
+				for (var i = 0; i < rawPosts.length; i++) {
+					posts.push(new Post(rawPosts[i]));
+				}
 				
 				/* Perform the search on this index */
 				/* Since new posts are at the end of indices, we look in reverse direction */
 				for (var i = paginationSize-1; i >= 0; i--) {
-					if (getSearchResults(posts[i])) { resultObjects.push(posts[i]); }
+					if (getSearchResults(posts[i])) { visibleResults.push(posts[i]); }
 				} 
 				
-				// Reverse the results array, if needed
-				if (!newestFirst) { resultObjects = resultObjects.reverse(); }
-				
-				// Write the collected results to the results container, up to maxResults
-				writeSearchResults(resultObjects);
+				/* Clear the posts array */
+				posts = [];
 				
 				/* Increment or decrement the index number whether we're going forwards or backwards */
-				if (newestFirst) { startIndex = startIndex - 1; }
-				else { startIndex = startIndex + 1; }
+				if (oldestFirst) { startSearchIndex = startSearchIndex + 1; }
+				else { startSearchIndex = startSearchIndex - 1; }
 				
-				// Repeat the search if we still need posts
-				continueSearch();
+				/* Recursively call this again to get more results, if needed */
+				/* Note that we go for maxResults to also populate the cache,
+					which we use to tell the user if there are more results to show */
+				if (visibleResults.length < maxResults) { doSearch(); }
+				/* Otherwise, complete this search call */
+				else { endSearch(); }
 			}
 		}
 		/* Functions that start the HTTP request */
 		req.open("GET", indexURL);
 		req.send(null);
 	}
+	/* If the next index doesn't exist, complete this search call */
+	else { endSearch(); }
+}
 
-	/* If we are at the last index and have no results, write that as a message */
-	/* If we have results, though, update the "load more" button */
-	else {
-		if (resultsContainer.innerHTML == "") { resultsContainer.innerHTML = "<em>No results found</em>" }
-		else { loadMoreButton(); }
+/* END SEARCH*/
+/* Finalizes the search process after doSearch() acquires enough results */
+
+function endSearch() {
+	
+	// Update the search counter for a successful search call
+	searchCount++;
+	
+	// Update the results count record in the URI hash
+	window.location.hash = window.location.hash.replace(/&c=[0-9]+/g, "&c=" + searchCount);
+	
+	// Reverse the results array, if needed
+	if (oldestFirst) { visibleResults = visibleResults.reverse(); }
+	
+	// Write any collected results to the results container, caching any excess
+	var resultHTML = "";
+	if (visibleResults.length > 0) { 
+		var resultsGroupClass = "";
+		if (searchCount > 1) { resultsGroupClass += "' class='" + resultsGroupName; }
+		resultHTML += "<div id='" + resultsGroupName + "-" + searchCount + resultsGroupClass + "'>";
+		for (var resultCount = 0; resultCount < visibleResults.length; resultCount++) {
+			if (resultCount < maxVisibleResults) { resultHTML += visibleResults[resultCount].writeToHtml(); }
+			else { cachedResults.push(visibleResults[resultCount]); }
+		}
+		resultHTML += "</div>";
+		resultsContainer.innerHTML += resultHTML;
 	}
+	
+	/* If targetSearchCount is set, then we know to auto-navigate
+	to where the user likely left off. 
+		Just ensure it doesn't try to navigate beyond the max group number */
+	if (targetSearchCount > 1) {
+		var navSection = resultsGroupName + "-" + Math.min(maxIndex, targetSearchCount);
+		hashNav(navSection);
+	}
+	
+	/* Reset the visibleResults array */
+	visibleResults = [];
+	
+	/* Load the "load more" container box / border */
+	showHidden(lmContainerId);
+	
+	/* If we got no results (results HTML is empty), input a "no results" message to the user */ 
+	if (resultsContainer.innerHTML == "") {
+		hideShown(lmEndId);
+		hideShown(lmButtonId);
+		showHidden(lmNoneId);
+	}
+	/* If we have results and posts left in the cache, show the "load more" button */
+	else if (cachedResults.length > 0) { 
+		hideShown(lmEndId);
+		hideShown(lmNoneId);
+		showHidden(lmButtonId);	
+	}
+	/* If we have results, but none in the cache, then show "end of results" text instead */
+	else {
+		hideShown(lmButtonId);
+		hideShown(lmNoneId);
+		showHidden(lmEndId);	
+	}
+	
+	/* Finally, repeat if we need to call another search automatically */
+	if (searchCount < targetSearchCount) { doSearch(); }
 }
 
 /* --- */
@@ -941,3 +1015,33 @@ function doSearch() {
 
 /* LOAD PREVIOUS QUERY */
 /* Takes a query encoded in the URI hash and populates related fields, then re-runs the search */
+
+if (window.location.hash) {
+	
+	/* Enable doAdvanced if needed */
+	if (window.location.hash.indexOf("&adv") != -1) { doAdvanced = 1; }
+	
+	/* Query textbox population */
+	/* We need to decode the URI encoding and swap "+" characters back to " " per encodeQueryHash() */
+	document.getElementById("search-input").value = decodeURIComponent(pullFromHash("query").replace("+", " "));
+
+	/* Checkbox populations */
+	setCheckboxFromHash("fields");
+	setCheckboxFromHash("tags");
+	
+	/* Date selectors setting */
+	setDateFromHash("before");
+	setDateFromHash("after");
+	
+	/* Read time selectors setting */
+	setReadTimeFromHash("readtime-more");
+	setReadTimeFromHash("readtime-less");
+	
+	/* Sort rule setting */
+	var sortRule = pullFromHash("sort-rule");
+	if (sortRule) { document.getElementsByName("sort-rule")[sortRule].checked = true; }
+	
+	/* Initial searches setting */
+	var loadedSearchCount = pullFromHash("search-count");
+	if (loadedSearchCount) { startSearch(loadedSearchCount); }
+}

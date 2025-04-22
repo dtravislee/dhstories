@@ -672,9 +672,12 @@ a {
 {{- end -}}
 {{- if eq "settings" $pageType -}}
 	/* Preview box */
-	.preview-box { 
-		padding: 0.5em; 
+	#preview-box { 
 		margin-top: 1em;
+	}
+	#preview-content { 
+		@include border-setter(1px, solid, "silver", all);
+		padding: 0.5em; 
 	}
 	/* Cookies error note */
 	#cookie-error {
@@ -738,6 +741,11 @@ a {
 	/* Results */
 	#results-container {
 		p { margin: 0; }
+	}
+	
+	/* Results groups */
+	.results-group {
+		@include border-setter(1px, solid, "silver", top);
 	}
 	
 	/* Load more button */

@@ -81,6 +81,27 @@ function getLocalObject(itemName) {
 	else { return targetItem; }
 }
 
+/* SHOW HIDDEN ELEMENT */
+/* Takes ID of an element and removes any "hidden" class */
+/* Preserves other classes */
+/* Params:
+	id = ID attribute of target element */
+function showHidden(Id) {
+	document.getElementById(Id).className = document.getElementById(Id).className.toString().replace(/\s*hidden\s*/g, "");
+}
+
+/* HIDE SHOWN ELEMENT */
+/* Opposite to showHidden: adds "hidden" class to hide the element instead */
+/* Params:
+	id = ID attribute of target element */
+function hideShown(Id) {
+	showHidden(Id); // Remove any existing "hidden" classes
+	document.getElementById(Id).className += " hidden";
+}
+
+/* PAGE LOAD SCRIPTS */
+/* Scripts for page load setup */
+
 /* Before anything else, we check if cookie permissions are set
 	If not, we skip everything. Need permission first! */
 /* Note: "dhstories-cookies" is a boolean cookie, either "true" or does not exist */

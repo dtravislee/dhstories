@@ -14,13 +14,16 @@ var cookiesPreOk = getLocalObject("dhstories-cookies"); /* Whether cookies have 
 var cookiesOk = cookiesPreOk; /* Initializing cookiesOk with pre-approval, if it exists */
 var scSaveIndicator = "sc="; /* Prefix of the settings code in the hash when clicking "Cancel" */
 var defaultSet = false; /* Indicator of whether the default input states have been set */
-var consentErrorElem = document.getElementById("cookie-error");
-var storageErrorElem = document.getElementById("storage-error");
-var allOkElem = document.getElementById("settings-ok");
 var nextPageHash = window.location.hash.match(/\/.*\//);
 var nextPage = baseURL;
 if (nextPageHash) { nextPage = baseURL + nextPageHash[0]; }
 var i, dump, settingsCode, submitSettings;
+
+/* Element IDs */
+var consentError = "cookie-error";
+var storageError = "storage-error";
+var allOk = "settings-ok";
+var previewBox = "preview-box";
 
 /* GET INPUT STATE */
 /* Gets the value of a selected input when given the name of the input or input group */
@@ -75,7 +78,7 @@ function previewSettings() {
 	/* Apply settings classes to the body element - temporarily */
 	applyStyle(settingsCode);
 	/* Show the preview box to give readers a better idea of the look */
-	document.getElementById("preview-box").className = "preview-box";
+	showHidden(previewBox);
 }
 
 /* STORE SETTINGS */
@@ -105,14 +108,15 @@ function storeSettings(newSettings, oldSettings){
 function updateSettings() {
 	/* Get the settings as input by the user */
 	getSettings();
-	/* Re-hide any previous error messages */
-	storageErrorElem.className = "hidden";
-	consentErrorElem.className = "hidden";
+	/* Re-hide any previous error messages, and the preview box */
+	hideShown(storageError);
+	hideShown(consentError);
+	hideShown(previewBox);
 	/* Check that cookies are accepted by the user, either now (checkbox) or earlier (storage obj.)
 	/* if not, display an error and halt */
 	if (!cookiesOk) {
 		window.alert("ERROR: Unable to save settings. Be sure to accept cookies!");
-		consentErrorElem.className = "";
+		showHidden(consentError);
 		document.getElementById("cookie-consent").focus();
 		return;
 	}
@@ -123,7 +127,7 @@ function updateSettings() {
 		/* Try to store the settings, using any current settings as the old settings */
 		storeSettings(settingsCode, currentSettings);
 		/* Show the All-OK box */
-		allOkElem.className = ""; 
+		showHidden(allOk); 
 		/* Wait about 1 second, then... */
 		submitSettings = setTimeout(function() {  
 			window.location.hash = nextPageHash; /* Remove any stored URI code from using Cancel then Back */
@@ -133,7 +137,7 @@ function updateSettings() {
 	catch(e) {
 		console.log(e);
 		window.alert("ERROR: Unable to save settings. You may have cookies and/or local storage disabled in your browser!");
-		storageErrorElem.className = "";
+		showHidden(storageError);
 	}
 }
 
@@ -177,7 +181,7 @@ function undoSettings() {
 	/* First, stop any submission in progress */
 	clearTimeout(submitSettings);
 	/* And hide the success box */
-	allOkElem.className = "hidden";
+	hideShown(allOk);
 	
 	/* Work with the rest only if cookies are accepted */
 	if (cookiesOk) {

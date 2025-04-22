@@ -44,6 +44,14 @@
 	{{- end -}}
 {{- end -}}
 
+{{/* --- */}}
+{{/* Global variables */}}
+{{/* --- */}}
+
+{{/* JAVASCRIPT NEEDS URI FRAGMENT */}}
+{{/* Whether any JS on the page requires the URI fragment to function */}}
+{{- $jsNeedsFrag := in (slice "/settings/" "/search/" "/share/") .RelPermalink -}}
+
 <!doctype html>
 <html lang='{{- .Site.Params.lang | default `en` -}}' itemscope itemtype='https://schema.org/WebPage'>
 	<head>
@@ -103,7 +111,13 @@
 		{{- .Site.Params.themes.defaultAlign -}}{{- ` ` -}}
 		'>
 		<div role='banner' class='site-header'>
-			<a class='sr-only' href='#main'><span>{{- `Skip to contents` -}}</span></a>
+			<a class='sr-only' href='
+				{{- if $jsNeedsFrag -}}
+					javascript:skipToMain();
+				{{- else -}}
+					#main
+				{{- end -}}
+			'><span>{{- `Skip to contents` -}}</span></a>
 			<ul class='site-nav' aria-label='Site navigation'>
 				{{- range where .Site.Menus.main "Params.disable" "!=" true -}}
 					<li {{ with .Params.class -}}class='{{- . -}}'{{- end -}}>
@@ -148,11 +162,14 @@
 			<p class='to-top'>
 				{{/* Top link is done the long way to prevent character escaping */}}
 				{{- $topLinkText := `<span>Back to Top</span>` -}}
-				{{- if in (slice "/settings/" "/search/" "/share/") .RelPermalink -}}
-					<a id="top-link" href="javascript:toTop();">{{- $topLinkText | safeHTML -}}</a>
-				{{- else -}}
-					<a id="top-link" href="#">{{- $topLinkText | safeHTML -}}</a>
-				{{- end -}}
+				<a id='top-link' href='
+					{{- if $jsNeedsFrag -}}
+						javascript:toTop();
+					{{- else -}}
+						#
+					{{- end -}}
+				'>{{- $topLinkText | safeHTML -}}</a>
+				
 			</p>
 		</div>
 		{{/* JavaScript */}}
